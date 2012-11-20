@@ -3,14 +3,14 @@
 import web
 import os
 import datetime
-from tool import nginx_uwsgi
+from tool import nginx_uwsgi # nginx_uwsgi负责app.py和nginx之间的通信
 import site_helper as sh # 注意，和shell没有关系, 只是一个简写而已:)
 import pagecontroller
 
 # debug模式默认为True，你可以在开发中设置为True，在发布中设置为False
 # 当debug为True时, 网页的打开速度可能会很慢
 # 当debug为False时，修改模版后必须重启程序才生效
-web.config.debug = False
+#web.config.debug = False
 
 urls = (
     '/cgi/index','pagecontroller.Index', # pagecontroller/Index.py

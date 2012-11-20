@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 ''' Sparker5 nginx_uwsgi
     used for link nginx and webpy
-    written by Sparker5 team
-    http://sparker5.com
+    written by Sparker5.com
     Use:
         1:  import nginx_uwsgi in your webpy app file
         2:  set the SERVER_PORT, FOOT_PRINTS_PATH and ERROR_LOG_PATH in this file
