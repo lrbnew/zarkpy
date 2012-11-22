@@ -19,7 +19,7 @@ if [ "x${ret}" != "x0" ]; then
     exit 1
 fi
 
-if [ "${rev1}"=="master" ]; then
+if [ "${rev1}"="master" ]; then
 
     mkdir -p /opt/zarkpy
     cd /opt/zarkpy
@@ -41,7 +41,7 @@ if [ "${rev1}"=="master" ]; then
     sh /opt/zarkpy/tool/export.sh master
 
 
-elif [ "${rev1}"=="exp" ]; then
+elif [ "${rev1}"="exp" ]; then
     mkdir -p /opt/zarkpy_exp
     cd /opt/zarkpy_exp
     tar xf /tmp/zarkpy.tgz
