@@ -5,7 +5,7 @@
 import os
 import sys
 
-RENAME_FILES = ['conf/nginx/exp', 'conf/nginx/master', 'doc/sql/init_database.sql', 'tool/auto_restart.py', 'tool/export.sh', 'tool/export_first.sh', 'tool/install.sh', 'tool/launch-exp.sh', 'tool/launch.sh', 'tool/set_git_to_share.sh', 'web/cgi/site_helper.py',]
+RENAME_FILES = ['conf/nginx/exp', 'conf/nginx/master', 'doc/sql/init_database.sql', 'tool/auto_restart.py', 'tool/export.sh', 'tool/export_first.sh', 'tool/install.sh', 'tool/launch-exp.sh', 'tool/launch.sh', 'tool/set_git_to_share.sh', 'web/cgi/site_helper.py', 'tool/reset_port.py',]
 
 if __name__=='__main__':
     if len(sys.argv) == 3:
@@ -18,7 +18,7 @@ if __name__=='__main__':
             for file_name in RENAME_FILES:
                 file_path = project_root + file_name
                 print file_path
-                os.system('sed -ie "s/%s/%s/g" "%s"' % (old_name, new_name, file_path))
+                os.system('''sed -i "" -e "s/%s/%s/g" "%s"''' % (old_name, new_name, file_path))
             also_count = os.popen('grep "%s" -rl "%s" | wc -l' % (old_name, project_root)).read().strip()
             print '\n替换后在%s中找到包含"%s"字符串的文件: %s 个' % (project_root, old_name, also_count)
             if also_count != '0':
