@@ -1,6 +1,6 @@
 *.pyc
 *~
-sessions
+session
 log
 *.swp
 *.swo

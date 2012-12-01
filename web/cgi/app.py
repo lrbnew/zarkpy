@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #coding=utf-8
+print 'starting app'
 import web
 import os
 import datetime
@@ -47,4 +48,8 @@ sh.page_render = web.template.render(loc=page_render_path, base='Base', globals=
 sh.page_render_nobase = web.template.render(loc=page_render_path, globals=template_enabled)
 
 if __name__ == "__main__":
+    from tool import init_database
+    init_database.initTables()
+    init_database.initDatas()
+    print 'ok'
     app.run()
