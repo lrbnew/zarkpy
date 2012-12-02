@@ -167,7 +167,7 @@ class DBHelper:
             assert('where' in query_string.lower())
         cursor = self.db_tuple.cursor()
         try:
-            caffected = ursor.execute(query_string, argv)
+            affected = cursor.execute(query_string, argv)
         except:
             sys.stderr.write('query string is: ' + query_string + '\n')
             sys.stderr.write('argv are: '+ str(argv) + '\n')

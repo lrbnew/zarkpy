@@ -2,7 +2,6 @@
 import web
 import copy
 import re
-import site_helper as sh
 from DBHelper import DBHelper
 
 class Model: # 子类的calss名称必须与文件名一致,包括大小写
@@ -39,7 +38,7 @@ class Model: # 子类的calss名称必须与文件名一致,包括大小写
         self._insertValidate(data)
         insert_cols =   [c       for c in self.column_names if c in data.keys()]
         insert_values = [data[c] for c in self.column_names if c in data.keys()]
-        query = 'insert into %s (%s) values (%s)' % (self.table_name, ','.join(insert_cols), ','.join(len(insert_cols)*['%s']))
+        query = self.replaceAttr('insert into {$table_name} (%s) values (%s)' % (','.join(insert_cols), ','.join(len(insert_cols)*['%s'])))
         return self.db.insert(query, tuple(insert_values))
 
     # 替换插入，当primary key或者某个unique key冲突时，即替换原有数据
@@ -51,7 +50,7 @@ class Model: # 子类的calss名称必须与文件名一致,包括大小写
         self._insertValidate(data)
         insert_cols =   [c       for c in self.column_names if c in data.keys()]
         insert_values = [data[c] for c in self.column_names if c in data.keys()]
-        query = 'replace into %s (%s) values (%s)' % (self.table_name, ','.join(insert_cols), ','.join(len(insert_cols)*['%s']))
+        query = self.replaceAttr('replace into {$table_name} (%s) values (%s)' % (','.join(insert_cols), ','.join(len(insert_cols)*['%s'])))
         return self.db.insert(query, tuple(insert_values))
 
     def update(self, item_id, data):
@@ -63,9 +62,8 @@ class Model: # 子类的calss名称必须与文件名一致,包括大小写
             update_cols =   [c       for c in self.column_names if c in data.keys()]
             update_values = [data[c] for c in self.column_names if c in data.keys()]
             assert(len(update_cols) == len(update_values) > 0 )
-            query = 'update '+self.table_name \
-                    + ' set ' + ','.join([c+'=%s' for c in update_cols]) \
-                    + ' where '+ self.table_name + 'id=%s'
+            query = self.replaceAttr('update {$table_name} set %s where {$primary_key}=%%s'
+                    % (','.join([c+'=%s' for c in update_cols])) )
             affected = self.db.update(query, update_values + [item_id])
         except:
             print 'ERROR INFO:'
@@ -74,16 +72,19 @@ class Model: # 子类的calss名称必须与文件名一致,包括大小写
         return affected
 
     def delete(self, item_id):
-        return self.db.delete('delete from ' + self.table_name + ' where ' + self.table_name + 'id=%s', item_id)
+        query = self.replaceAttr('delete from {$table_name} where {$primary_key}=%s')
+        return self.db.delete(query, item_id)
 
     def get(self, item_id):
-        return self.db.fetchOne('select * from ' + self.table_name + ' where ' + self.table_name + 'id=%s limit 1', item_id)
+        query = self.replaceAttr('select * from {$table_name} where {$primary_key}=%s limit 1')
+        return self.db.fetchOne(query, item_id)
 
     def gets(self, item_ids):
-        assert(type(item_ids) is list)
-        if len(item_ids) > 0:
-            where = ' or '.join([self.table_name+'id=%s'] * len(item_ids))
-            return self.db.fetchSome('select * from ' + self.table_name + ' where ' + where, item_ids)
+        assert(isinstance(item_ids, list) or isinstance(item_ids, tuple))
+        if item_ids:
+            query = self.replaceAttr('select * from {$table_name} where %s'
+                    % ' or '.join(['{$primary_key}=%s'] * len(item_ids)) )
+            return self.db.fetchSome(query, item_ids)
         else:
             return []
 
@@ -97,23 +98,33 @@ class Model: # 子类的calss名称必须与文件名一致,包括大小写
     # limit: (0, 10)
     # distinct: True
     def all(self, env=None):
-        query_string, argv = self._spliceQuery(env)
-        return self.db.fetchSome(query_string, argv)
+        query, argv = self._spliceQuery(env)
+        query = self.replaceAttr(query)
+        return self.db.fetchSome(query, argv)
 
+    # 用例: user_model.getOneByWhere('sex=%s and age>%s', ['男', 18])
     def getOneByWhere(self, where, argv=[]):
-        assert(type(argv) in [list,tuple])
-        return self.db.fetchOne('select * from ' + self.table_name + ' where ' + where + ' limit 1', argv)
+        query = self.replaceAttr('select * from {$table_name} where ' + where + ' limit 1')
+        return self.db.fetchOne(query, argv)
 
-    # 根据env获得数据量
+    # 根据env获得count(*)值
     def getCount(self, env={}):
-        new_env = self._copyData(env) # 不改变原env
+        new_env = self._copyData(env) # 不要改变原env
         new_env['select'] = 'count(*)' 
-        if new_env.has_key('limit'):
-            del new_env['limit'] # mysql语法中, count(*)和limit不能一起用
-        query_string, argv = self._spliceQuery(new_env)
-        return self.db.fetchFirst(query_string, argv)
+        # 删除limit, mysql语法中count(*)和limit不能一起用
+        if new_env.has_key('limit'): del new_env['limit']
+        query, argv = self._spliceQuery(new_env)
+        query = self.replaceAttr(query)
+        return self.db.fetchFirst(query, argv)
 
-    # 获得model的装饰器的属性
+    # 用model的属性值替换query中的{$xxx}
+    def replaceAttr(self, query):
+        ret_query = query
+        for variable in re.compile('{\$\w+}').findall(query):
+            ret_query = ret_query.replace(variable, getattr(self, variable[2:-1]))
+        return ret_query
+
+    # 尝试获得model的装饰器的属性
     def getDecoratorAttr(self, attr):
         if hasattr(self, '_decorator_model'):
             assert(self._decorator_model is not None)
@@ -125,56 +136,56 @@ class Model: # 子类的calss名称必须与文件名一致,包括大小写
     def createTable(self):
         assert(len(self.table_name)>0)
         assert(len(self.table_template)>0)
-        assert(not DBHelper().isTableExists(self.table_name))
+        assert(not self.db.isTableExists(self.table_name))
         try:
-            formated_creat_query = self._getCreateTableQuery()
-            self.db.executeQuery(formated_creat_query)
+            query = self.replaceAttr(self.table_template)
+            self.db.executeQuery(query)
         except:
-            print formated_creat_query
+            print query
             raise
 
     # 根据table_template在原有表上添加新字段, 但不添加新的索引(为了保证线上数据稳定)
     def increaseCreateTable(self):
         assert(len(self.table_name)>0)
         assert(len(self.table_template)>0)
-        assert(DBHelper().isTableExists(self.table_name))
-        def getColumnsFromSQL(sql):
-            sql = sql.partition('(')[2].rpartition(')')[0].replace('\n', ' ').replace('\r', ' ')
+        assert(self.db.isTableExists(self.table_name))
+        def getAlterQuerys(sql):
+            sql = re.sub(r'\s+', ' ', sql.partition('(')[2].rpartition(')')[0])
             columns = []
             column = []
             bracket_count = 0
-            for c in sql+',':
+            for c in sql + ',':
                 if c == '(':
                     bracket_count += 1
                     column.append(c)
                 elif c == ')':
                     bracket_count -= 1
                     column.append(c)
-                elif bracket_count == 0 and c==',':
-                    column = ''.join(column)
-                    if column.strip().split()[0].lower() not in ['key', 'primary', 'unique'] and column.strip().split('(')[0].lower() not in ['key', 'primary', 'unique']:
-                        columns.append((column.strip().split()[0], column))
+                elif bracket_count == 0 and c == ',':
+                    column = ''.join(column).strip()
+                    if all(map(lambda x: not column.startswith(x), ['key ','key(','primary ','unique '])):
+                        columns.append((column.split()[0], column))
                     column = []
                 else:
                     column.append(c)
                 if bracket_count < 0:
                     raise Exception('table template is invalid. model name is: ' + self.table_name)
             return columns
+
         try:
-            exists_columns = sh.getDBHelper().getTableColumns(self.table_name)
-            formated_creat_query = self._getCreateTableQuery()
-            columns = getColumnsFromSQL(formated_creat_query)
-            for column_name, query  in columns:
-                if column_name.lower() not in map(str.lower, exists_columns):
+            exists_columns = map(str.lower, self.db.getTableColumns(self.table_name))
+            query = self.replaceAttr(self.table_template)
+            for column_name, alter_query in getAlterQuerys(query):
+                if column_name.lower() not in exists_columns:
                     try:
-                        self.db.executeQuery('alter table %s add %s' % (self.table_name, query))
+                        self.db.executeQuery(self.replaceAttr('alter table {$table_name} add %s' % alter_query))
                     except:
                         print 'alter query is:'
-                        print 'alter table %s add %s' % (self.table_name, query)
+                        print 'alter table %s add %s' % (self.table_name, alter_query)
                         raise
         except:
             print 'formated creat query is:'
-            print formated_creat_query
+            print query
             raise
 
     # 对insert的数据进行预处理
@@ -206,53 +217,43 @@ class Model: # 子类的calss名称必须与文件名一致,包括大小写
             ret_data[k] = copy.copy(data[k])
         return ret_data
 
-    def _getCreateTableQuery(self):
-        ret_query = self.table_template
-        for variable in re.compile('{\$\w+}').findall(self.table_template):
-            ret_query = ret_query.replace(variable, getattr(self, variable[2:-1]))
-        return ret_query
-
-    def replaceAttr(self, query):
-        pass
-
-    # 使用env生成query_string和argv
+    # 使用env生成query和argv
     # 注意，不能把env的默认值改为{}, 否则env将成为_spliceQuery函数的一个全局属性
     def _spliceQuery(self, env=None):
         if env is None: env = {}
-        query_string = 'select '
+        query = 'select '
         argv = []
         assert(type(env) in [dict, web.Storage])
 
         if env.get('select', None):
-            query_string += env['select'] + ' '
+            query += env['select'] + ' '
         else:
             if env.get('distinct', None):
-                query_string += 'distinct '
-            query_string += '* '
+                query += 'distinct '
+            query += '* '
 
         if env.get('from', None):
-            query_string += 'from '+ env['from'] + ' '
+            query += 'from '+ env['from'] + ' '
         else:
-            query_string += 'from '+ self.table_name + ' '
+            query += 'from '+ self.table_name + ' '
 
         if env.get('where', None) != None: # { 'where': ('title=%s',['test']) }
             assert( type(env['where']) in (tuple, list) and  len(env['where']) == 2 )
             assert( type(env['where'][0]) is str )
             assert( type(env['where'][1]) in (tuple, list) )
-            query_string += ' where ' + env['where'][0] + ' '
+            query += ' where ' + env['where'][0] + ' '
             argv.extend(env['where'][1])
 
         if env.get('orderby', None):
-            query_string += ' order by '+env.get('orderby')
+            query += ' order by '+env.get('orderby')
 
         if env.get('limit', None):
             assert( type(env['limit']) in (tuple, list) and  len(env['limit']) == 2 )
-            #assert( (type(env['limit'][0]) and type(env['limit'][1])) in [int,long] )
-            query_string += ' limit %s, %s'
+            query += ' limit %s, %s'
             argv.append(env['limit'][0])
             argv.append(env['limit'][1])
 
-        return query_string, argv
+        return query, argv
 
     # table_template变量名不能以下划线"_"开头，因为_开头的“类静态”数据将不会被子类overwrite
     # 而Model要求每个子类会调用自己的table_template变量，而不使用父类的
