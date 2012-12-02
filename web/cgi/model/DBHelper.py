@@ -1,6 +1,7 @@
 #coding=utf-8
 import MySQLdb, MySQLdb.cursors
-import web, sys, site_helper
+import web
+import site_helper
 
 # 数据库配置,若想把DBHelper.py单独用于你的其它项目中,仅需修改此配置即可
 DB_PASSWORD = site_helper.config.DB_PASSWORD
@@ -62,13 +63,12 @@ class DBHelper:
         try:
             cursor.execute(query_string, argv)
         except:
-            sys.stderr.write('query string is: '+ query_string + '\n')
-            sys.stderr.write('argv are: '+ str(argv) + '\n')
+            print 'query string is:', query_string
+            print 'argv are:', argv
             raise
         one = cursor.fetchone()
         if one is not None:
-            one = self._toUtf8(one)
-            one = web.Storage(one)
+            one = web.Storage(self._toUtf8(one))
         return one
 
     def fetchSome(self, query_string, argv=(), ignore_assert=False):
@@ -79,23 +79,10 @@ class DBHelper:
         try:
             cursor.execute(query_string, argv)
         except:
-            sys.stderr.write('query string is: '+ query_string + '\n')
-            sys.stderr.write('argv are: '+ str(argv) + '\n')
+            print 'query string is:', query_string
+            print 'argv are:', argv
             raise
-        retList = []
-        for one in cursor.fetchall():
-            one = self._toUtf8(one)
-            one = web.Storage(one)
-            if not ignore_assert:
-                try:
-                    assert(one is not None)
-                except:
-                    print "==============ERROR INFO=============="
-                    print 'query_string:', query_string
-                    print 'argv:', argv
-                    raise
-            retList.append(one)
-        return retList
+        return [web.Storage(self._toUtf8(one)) for one in cursor.fetchall()]
 
     def fetchFirst(self, query_string, argv=(), ignore_assert=False):
         '''return a int or string(etc.) of the colume's first value in query.'''
@@ -105,8 +92,8 @@ class DBHelper:
         try:
             cursor.execute(query_string, argv)
         except:
-            sys.stderr.write('query string is: '+ query_string + '\n')
-            sys.stderr.write('argv are: '+ str(argv) + '\n')
+            print 'query string is:', query_string
+            print 'argv are:', argv
             raise
         one = cursor.fetchone()
         if one is not None:
@@ -123,8 +110,8 @@ class DBHelper:
         try:
             cursor.execute(query_string, argv)
         except:
-            sys.stderr.write('query string is: '+ query_string + '\n')
-            sys.stderr.write('argv are: '+ str(argv) + '\n')
+            print 'query string is:', query_string
+            print 'argv are:', argv
             raise
         retList = []
         for one in cursor.fetchall():
@@ -141,8 +128,8 @@ class DBHelper:
         try:
             cursor.execute(query_string, argv)
         except:
-            sys.stderr.write('query string is: '+ query_string + '\n')
-            sys.stderr.write('argv are: '+ str(argv) + '\n')
+            print 'query string is:', query_string
+            print 'argv are:', argv
             raise
         self.db_tuple.commit()
         return cursor.lastrowid
@@ -155,8 +142,8 @@ class DBHelper:
         try:
             affected = cursor.execute(query_string, argv)
         except:
-            sys.stderr.write('query string is: '+ query_string + '\n')
-            sys.stderr.write('argv are: '+ str(argv) + '\n')
+            print 'query string is:', query_string
+            print 'argv are:', argv
             raise
         self.db_tuple.commit()
         return affected
@@ -169,8 +156,8 @@ class DBHelper:
         try:
             affected = cursor.execute(query_string, argv)
         except:
-            sys.stderr.write('query string is: ' + query_string + '\n')
-            sys.stderr.write('argv are: '+ str(argv) + '\n')
+            print 'query string is:', query_string
+            print 'argv are:', argv
             raise
         self.db_tuple.commit()
         return affected
@@ -186,6 +173,9 @@ class DBHelper:
         cursor.execute("SHOW TABLES LIKE '%s';" % table_name)
         one = cursor.fetchone()
         return one is not None
+
+    def isColumnExists(self, table_name, column_name):
+        return self.isTableExists(table_name) and column_name in self.getTableColumns(table_name)
 
     # 获得某张表中的字段名
     def getTableColumns(self, table_name):

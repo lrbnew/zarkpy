@@ -2,12 +2,13 @@
 import web
 import copy
 import re
-from DBHelper import DBHelper
+import DBHelper
+import site_helper as sh
 
-class Model: # 子类的calss名称必须与文件名一致,包括大小写
-    # 数据表名,应该与class名称和文件名一致,否则需同时修改primary_key
-    # 为空则不自动创建表
-    table_name = '' 
+# model模块的基类
+# 子类的calss名称必须与文件名一致,包括大小写
+class Model:
+    table_name = ''    # 数据表名,应该与class名称和文件名一致.为空则不自动创建表
     column_names = []  # 需要自动insert或update的字段列表,子类不能为空
     primary_key = None # 表的主键名，不推荐修改
     decorator = []     # 此model使用的装饰器，详见modeldecorator模块
@@ -27,7 +28,7 @@ class Model: # 子类的calss名称必须与文件名一致,包括大小写
         assert(len(self.primary_key) > 0)
         assert(type(self.column_names) is list)
         assert(len(self.column_names) > 0) # column_names不能为空
-        self.db = DBHelper()
+        self.db = DBHelper.DBHelper()
 
     # 插入一个数据，type(data)为dict或web.Storage
     # 返回新数据的主键值(primary key)
@@ -76,15 +77,16 @@ class Model: # 子类的calss名称必须与文件名一致,包括大小写
         return self.db.delete(query, item_id)
 
     def get(self, item_id):
-        query = self.replaceAttr('select * from {$table_name} where {$primary_key}=%s limit 1')
-        return self.db.fetchOne(query, item_id)
+        query = self.replaceAttr('select * from {$table_name} where {$primary_key}=%s')
+        item = self.db.fetchOne(query, item_id)
+        return ModelData(item, self) if item is not None else None
 
     def gets(self, item_ids):
         assert(isinstance(item_ids, list) or isinstance(item_ids, tuple))
         if item_ids:
             query = self.replaceAttr('select * from {$table_name} where %s'
                     % ' or '.join(['{$primary_key}=%s'] * len(item_ids)) )
-            return self.db.fetchSome(query, item_ids)
+            return [ModelData(one, self) for one in self.db.fetchSome(query, item_ids)]
         else:
             return []
 
@@ -100,12 +102,12 @@ class Model: # 子类的calss名称必须与文件名一致,包括大小写
     def all(self, env=None):
         query, argv = self._spliceQuery(env)
         query = self.replaceAttr(query)
-        return self.db.fetchSome(query, argv)
+        return [ModelData(one, self) for one in self.db.fetchSome(query, argv)]
 
     # 用例: user_model.getOneByWhere('sex=%s and age>%s', ['男', 18])
     def getOneByWhere(self, where, argv=[]):
-        query = self.replaceAttr('select * from {$table_name} where ' + where + ' limit 1')
-        return self.db.fetchOne(query, argv)
+        query = self.replaceAttr('select * from {$table_name} where %s' % where)
+        return ModelData(self.db.fetchOne(query, argv), self)
 
     # 根据env获得count(*)值
     def getCount(self, env={}):
@@ -262,3 +264,49 @@ class Model: # 子类的calss名称必须与文件名一致,包括大小写
             {$table_name}id int unsigned not null auto_increment,
             primary key ({$table_name}id)
         )ENGINE=InnoDB; '''
+
+
+# model返回的数据类型,在dict的基础上实现通过d.abc代替d['abc']
+# 当返回值d拥有某个model的主键值时,比如Userid,则可以通过d.user.email来直接访问相关数据
+# 还可以通过后缀s访问一对多的数据,比如如果Comment表有一个Bookid属性
+# 那么可以通过b.comments来获得这本书的所有评论
+class ModelData(web.Storage):
+    db = DBHelper.DBHelper()
+    table_names = {} # 在__init__文件中记录所有model的小写到大写的关系
+
+    def __init__(self, data, model):
+        assert(data is not None and isinstance(data, dict))
+        assert(model is not None)
+        web.Storage.__init__(self, data)
+        self._table_name  = model.table_name
+        self._primary_key = model.primary_key
+        self._class_name  = model.__module__.__class__
+
+    def __getattr__(self, key):
+        try:
+            if key == 'id': key = self._primary_key
+            return web.Storage.__getattr__(self, key)
+        except AttributeError:
+            if ModelData.table_names.has_key(key):
+                table_name = ModelData.table_names[key]
+                if self.has_key(table_name + 'id'):
+                    try:
+                        return sh.model(table_name).get(self.get(table_name + 'id'))
+                    except:
+                        print 'ERROR: ModelData找不到属性', key
+                        raise
+            if key.endswith('s') and ModelData.table_names.has_key(key[:-1]):
+                table_name = ModelData.table_names[key[:-1]]
+                id_key = self.get('_table_name') + 'id'
+                if self.db.isColumnExists(table_name, id_key):
+                    try:
+                        return sh.model(table_name).all({'where': (id_key + '=%s', [self.id])})
+                    except:
+                        print 'ERROR: ModelData找不到属性', key
+                        raise
+            raise
+
+    def __setattr__(self, key, value):
+        # 不能对id赋值,因为__getattr__会对id做特殊判断,导致赋值失效
+        assert(key != 'id')
+        web.Storage.__setattr__(self, key, value)
