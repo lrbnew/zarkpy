@@ -9,24 +9,19 @@ import site_helper as sh
 # 子类的calss名称必须与文件名一致,包括大小写
 class Model:
     table_name = ''    # 数据表名,应该与class名称和文件名一致.为空则不自动创建表
-    column_names = []  # 需要自动insert或update的字段列表,子类不能为空
+    column_names = ()  # 需要自动insert或update的字段列表,子类不能为空
     primary_key = None # 表的主键名，不推荐修改
     decorator = []     # 此model使用的装饰器，详见modeldecorator模块
 
     def __init__(self):
         if self.primary_key == None:
             self.primary_key = self.table_name+'id'
-        try:
-            assert(type(self.table_name) is str)
-            assert(len (self.table_name) > 0)
-            assert(' ' not in self.table_name )
-        except:
-            print 'the table_name is:', self.table_name
-            print 'and the class is:', self.__class__
-            raise
-        assert(type(self.primary_key) is str)
+        assert(isinstance(self.table_name, str))
+        assert(len(self.table_name) > 0)
+        assert(' ' not in self.table_name)
+        assert(isinstance(self.primary_key, str))
         assert(len(self.primary_key) > 0)
-        assert(type(self.column_names) is list)
+        assert(isinstance(self.column_names, list) or isinstance(self.column_names, tuple))
         assert(len(self.column_names) > 0) # column_names不能为空
         self.db = DBHelper.DBHelper()
 
@@ -81,14 +76,10 @@ class Model:
         item = self.db.fetchOne(query, item_id)
         return ModelData(item, self) if item is not None else None
 
+    # 继承了get所做的事情. 虽会有多次查询，不要怕. 宁花机器一分，不花程序员一秒
     def gets(self, item_ids):
         assert(isinstance(item_ids, list) or isinstance(item_ids, tuple))
-        if item_ids:
-            query = self.replaceAttr('select * from {$table_name} where %s'
-                    % ' or '.join(['{$primary_key}=%s'] * len(item_ids)) )
-            return [ModelData(one, self) for one in self.db.fetchSome(query, item_ids)]
-        else:
-            return []
+        return map(self.get, item_ids)
 
     # 根据env dict返回多个数据的list
     # env的可选参数以及样例分别有:
@@ -107,7 +98,8 @@ class Model:
     # 用例: user_model.getOneByWhere('sex=%s and age>%s', ['男', 18])
     def getOneByWhere(self, where, argv=[]):
         query = self.replaceAttr('select * from {$table_name} where %s' % where)
-        return ModelData(self.db.fetchOne(query, argv), self)
+        item = self.db.fetchOne(query, argv)
+        return ModelData(item, self) if item is not None else None
 
     # 根据env获得count(*)值
     def getCount(self, env={}):
@@ -165,7 +157,7 @@ class Model:
                     column.append(c)
                 elif bracket_count == 0 and c == ',':
                     column = ''.join(column).strip()
-                    if all(map(lambda x: not column.startswith(x), ['key ','key(','primary ','unique '])):
+                    if all(map(lambda x: not column.lower().startswith(x), ['key ','key(','primary ','unique '])):
                         columns.append((column.split()[0], column))
                     column = []
                 else:
@@ -278,9 +270,10 @@ class ModelData(web.Storage):
         assert(data is not None and isinstance(data, dict))
         assert(model is not None)
         web.Storage.__init__(self, data)
-        self._table_name  = model.table_name
-        self._primary_key = model.primary_key
-        self._class_name  = model.__module__.__class__
+        self._table_name   = model.table_name
+        self._primary_key  = model.primary_key
+        self._class_name   = model.__module__.__class__
+        self._column_names = model.column_names
 
     def __getattr__(self, key):
         try:
