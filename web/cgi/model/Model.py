@@ -124,7 +124,7 @@ class Model:
             assert(self._decorator_model is not None)
             return getattr(self._decorator_model, attr)
         else:
-            return getattr(self, attr)
+            return None
 
     # 使用table_template字段创建数据表
     def createTable(self):

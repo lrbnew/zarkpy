@@ -15,6 +15,7 @@ import pagecontroller
 
 urls = (
     '/cgi/index','pagecontroller.Index', # pagecontroller/Index.py
+    '/cgi/insert','pagecontroller.Insert',
 )
 
 # init app

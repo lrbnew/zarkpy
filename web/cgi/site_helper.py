@@ -64,16 +64,17 @@ def model(model_name, decorator=[]):
     else:
         # 此import语句不能放到model函数外面去
         # 否则会与model中的import site_helper语句形成互相依赖
-        import model, modeldecorator 
+        import model
+        import modeldecorator 
         try:
             for name in model_name.split('.'):
                 assert( hasattr(model, name) )
                 model = getattr(model, name)
+            model = model()
         except:
             print 'the name is', name
             print 'the model name is', model_name
             raise
-        model = model()
         for d,arguments in model.decorator + decorator:
             # 仅在非测试环境下,或此装饰器可测试时才使用装饰
             if not config.IS_TEST or getattr(modeldecorator, d).TEST:
@@ -109,6 +110,40 @@ def getUrlParams(url=None):
     if url is None: url = getEnv('REQUEST_URI')
     url = urlparse(url)
     return dict([(part.split('=')[0], _unquote(part.split('=')[1])) for part in url[4].split('&') if len(part.split('=')) == 2])
+
+# 把网络访问地址转为本地文件路径
+def urlToPath(url):
+    assert(url.startswith('/'))
+    assert(not url.startswith(config.APP_ROOT_PATH + 'web'))
+    return config.APP_ROOT_PATH + 'web' + url
+
+# 把本地文件路径转为网络访问地址
+def pathToUrl(path):
+    assert(path.startswith(config.APP_ROOT_PATH + 'web' + '/'))
+    return path.partition(config.APP_ROOT_PATH + 'web')[2]
+
+# 打印一个dict或list的值，便于调试
+def printDictOrList(d, index=0):
+    if type(d) is dict or type(d) is web.Storage:
+        for k, v in d.items():
+            print ' ' * index + k, ':'
+            printDictOrList(v, index+4)
+    elif type(d) is list or type(d) is tuple:
+        for i in d:
+            printDictOrList(i, index+4)
+    else:
+        print ' ' * index + str(d)
+
+# 返回一个可以用foo.abc代替foo['abc']的dict
+def storage(data={}):
+    return web.Storage(data)
+
+def refresh(referer=None):
+    if referer is None:
+        referer = web.input().get('referer', None)
+    if referer is None:
+        referer = web.ctx.env['HTTP_REFERER']
+    return web.seeother(referer)
 
 if __name__=='__main__':
     # 创建可能需要用到的文件夹，所以路径配置应该以_PATH结尾

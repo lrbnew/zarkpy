@@ -6,10 +6,10 @@ import site_helper
 # 数据库配置,若想把DBHelper.py单独用于你的其它项目中,仅需修改此配置即可
 DB_PASSWORD = site_helper.config.DB_PASSWORD
 DB_DATABASE = site_helper.config.DB_DATABASE
-DB_HOST = site_helper.config.DB_HOST
-DB_USER = site_helper.config.DB_USER
-DB_CHARSET = site_helper.config.DB_CHARSET
-DB_TIMEOUT = site_helper.config.DB_TIMEOUT
+DB_HOST     = site_helper.config.DB_HOST
+DB_USER     = site_helper.config.DB_USER
+DB_CHARSET  = site_helper.config.DB_CHARSET
+DB_TIMEOUT  = site_helper.config.DB_TIMEOUT
 
 def _exceptMySQLdbException(e):
     if len(e.args) > 0:
