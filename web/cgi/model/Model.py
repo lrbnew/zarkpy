@@ -25,6 +25,11 @@ class Model:
         assert(len(self.column_names) > 0) # column_names不能为空
         self.db = DBHelper.DBHelper()
 
+    def get(self, item_id):
+        query  = self.replaceAttr('select * from {$table_name} where {$primary_key}=%s')
+        exists = self.db.fetchOne(query, item_id)
+        return ModelData(exists, self) if exists else None
+
     # 插入一个数据，type(data)为dict或web.Storage
     # 返回新数据的主键值(primary key)
     def insert(self, data):
@@ -49,6 +54,7 @@ class Model:
         query = self.replaceAttr('replace into {$table_name} (%s) values (%s)' % (','.join(insert_cols), ','.join(len(insert_cols)*['%s'])))
         return self.db.insert(query, tuple(insert_values))
 
+    # 更新数据，item_id为主键id，保存data中出现的新值
     def update(self, item_id, data):
         try:
             data = self._formatUpdateData(data)
@@ -71,11 +77,6 @@ class Model:
         query = self.replaceAttr('delete from {$table_name} where {$primary_key}=%s')
         return self.db.delete(query, item_id)
 
-    def get(self, item_id):
-        query = self.replaceAttr('select * from {$table_name} where {$primary_key}=%s')
-        item = self.db.fetchOne(query, item_id)
-        return ModelData(item, self) if item is not None else None
-
     # 继承了get所做的事情. 虽会有多次查询，不要怕. 宁花机器一分，不花程序员一秒
     def gets(self, item_ids):
         assert(isinstance(item_ids, list) or isinstance(item_ids, tuple))
@@ -96,10 +97,11 @@ class Model:
         return [ModelData(one, self) for one in self.db.fetchSome(query, argv)]
 
     # 用例: user_model.getOneByWhere('sex=%s and age>%s', ['男', 18])
+    # getOneByWhere会调用一次self.get, 以继承get函数
     def getOneByWhere(self, where, argv=[]):
-        query = self.replaceAttr('select * from {$table_name} where %s' % where)
-        item = self.db.fetchOne(query, argv)
-        return ModelData(item, self) if item is not None else None
+        query  = self.replaceAttr('select * from {$table_name} where %s' % where)
+        exists = self.db.fetchOne(query, argv)
+        return ModelData(self.get(exists.id), self) if exists else None
 
     # 根据env获得count(*)值
     def getCount(self, env={}):
@@ -198,7 +200,7 @@ class Model:
         return ret_data
 
     def _copyData(self, data):
-        ret_data = web.Storage({})
+        ret_data = sh.storage()
         for k in data.keys():
             ret_data[k] = copy.copy(data[k])
         return ret_data
@@ -206,7 +208,8 @@ class Model:
     # 使用env生成query和argv
     # 注意，不能把env的默认值改为{}, 否则env将成为_spliceQuery函数的一个全局属性
     def _spliceQuery(self, env=None):
-        if env is None: env = {}
+        if env is None:
+            env = {}
         query = 'select '
         argv = []
         assert(type(env) in [dict, web.Storage])

@@ -8,7 +8,7 @@ class ImgText(ImgItem):
     column_names = ['Imageid', 'title', 'content']
 
     decorator = [
-        ('Orderby',{'orderby':'{$primary_key} desc'}),
+        ('Orderby', dict(orderby='{$primary_key} desc') ),
     ]
 
     table_template = \

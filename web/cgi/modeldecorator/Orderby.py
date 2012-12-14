@@ -4,7 +4,7 @@ import site_helper as sh
 
 class Orderby(Decorator):
     ''' decorator = [
-        ('Orderby',{'orderby':'{$primary_key} desc'}),
+        ('Orderby', dect(orderby='{$primary_key} desc') ),
     ]
     '''
 

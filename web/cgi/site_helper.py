@@ -87,7 +87,10 @@ def getDBHelper():
     from model import DBHelper
     return DBHelper()
 
-# 把整数ip转换为字符串
+def ipToInt(ip_str):
+    assert(isinstance(ip_str, str))
+    return struct.unpack('=L',socket.inet_aton(ip_str))[0]
+
 def ipToStr(ip_int):
     assert(isinstance(ip_int, int))
     return socket.inet_ntoa(struct.pack('=L', ip_int))
