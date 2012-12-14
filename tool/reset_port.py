@@ -4,7 +4,7 @@
 import os
 import sys
 
-REPORT_FILES = ['conf/nginx/master', 'conf/nginx/exp', 'tool/export.sh', 'tool/launch.sh', 'tool/launch-exp.sh', 'web/cgi/site_helper.py',]
+REPORT_FILES = ['conf/nginx/master', 'conf/nginx/exp', 'tool/export.sh', 'tool/launch.sh', 'tool/launch-exp.sh', 'web/cgi/site_helper.py', 'tool/launch-local.sh',]
 
 if __name__=='__main__':
     if len(sys.argv) == 3:

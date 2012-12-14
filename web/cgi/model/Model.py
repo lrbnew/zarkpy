@@ -118,14 +118,6 @@ class Model:
             ret_query = ret_query.replace(variable, getattr(self, variable[2:-1]))
         return ret_query
 
-    # 尝试获得model的装饰器的属性
-    def getDecoratorAttr(self, attr):
-        if hasattr(self, '_decorator_model'):
-            assert(self._decorator_model is not None)
-            return getattr(self._decorator_model, attr)
-        else:
-            return None
-
     # 使用table_template字段创建数据表
     def createTable(self):
         assert(len(self.table_name)>0)
@@ -231,7 +223,7 @@ class Model:
         else:
             query += 'from '+ self.table_name + ' '
 
-        if env.get('where', None) != None: # { 'where': ('title=%s',['test']) }
+        if env.get('where', None) != None:
             assert( type(env['where']) in (tuple, list) and  len(env['where']) == 2 )
             assert( type(env['where'][0]) is str )
             assert( type(env['where'][1]) in (tuple, list) )

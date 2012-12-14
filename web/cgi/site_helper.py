@@ -24,6 +24,7 @@ config = web.Storage({
     'FOOT_LOG_PATH' :   '',   # 访问log, 一般情况下可以不使用
     'SECRET_KEY' :      'zarkpy',   # 程序密匙,每个新项目务必修改此key
     'HOST_NAME' :       'http://me.zarkpy.com',
+    'IS_TEST' :       False, # 是否正在测试，测试时会被修改为True
 })
 
 # 初始化一些重要变量
@@ -76,8 +77,8 @@ def model(model_name, decorator=[]):
             print 'the model name is', model_name
             raise
         for d,arguments in model.decorator + decorator:
-            # 仅在非测试环境下,或此装饰器可测试时才使用装饰
-            if not config.IS_TEST or getattr(modeldecorator, d).TEST:
+            # 某些装饰器不用测试
+            if not config.IS_TEST or getattr(modeldecorator, d).test_me:
                 model = getattr(modeldecorator,d)(model,arguments)
         CACHED_MODELS[cache_key] = model
         return model
