@@ -37,7 +37,7 @@ class Cascade(Decorator):
             for other_table, attr in self.arguments.decrease:
                 other_model = sh.model(other_table)
                 query = other_model.replaceAttr('delete from {$table_name} where %sid=%%s' % self.getModelTableName())
-                other_model.delete(query, [item_id])
+                other_model.db.delete(query, [item_id])
 
         return ret
 
