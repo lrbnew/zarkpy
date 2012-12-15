@@ -25,7 +25,6 @@ class Insert:
                 inputs.image_file = sh.storage({'filename':image_file.filename, 'value': image_file.value, 'imagetype': image_file.type.partition('/')[2]})
 
         #inputs.Userid = sh.session.user_id
-        inputs.ip     = sh.session.ip
         return inputs
 
     def GET(self):
