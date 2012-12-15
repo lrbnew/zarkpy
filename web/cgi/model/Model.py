@@ -1,6 +1,5 @@
 #coding=utf-8
 import web
-import copy
 import re
 import DBHelper
 import site_helper as sh
@@ -105,11 +104,11 @@ class Model:
 
     # 根据env获得count(*)值
     def getCount(self, env={}):
-        new_env = self._copyData(env) # 不要改变原env
-        new_env['select'] = 'count(*)' 
-        # 删除limit, mysql语法中count(*)和limit不能一起用
-        if new_env.has_key('limit'): del new_env['limit']
-        query, argv = self._spliceQuery(new_env)
+        env = sh.copy(env)
+        env['select'] = 'count(*)' 
+        if env.has_key('limit'):
+            del env['limit'] # mysql语法中count(*)和limit不能一起用
+        query, argv = self._spliceQuery(env)
         query = self.replaceAttr(query)
         return self.db.fetchFirst(query, argv)
 
@@ -193,16 +192,10 @@ class Model:
         pass
 
     def _removeNone(self, data):
-        ret_data = self._copyData(data)
+        ret_data = sh.copy(data)
         for k,v in data.items():
             if v is None:
                 del ret_data[k]
-        return ret_data
-
-    def _copyData(self, data):
-        ret_data = sh.storage()
-        for k in data.keys():
-            ret_data[k] = copy.copy(data[k])
         return ret_data
 
     # 使用env生成query和argv

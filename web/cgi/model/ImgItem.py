@@ -18,7 +18,7 @@ class ImgItem(Model):
 
     def insert(self, data):
         assert(self.table_name != '')
-        data = self._copyData(data)
+        data = sh.copy(data)
         img_model = sh.model('Image')
 
         new_id = Model.insert(self, data)

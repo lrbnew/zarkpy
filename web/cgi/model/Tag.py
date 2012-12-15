@@ -11,7 +11,7 @@ class Tag(Model):
             data_name       varchar(30)  not null,
             data_id         int unsigned not null,
             name            varchar(100) charset utf8 not null,
-            primary key     ({table_name}id),
+            primary key     ({$table_name}id),
             unique key      (data_name, data_id, name),
             key             (data_name, name)
         )ENGINE=InnoDB; '''

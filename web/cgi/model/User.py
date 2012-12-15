@@ -38,7 +38,7 @@ class User(ImgItem):
         self._insertValidate(data)
 
     def _formatInsertData(self, data):
-        data = self._copyData(data)
+        data = sh.copy(data)
         data.text_password = data.password
         data.password = self.getMD5Password(data.password)
         return data

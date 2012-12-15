@@ -7,5 +7,7 @@ import site_helper as sh
 class Index:
 
     def GET(self):
-        books = sh.model('Book').all()
+        bm = sh.model('Book')
+        books = bm.all()
+        p = bm.getPaginationHtml()
         return sh.page_render.Index(sh.storage(locals()))

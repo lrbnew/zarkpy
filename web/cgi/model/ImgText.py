@@ -7,10 +7,6 @@ class ImgText(ImgItem):
     table_name = ''
     column_names = ['Imageid', 'title', 'content']
 
-    decorator = [
-        ('Orderby', dict(orderby='{$primary_key} desc') ),
-    ]
-
     table_template = \
         ''' CREATE TABLE {$table_name} (
             {$table_name}id int unsigned  not null auto_increment,

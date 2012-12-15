@@ -10,6 +10,6 @@ class Category(Model):
             {$table_name}id int unsigned not null auto_increment,
             data_name       varchar(30)  not null,
             name            varchar(100) charset utf8 not null,
-            primary key     ({table_name}id),
+            primary key     ({$table_name}id),
             unique key      (data_name, name)
         )ENGINE=InnoDB; '''

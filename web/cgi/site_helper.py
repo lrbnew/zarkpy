@@ -1,5 +1,5 @@
 #coding=utf-8
-import web, glob, sys, os
+import web, glob, sys, os, copy as _copy
 from urllib import quote as _quote, unquote as _unquote
 import socket, struct
 from urlparse import urlparse
@@ -162,6 +162,9 @@ def refresh(referer=None):
     if referer is None:
         referer = web.ctx.env['HTTP_REFERER']
     return web.seeother(referer)
+
+def copy(obj):
+    return _copy.deepcopy(obj)
 
 if __name__=='__main__':
     # 创建可能需要用到的文件夹，所以路径配置应该以_PATH结尾
