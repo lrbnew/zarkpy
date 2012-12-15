@@ -14,6 +14,8 @@ class Book(ImgText):
     decorator = [
         ('Orderby',   dict(orderby='{$primary_key} desc') ),
         ('Pagination',dict(paging_key='page_num', paging_volume=3, paging=True) ),
+        ('EmptyModel', dict() ),
+        ('StringProcess', dict(strip=['title'], lower=['title']) )
     ]
 
     table_template = \

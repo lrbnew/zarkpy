@@ -25,10 +25,8 @@ class User(ImgItem):
         return self.getOneByWhere('name=%s',[name])
 
     def getMD5Password(self, text_password):
-        if isinstance(text_password, unicode):
-            text_password = text_password.encode('utf-8')
         m = hashlib.md5()
-        m.update(sh.config.SECRET_KEY + text_password)
+        m.update(sh.config.SECRET_KEY + sh.unicodeToStr(text_password))
         return m.hexdigest()
 
     def _insertValidate(self, data):

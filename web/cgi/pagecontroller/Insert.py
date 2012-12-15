@@ -7,7 +7,7 @@ class Insert:
     def POST(self, inputs=None):
         inputs = self.initInputs(inputs)
         assert(inputs.has_key('model_name'))
-        assert(sh.session.is_login)
+        #assert(sh.session.is_login)
         model = sh.model(inputs.model_name)
         new_id = model.insert(inputs)
         return sh.refresh()
@@ -24,7 +24,7 @@ class Insert:
             else:
                 inputs.image_file = sh.storage({'filename':image_file.filename, 'value': image_file.value, 'imagetype': image_file.type.partition('/')[2]})
 
-        inputs.Userid = sh.session.user_id
+        #inputs.Userid = sh.session.user_id
         inputs.ip     = sh.session.ip
         return inputs
 

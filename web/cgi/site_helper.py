@@ -97,17 +97,19 @@ def ipToStr(ip_int):
 
 # 获得webpy提供的request变量, key的取值可以为:
 # CONTENT_LENGTH CONTENT_TYPE DOCUMENT_ROOT HTTP_ACCEPT HTTP_ACCEPT_CHARSET HTTP_ACCEPT_ENCODING HTTP_ACCEPT_LANGUAGE HTTP_CONNECTION HTTP_COOKIE HTTP_HOST HTTP_REFERER HTTP_USER_AGENT PATH_INFO QUERY_STRING REMOTE_ADDR REMOTE_PORT REQUEST_METHOD REQUEST_URI SERVER_NAME SERVER_PORT SERVER_PROTOCOL
-def getEnv(key):
+def getEnv(key, default=''):
     assert(isinstance(key, str))
-    return web.ctx.env.get(key, '')
+    return web.ctx.env.get(key, default)
 
-def quote(string):
-    assert(type(string) in [unicode, str])
-    return _quote(string.encode('utf-8')) if isinstance(string, unicode) else _quote(string)
+def unicodeToStr(s):
+    assert(type(s) in [unicode, str])
+    return s.encode('utf-8', 'ignore') if isinstance(s, unicode) else s
 
-def unquote(string):
-    assert(type(string) in [unicode, str])
-    return _unquote(string.encode('utf-8')) if isinstance(string, unicode) else _unquote(string)
+def quote(s):
+    return _quote(unicodeToStr(s))
+
+def unquote(s):
+    return _unquote(unicodeToStr(s))
 
 # 得到url中的参数值,默认url为当前访问的url
 def getUrlParams(url=None):
