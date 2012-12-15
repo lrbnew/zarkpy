@@ -142,6 +142,20 @@ def printDictOrList(d, index=0):
 def storage(data={}):
     return web.Storage(data)
 
+def getSiteConfig(name, default=''):
+    exists = model('SiteConfig').getOneByWhere('name=%s', [name])
+    return exists.value.strip() if exists and exists.value.strip() else default
+
+def setSiteConfig(name, value):
+    model = model('SiteConfig')
+    assert(name.strip())
+    exists = model.getOneByWhere('name=%s', [name])
+    if exists:
+        model.update(exists.id, dict(value=value))
+        return exists.id
+    else:
+        return model.insert(dict(name=name, value=value))
+
 def refresh(referer=None):
     if referer is None:
         referer = web.input().get('referer', None)
