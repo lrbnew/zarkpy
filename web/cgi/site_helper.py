@@ -158,15 +158,29 @@ def setSiteConfig(name, value):
     else:
         return model.insert(dict(name=name, value=value))
 
-def refresh(referer=None):
+def getReferer(referer):
     if referer is None:
         referer = web.input().get('referer', None)
     if referer is None:
         referer = web.ctx.env['HTTP_REFERER']
+    return referer
+
+# 刷新当前页面，可以通过referer参数指定打开的页面
+def refresh(referer=None):
+    referer = getReferer(referer)
     return web.seeother(referer)
+
+# 跳转到/alert页面，显示一条消息，然后再跳转到另一个页面
+def alert(msg, referer=None, stay=3):
+    referer = getReferer(referer)
+    if not referer: referer = '/'
+    return web.seeother(quote('/alert?msg=%s&referer=%s&stay=%d' % (msg, referer, stay)))
 
 def copy(obj):
     return _copy.deepcopy(obj)
+
+def filterNone(l):
+    return [i for i in l if i is not None]
 
 if __name__=='__main__':
     # 创建可能需要用到的文件夹，所以路径配置应该以_PATH结尾

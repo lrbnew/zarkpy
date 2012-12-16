@@ -1,0 +1,9 @@
+$def with(msg, referer, stay)
+
+<p>$msg</p>
+
+<script>
+    window.setTimeout(function(){
+        window.location.href = '$referer';
+    }, $(stay*1000));
+</script>
