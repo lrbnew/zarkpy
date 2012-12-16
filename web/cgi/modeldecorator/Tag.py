@@ -105,8 +105,7 @@ class Tag(Decorator):
         return self.__getTagModel().getOneByWhere('data_name=%s and name=%s', [self.getModelTableName(), tag.strip()])
 
     def __insertTag(self, item_id, tag):
-        return self.__getTagModel().insert(dict( data_name = self.getModelTableName()
-            data_id = item_id, name = tag ))
+        return self.__getTagModel().insert(dict( data_name = self.getModelTableName(), data_id = item_id, name = tag ))
 
     def __getTagModel(self):
         return sh.model(self.arguments.tag_model_name)

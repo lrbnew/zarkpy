@@ -1,5 +1,8 @@
 #coding=utf-8
-import hashlib
+import sys, os, hashlib
+if __name__=='__main__':
+    sys.path.insert(0, os.path.split(os.path.realpath(__file__))[0].rpartition('/')[0])
+
 from ImgItem import ImgItem
 import site_helper as sh
 
@@ -9,6 +12,7 @@ class User(ImgItem):
 
     decorator = [
         ('NotEmpty', dict(not_empty_attrs=['email', 'name', 'password', 'register_ip']) ),
+        ('StringProcess', dict(lower=['email'], strip=['email']) )
     ]
 
     max_width       = None
@@ -29,16 +33,12 @@ class User(ImgItem):
         m.update(sh.config.SECRET_KEY + sh.unicodeToStr(text_password))
         return m.hexdigest()
 
-    def _insertValidate(self, data):
-        assert not data.has_key('text_password'), '不能指定text_password'
-
-    def _updateValidate(self, data):
-        self._insertValidate(data)
-
     def _formatInsertData(self, data):
         data = sh.copy(data)
-        data.text_password = data.password
-        data.password = self.getMD5Password(data.password)
+        assert not data.has_key('text_password'), '不能指定text_password'
+        if data.has_key('password'):
+            data['text_password'] = data['password']
+            data['password'] = self.getMD5Password(data['password'])
         return data
 
     def _formatUpdateData(self, data):
@@ -48,7 +48,7 @@ class User(ImgItem):
         ''' CREATE TABLE {$table_name} (
             {$table_name}id int unsigned  not null auto_increment,
             email           varchar(100) not null,
-            name       varchar(32)  charset utf8 not null,
+            name            varchar(32)  charset utf8 not null,
             password        varchar(32)  not null,
             text_password   varchar(100) not null,
             dead            enum('yes', 'no') not null default 'no',
@@ -63,3 +63,64 @@ class User(ImgItem):
             key (register_ip),
             key (login_ip)
         )ENGINE=InnoDB;'''
+
+def _operate(model, argv, usage, actions):
+    try:
+        assert len(argv) >= 3
+        assert argv[1] in actions
+        action, p = argv[1], argv[2:]
+
+        if action == 'add':
+            assert len(p) == 3
+            exists = model.getByEmail(p[0])
+            if exists:
+                print 'ERROR: user %s is exists' % p[0]
+                exit(0)
+            model.insert(dict(email=p[0], name=p[1], password=p[2], register_ip='command'))
+
+        else:
+            exists = model.getByEmail(p[0])
+            if not exists:
+                print 'ERROR: user %s is not exists' % p[0]
+                exit(0)
+
+            if action == 'delete':
+                assert len(p) == 1
+                model.delete(exists.id)
+
+            elif action == 'resetpassword':
+                assert len(p) == 2
+                model.update(exists.id, dict(password=p[1]))
+
+            elif action == 'dead':
+                assert len(p) == 2 and p[1] in ['yes', 'no']
+                model.update(exists.id, dict(dead=p[1]))
+
+            elif action == 'activated':
+                assert len(p) == 2 and p[1] in ['yes', 'no']
+                model.update(exists.id, dict(activated=p[1]))
+
+            elif action == 'name':
+                assert len(p) == 2
+                model.update(exists.id, dict(name=p[1]))
+
+            elif action == 'show':
+                assert len(p) == 1
+                for k, v in exists.items():
+                    if not k.startswith('_'):
+                        print '%s: %s' % (k.ljust(15), v)
+
+    except Exception:
+        print usage
+
+if __name__=='__main__':
+    usage = 'Usage: python model/User.py {add|delete|resetpassword|dead|activated|name|show}'
+    usage += '\n   add email name password'
+    usage += '\n   delete email'
+    usage += '\n   resetpassword email new_password'
+    usage += '\n   dead email {yes|no}'
+    usage += '\n   activated email {yes|no}'
+    usage += '\n   name email new_name'
+    usage += '\n   show email'
+    _operate(sh.model('User'), sys.argv, usage, 
+        ['add', 'delete', 'resetpassword', 'dead', 'activated', 'name', 'show',])

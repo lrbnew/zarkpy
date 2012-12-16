@@ -10,7 +10,7 @@ class Model:
     table_name = ''    # 数据表名,应该与class名称和文件名一致.为空则不自动创建表
     column_names = ()  # 需要自动insert或update的字段列表,子类不能为空
     primary_key = None # 表的主键名，不推荐修改
-    decorator = []     # 此model使用的装饰器，详见modeldecorator模块
+    decorator = []     # 此model使用的装饰器，后装饰的先运行
 
     def __init__(self):
         if self.primary_key == None:
@@ -100,7 +100,7 @@ class Model:
     def getOneByWhere(self, where, argv=[]):
         query  = self.replaceAttr('select * from {$table_name} where %s' % where)
         exists = self.db.fetchOne(query, argv)
-        return ModelData(self.get(exists.id), self) if exists else None
+        return ModelData(self.get(exists.get(self.primary_key)), self) if exists else None
 
     # 根据env获得count(*)值
     def getCount(self, env={}):

@@ -10,4 +10,4 @@ class Index:
         bm = sh.model('Book')
         books = bm.all()
         p = bm.getPaginationHtml()
-        return sh.page_render.Index(sh.storage(locals()))
+        return sh.page.Index(sh.storage(locals()))

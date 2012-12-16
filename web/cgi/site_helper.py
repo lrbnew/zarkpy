@@ -31,8 +31,9 @@ config = web.Storage({
 web.config.session_parameters['timeout']    = config.SESSION_EXPIRES
 web.config.session_parameters['secret_key'] = config.SECRET_KEY
 session = None
-page_render = None
-page_render_nobase = None
+page = None
+page_nobase = None
+module = None
 
 # 根据path自动创建文件夹，使用此函数来避免抛出找不到文件夹的异常
 def autoMkdir(path):
@@ -57,8 +58,8 @@ def getDirModules(dir_path, dir_name, except_files=[]):
 CACHED_MODELS = {}
 # model函数从model文件夹中找到名称为model_name的model
 # 然后得到他的一个实例并用modeldecorator装饰后return
-def model(model_name, decorator=[]):
-    cache_key = (model_name, str(decorator))
+def model(model_name):
+    cache_key = model_name
 
     if CACHED_MODELS.has_key(cache_key):
         return CACHED_MODELS[cache_key]
@@ -69,19 +70,32 @@ def model(model_name, decorator=[]):
         import modeldecorator 
         try:
             for name in model_name.split('.'):
-                assert( hasattr(model, name) )
+                assert(hasattr(model, name))
                 model = getattr(model, name)
             model = model()
         except:
             print 'the name is', name
             print 'the model name is', model_name
             raise
-        for d,arguments in model.decorator + decorator:
+        for d,arguments in model.decorator:
             # 某些装饰器不用测试
             if not config.IS_TEST or getattr(modeldecorator, d).test_me:
-                model = getattr(modeldecorator,d)(model,arguments)
+                model = getattr(modeldecorator, d)(model, arguments)
         CACHED_MODELS[cache_key] = model
         return model
+
+# 获得controller模块中的实例
+def controller(name):
+    import controller
+    try:
+        for name in name.split('.'):
+            assert(hasattr(controller, name))
+            controller = getattr(controller, name)
+    except:
+        print 'the name is', name
+        print 'the controller name is', name
+        raise
+    return controller()
 
 def getDBHelper():
     from model import DBHelper
@@ -158,11 +172,13 @@ def setSiteConfig(name, value):
     else:
         return model.insert(dict(name=name, value=value))
 
-def getReferer(referer):
-    if referer is None:
+def getReferer(referer=None):
+    if not referer:
         referer = web.input().get('referer', None)
-    if referer is None:
+    if not referer:
         referer = web.ctx.env['HTTP_REFERER']
+        if referer and not referer.startswith(config.HOST_NAME):
+            referer = '/'
     return referer
 
 # 刷新当前页面，可以通过referer参数指定打开的页面
@@ -175,6 +191,17 @@ def alert(msg, referer=None, stay=3):
     referer = getReferer(referer)
     if not referer: referer = '/'
     return web.seeother(quote('/alert?msg=%s&referer=%s&stay=%d' % (msg, referer, stay)))
+
+def redirect(url):
+    web.seeother(url)
+
+def redirect404():
+    web.seeother('/404.html')
+
+def redirectToLogin(referer=None):
+    referer = getReferer(referer)
+    url = '/login?referer=%s' % referer if referer else '/login'
+    web.seeother(quote(url))
 
 def copy(obj):
     return _copy.deepcopy(obj)

@@ -11,4 +11,4 @@ class Alert:
         msg = inputs.get('msg', '')
         referer = inputs.get('referer', '')
         stay = inputs.get('stay', 3)
-        return sh.page_render.Alert(msg, referer)
+        return sh.page.Alert(msg, referer)

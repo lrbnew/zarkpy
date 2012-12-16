@@ -10,8 +10,8 @@ class NotEmpty(Decorator):
     ] '''
 
     def insert(self, data):
-        self.__NoNoneValidate(data)
-        return self.model.insert(data, 'insert')
+        self.__NoNoneValidate(data, 'insert')
+        return self.model.insert(data)
 
     def update(self, item_id, data):
         self.__NoNoneValidate(data, 'update')
