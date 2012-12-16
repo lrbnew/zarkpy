@@ -16,6 +16,10 @@ import pagecontroller
 urls = (
     '/cgi/index','pagecontroller.Index', # pagecontroller/Index.py
     '/cgi/insert','pagecontroller.Insert', # pagecontroller/Insert.py
+    '/cgi/update','pagecontroller.Update', # pagecontroller/Update.py
+    '/cgi/delete','pagecontroller.Delete', # pagecontroller/Delete.py
+    '/cgi/login','pagecontroller.user.Login', # pagecontroller/user.Login.py
+    '/cgi/logout','pagecontroller.user.Login', # pagecontroller/user.Login.py
 )
 
 # init app
@@ -42,8 +46,8 @@ template_enabled = {
 
 page_render_path = sh.config.APP_ROOT_PATH + 'web/cgi/page'
 sh.autoMkdir(page_render_path)
-sh.page_render = web.template.render(loc=page_render_path, base='Base', globals=template_enabled)
-sh.page_render_nobase = web.template.render(loc=page_render_path, globals=template_enabled)
+sh.page = web.template.render(loc=page_render_path, base='Base', globals=template_enabled)
+sh.page_nobase = web.template.render(loc=page_render_path, globals=template_enabled)
 
 if __name__ == "__main__":
     from tool import init_database

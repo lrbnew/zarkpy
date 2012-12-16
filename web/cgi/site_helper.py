@@ -209,6 +209,9 @@ def copy(obj):
 def filterNone(l):
     return [i for i in l if i is not None]
 
+def setCookie(key, value):
+    web.setcookie(key, value, config.COOKIE_EXPIRES)
+
 if __name__=='__main__':
     # 创建可能需要用到的文件夹，所以路径配置应该以_PATH结尾
     if len(sys.argv) == 2 and sys.argv[1] == 'init_dir':

@@ -64,7 +64,7 @@ class User(ImgItem):
             key (login_ip)
         )ENGINE=InnoDB;'''
 
-def _operate(model, argv, usage, actions):
+def _operateUser(model, argv, usage, actions):
     try:
         assert len(argv) >= 3
         assert argv[1] in actions
@@ -122,5 +122,5 @@ if __name__=='__main__':
     usage += '\n   activated email {yes|no}'
     usage += '\n   name email new_name'
     usage += '\n   show email'
-    _operate(sh.model('User'), sys.argv, usage, 
+    _operateUser(sh.model('User'), sys.argv, usage, 
         ['add', 'delete', 'resetpassword', 'dead', 'activated', 'name', 'show',])

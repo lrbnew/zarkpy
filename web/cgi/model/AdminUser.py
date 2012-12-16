@@ -35,5 +35,5 @@ if __name__=='__main__':
     usage += '\n   name email new_name'
     usage += '\n   show email'
     import User as UserModule
-    UserModule._operate(sh.model('AdminUser'), sys.argv, usage, 
+    UserModule._operateUser(sh.model('AdminUser'), sys.argv, usage, 
         ['add', 'delete', 'resetpassword', 'name', 'show',])
