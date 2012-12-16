@@ -16,6 +16,17 @@ class Tag(Decorator):
                 data_key='tags', split_char=' ', auto_operate='append') ),
     ] '''
 
+    def get(self, item_id):
+        exists = self.model.get(item_id)
+        if exists: exists.tags = self.getTags(item_id)
+        return exists
+
+    def all(self, env=None):
+        items = self.model.all(env)
+        for item in items:
+            if item: item.tags = self.getTags(item.id)
+        return items
+
     # 插入数据并自动插入tag
     def insert(self, data):
         new_id = self.model.insert(data)
@@ -26,6 +37,12 @@ class Tag(Decorator):
     def update(self, item_id, data):
         self.__autoOperateTags(item_id, data.get(self.arguments.data_key, ''))
         return self.model.update(item_id, data)
+
+    # 删除数据并自动删除tag
+    def delete(self, item_id):
+        ret = self.model.delete(item_id)
+        self.__clearTags(item_id)
+        return ret
 
     # 为某个数据添加tag
     def addTag(self, item_id, tag):
@@ -55,7 +72,7 @@ class Tag(Decorator):
     # 删除某个数据的某个tag
     def removeTag(self, item_id, tag):
         exists = self.__getExistsTag(item_id, tag)
-        return self.__deleteTag(self, exists.id) if exists else 0
+        return self.__deleteTag(exists.id) if exists else 0
 
     # 根据tag名称获得所有打了此tag的数据
     def getsByTag(self, tag):
