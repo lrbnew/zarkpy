@@ -18,8 +18,9 @@ urls = (
     '/cgi/insert','pagecontroller.Insert', # pagecontroller/Insert.py
     '/cgi/update','pagecontroller.Update', # pagecontroller/Update.py
     '/cgi/delete','pagecontroller.Delete', # pagecontroller/Delete.py
-    '/cgi/login','pagecontroller.user.Login', # pagecontroller/user.Login.py
-    '/cgi/logout','pagecontroller.user.Login', # pagecontroller/user.Login.py
+    '/cgi/login','pagecontroller.user.Login', # pagecontroller/user/Login.py
+    '/cgi/logout','pagecontroller.user.Login', # pagecontroller/user/Login.py
+    '/cgi/register','pagecontroller.user.Register', # pagecontroller/user/Register.py
 )
 
 # init app

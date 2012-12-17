@@ -25,5 +25,15 @@ class User:
         sh.setCookie('email',  '')
         sh.setCookie('md5password',  '')
 
+    # 向用户发送带有验证码的激活邮件
+    def sendValidationEmail(self, user):
+        code = self.__getActivationCode(user)
+        sh.model('UserValidation').replaceInsert(dict(Userid=user.id, code=code))
+        mail_text = '欢迎%s\n请点击激活: %s/accounts/activate?user_id=%d&code=%s' % (user.name, sh.config.HOST_NAME, user.id, code)
+        sh.sendMail(user.email, '欢迎注册，请验证', mail_text)
+
+    def __getActivationCode(self, user_id):
+        return sh.toMD5(str(user_id) + str(time.time()))
+
     def __validatePassword(self, md5_password, text_password):
         return sh.model(self.model_name).getMD5Password(text_password) == md5_password

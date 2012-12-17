@@ -1,5 +1,5 @@
 #coding=utf-8
-import web, glob, sys, os, copy as _copy
+import web, glob, sys, os, copy as _copy, hashlib, subprocess
 from urllib import quote as _quote, unquote as _unquote
 import socket, struct
 from urlparse import urlparse
@@ -24,6 +24,7 @@ config = web.Storage({
     'FOOT_LOG_PATH' :   '',   # 访问log, 一般情况下可以不使用
     'SECRET_KEY' :      'zarkpy',   # 程序密匙,每个新项目务必修改此key
     'HOST_NAME' :       'http://me.zarkpy.com',
+    'MAIL_SENDER' :     'noreply@zarkpy.com', # 邮件的默认发送者
     'IS_TEST' :       False, # 是否正在测试，测试时会被修改为True
 })
 
@@ -178,8 +179,13 @@ def getReferer(referer=None):
     if not referer:
         referer = web.ctx.env['HTTP_REFERER']
         if referer and not referer.startswith(config.HOST_NAME):
-            referer = '/'
+            referer = None
     return referer
+
+def toMD5(text):
+    m = hashlib.md5()
+    m.update(config.SECRET_KEY + unicodeToStr(text))
+    return m.hexdigest()
 
 # 刷新当前页面，可以通过referer参数指定打开的页面
 def refresh(referer=None):
@@ -211,6 +217,19 @@ def filterNone(l):
 
 def setCookie(key, value):
     web.setcookie(key, value, config.COOKIE_EXPIRES)
+
+# 发送邮件，需要已设置exim4以及mail程序, 以及exim4.conf中的域名指向你的服务器ip
+# 安装命令: sudo aptitude install exim4 heirloom-mailx
+# 使用配置: cp /opt/zarkpy/conf/exim4.conf /etc/exim4/exim4.conf
+#           sudo /etc/init.d/exim4 restart
+# 发送命令: cat content_file | mail -s subject -r sender@domain.com -B receiver
+def sendMail(email, subject, content, sender=None):
+    if not sender: sender = config.MAIL_SENDER
+    p = subprocess.Popen(['mail','-s',subject,'-r',sender,'-B',email],stdout=subprocess.PIPE,stdin=subprocess.PIPE)
+    p.stdin.write(content)
+    p.communicate()
+    p.stdin.close()
+
 
 if __name__=='__main__':
     # 创建可能需要用到的文件夹，所以路径配置应该以_PATH结尾

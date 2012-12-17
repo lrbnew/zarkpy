@@ -15,7 +15,7 @@ class Login:
             return sh.redirect('/')
 
     def POST(self, inputs=None):
-        if inputs is None: inputs = web.input()
+        if not inputs: inputs = web.input()
         assert(inputs.get('email', '').strip())
         assert(inputs.get('password', ''))
 

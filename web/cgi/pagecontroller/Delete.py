@@ -5,11 +5,11 @@ import site_helper as sh
 class Delete(Insert):
 
     def POST(self, inputs=None):
+        if not inputs: inputs = self.getInputs()
         self._delete(inputs)
         return sh.refresh()
 
-    def _delete(self, inputs=None):
-        if inputs is None: inputs = self.initInputs(inputs)
+    def _delete(self, inputs):
         assert inputs.has_key('model_name'), '请指明需要修改的数据类型'
         assert inputs.has_key('model_id'),   '请指明需要修改的数据id'
         assert sh.session.is_login, '请先登录'

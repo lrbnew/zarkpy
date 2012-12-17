@@ -1,5 +1,6 @@
+#!/usr/bin/env python
 #coding=utf-8
-import sys, os, hashlib
+import sys, os
 if __name__=='__main__':
     sys.path.insert(0, os.path.split(os.path.realpath(__file__))[0].rpartition('/')[0])
 
@@ -8,7 +9,7 @@ import site_helper as sh
 
 class User(ImgItem):
     table_name = 'User'
-    column_names = ['email','name','password','text_password','dead','activated','register_ip','login_ip','login_count',]
+    column_names = ['Imageid', 'email','name','password','text_password','dead','activated','register_ip','login_ip','login_count',]
 
     decorator = [
         ('NotEmpty', dict(not_empty_attrs=['email', 'name', 'password', 'register_ip']) ),
@@ -21,17 +22,16 @@ class User(ImgItem):
     convert_gif     = False
     convert_quality = None
     remove_info     = True
+    validation_request = False # 为True注册时发送验证邮件, 见 ../pagecontroller/user/Register.py
 
     def getByEmail(self, email):
-        return self.getOneByWhere('email=%s',[email])
+        return self.getOneByWhere('email=%s',[email.lower()])
 
     def getByName(self, name):
         return self.getOneByWhere('name=%s',[name])
 
     def getMD5Password(self, text_password):
-        m = hashlib.md5()
-        m.update(sh.config.SECRET_KEY + sh.unicodeToStr(text_password))
-        return m.hexdigest()
+        return sh.toMD5(text_password)
 
     def _formatInsertData(self, data):
         data = sh.copy(data)
@@ -47,6 +47,7 @@ class User(ImgItem):
     table_template = \
         ''' CREATE TABLE {$table_name} (
             {$table_name}id int unsigned  not null auto_increment,
+            Imageid         int unsigned  not null default 0,
             email           varchar(100) not null,
             name            varchar(32)  charset utf8 not null,
             password        varchar(32)  not null,
