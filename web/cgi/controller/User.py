@@ -29,7 +29,7 @@ class User:
     def sendValidationEmail(self, user):
         code = self.__getActivationCode(user)
         sh.model('UserValidation').replaceInsert(dict(Userid=user.id, code=code))
-        mail_text = '欢迎%s\n请点击激活: %s/accounts/activate?user_id=%d&code=%s' % (user.name, sh.config.HOST_NAME, user.id, code)
+        mail_text = '欢迎%s\n请点击激活: %s/accounts/validate?Userid=%d&code=%s' % (user.name, sh.config.HOST_NAME, user.id, code)
         sh.sendMail(user.email, '欢迎注册，请验证', mail_text)
 
     def __getActivationCode(self, user_id):

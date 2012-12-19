@@ -201,7 +201,7 @@ def alert(msg, referer=None, stay=3):
 def redirect(url):
     web.seeother(url)
 
-def redirect404():
+def redirectTo404():
     web.seeother('/404.html')
 
 def redirectToLogin(referer=None):

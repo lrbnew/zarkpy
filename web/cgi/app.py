@@ -21,6 +21,7 @@ urls = (
     '/cgi/login','pagecontroller.user.Login', # pagecontroller/user/Login.py
     '/cgi/logout','pagecontroller.user.Login', # pagecontroller/user/Login.py
     '/cgi/register','pagecontroller.user.Register', # pagecontroller/user/Register.py
+    '/cgi/accounts/validate','pagecontroller.user.Validate', # pagecontroller/user/Validate.py
 )
 
 # init app

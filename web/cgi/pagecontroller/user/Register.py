@@ -4,6 +4,7 @@ import site_helper as sh
 from pagecontroller import Insert
 
 # ../../page/user/Register.html
+# ../../controller/User.py
 # ../Insert.py
 
 class Register(Insert):
