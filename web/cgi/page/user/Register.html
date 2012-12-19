@@ -1,0 +1,26 @@
+$def with(error_info='', email='', referer='')
+
+<form action="/register" method="POST" enctype="multipart/form-data">
+
+    <h2>注册会员</h2>
+    <span>$error_info</span>
+
+    $if referer:
+        <input type="hidden" name="referer" value="$referer" />
+
+    <p>＊Email</p>
+    <input name="email" type="text" value="$email" />
+
+    <p>＊用户名</p>
+    <input name="name" type="text">
+
+    <p>＊密码</p>
+    <input name="password" type="password"/>
+
+    <p>上传头像</p>
+    <input autocomplete="off" name="image_file" type="file"/>
+
+    <br/>
+    <input type="submit" value="注册" />
+
+</form>
