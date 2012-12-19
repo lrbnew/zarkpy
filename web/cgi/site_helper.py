@@ -120,11 +120,11 @@ def unicodeToStr(s):
     assert(type(s) in [unicode, str])
     return s.encode('utf-8', 'ignore') if isinstance(s, unicode) else s
 
-def quote(s):
-    return _quote(unicodeToStr(s))
+def quote(*l):
+    return tuple(_quote(unicodeToStr(s)) for s in l) if len(l) != 1 else _quote(unicodeToStr(l[0]))
 
-def unquote(s):
-    return _unquote(unicodeToStr(s))
+def unquote(*l):
+    return tuple(_unquote(unicodeToStr(s)) for s in l) if len(l) != 1 else _unquote(unicodeToStr(l[0]))
 
 # 得到url中的参数值,默认url为当前访问的url
 def getUrlParams(url=None):
@@ -196,7 +196,7 @@ def refresh(referer=None):
 def alert(msg, referer=None, stay=3):
     referer = getReferer(referer)
     if not referer: referer = '/'
-    return web.seeother(quote('/alert?msg=%s&referer=%s&stay=%d' % (msg, referer, stay)))
+    return web.seeother('/alert?msg=%s&referer=%s&stay=%s' % quote(msg, referer, str(stay)))
 
 def redirect(url):
     web.seeother(url)
@@ -206,8 +206,8 @@ def redirectTo404():
 
 def redirectToLogin(referer=None):
     referer = getReferer(referer)
-    url = '/login?referer=%s' % referer if referer else '/login'
-    web.seeother(quote(url))
+    url = '/login?referer=%s' % quote(referer if referer else '/login')
+    web.seeother(url)
 
 def copy(obj):
     return _copy.deepcopy(obj)

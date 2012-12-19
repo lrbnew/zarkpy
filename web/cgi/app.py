@@ -18,17 +18,20 @@ urls = (
 '/cgi/insert','pagecontroller.Insert', # pagecontroller/Insert.py
 '/cgi/update','pagecontroller.Update', # pagecontroller/Update.py
 '/cgi/delete','pagecontroller.Delete', # pagecontroller/Delete.py
+'/cgi/alert','pagecontroller.Alert', # pagecontroller/Alert.py
 '/cgi/login','pagecontroller.user.Login', # pagecontroller/user/Login.py
 '/cgi/logout','pagecontroller.user.Login', # pagecontroller/user/Login.py
 '/cgi/register','pagecontroller.user.Register', # pagecontroller/user/Register.py
 '/cgi/accounts/validate','pagecontroller.user.Validate', # pagecontroller/user/Validate.py
 '/cgi/accounts/forget-password','pagecontroller.user.ForgetPassword', # pagecontroller/user/ForgetPassword.py
+'/cgi/accounts/reset-password','pagecontroller.user.ResetPassword', # pagecontroller/user/ResetPassword.py
 )
 
 # init app
 app = web.application(urls)
 
-sh.session = web.session.Session(app, web.session.DiskStore(sh.config.SESSION_PATH), initializer={})
+default_session = dict(is_login=False, id=0, name='')
+sh.session = web.session.Session(app, web.session.DiskStore(sh.config.SESSION_PATH), initializer=default_session)
 
 # 模版文件中可以直接访问的变量
 template_enabled = {
