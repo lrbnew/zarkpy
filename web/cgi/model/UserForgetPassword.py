@@ -1,11 +1,12 @@
 #coding=utf-8
 from Model import Model
 
-# 验证用户邮箱的验证码
+# 重置用户密码的验证码
 
-class UserValidation(Model):  
-    table_name = 'UserValidation'
+class UserForgetPassword(Model):
+    table_name = 'UserForgetPassword'
     column_names = ['Userid', 'code', ]
+    expires = 3600 * 24 # 验证码过期时间
 
     table_template = \
         ''' CREATE TABLE {$table_name} (

@@ -14,14 +14,15 @@ import pagecontroller
 #web.config.debug = False
 
 urls = (
-    '/cgi/index','pagecontroller.Index', # pagecontroller/Index.py
-    '/cgi/insert','pagecontroller.Insert', # pagecontroller/Insert.py
-    '/cgi/update','pagecontroller.Update', # pagecontroller/Update.py
-    '/cgi/delete','pagecontroller.Delete', # pagecontroller/Delete.py
-    '/cgi/login','pagecontroller.user.Login', # pagecontroller/user/Login.py
-    '/cgi/logout','pagecontroller.user.Login', # pagecontroller/user/Login.py
-    '/cgi/register','pagecontroller.user.Register', # pagecontroller/user/Register.py
-    '/cgi/accounts/validate','pagecontroller.user.Validate', # pagecontroller/user/Validate.py
+'/cgi/index','pagecontroller.Index', # pagecontroller/Index.py
+'/cgi/insert','pagecontroller.Insert', # pagecontroller/Insert.py
+'/cgi/update','pagecontroller.Update', # pagecontroller/Update.py
+'/cgi/delete','pagecontroller.Delete', # pagecontroller/Delete.py
+'/cgi/login','pagecontroller.user.Login', # pagecontroller/user/Login.py
+'/cgi/logout','pagecontroller.user.Login', # pagecontroller/user/Login.py
+'/cgi/register','pagecontroller.user.Register', # pagecontroller/user/Register.py
+'/cgi/accounts/validate','pagecontroller.user.Validate', # pagecontroller/user/Validate.py
+'/cgi/accounts/forget-password','pagecontroller.user.ForgetPassword', # pagecontroller/user/ForgetPassword.py
 )
 
 # init app

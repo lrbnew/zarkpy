@@ -27,13 +27,20 @@ class User:
 
     # 向用户发送带有验证码的激活邮件
     def sendValidationEmail(self, user):
-        code = self.__getActivationCode(user)
+        code = self.__getValidationCode(user)
         sh.model('UserValidation').replaceInsert(dict(Userid=user.id, code=code))
         mail_text = '欢迎%s\n请点击激活: %s/accounts/validate?Userid=%d&code=%s' % (user.name, sh.config.HOST_NAME, user.id, code)
         sh.sendMail(user.email, '欢迎注册，请验证', mail_text)
 
-    def __getActivationCode(self, user_id):
-        return sh.toMD5(str(user_id) + str(time.time()))
+    # 向用户发送重置密码的验证邮件
+    def sendForgetPasswordEmail(self, user):
+        code = self.__getValidationCode(user)
+        sh.model('UserForgetPassword').replaceInsert(dict(Userid=user.id, code=code))
+        mail_text = '%s您好，请申请了密码重置,此链接将在24小时候过期\n%s/accounts/forget-password?Userid=%d&code=%s\n若非您本人操作，请忽略本邮件' % (user.name, sh.config.HOST_NAME, user.id, code)
+        sh.sendMail(user.email, '重置您的密码', mail_text)
+
+    def __getValidationCode(self, user):
+        return sh.toMD5(str(user.id) + str(time.time()))
 
     def __validatePassword(self, md5_password, text_password):
         return sh.model(self.model_name).getMD5Password(text_password) == md5_password
