@@ -22,8 +22,8 @@ class User:
         sh.session.id = 0
         sh.session.is_login = False
         sh.session.name = ''
-        sh.setCookie('email',  '')
-        sh.setCookie('md5password',  '')
+        sh.setCookie('email',  None)
+        sh.setCookie('md5password',  None)
 
     # 向用户发送带有验证码的激活邮件
     def sendValidationEmail(self, user):

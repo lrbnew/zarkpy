@@ -215,8 +215,12 @@ def copy(obj):
 def filterNone(l):
     return [i for i in l if i is not None]
 
+# 设置浏览器cookie，value为None时删除cookie
 def setCookie(key, value):
-    web.setcookie(key, value, config.COOKIE_EXPIRES)
+    if value is not None:
+        web.setcookie(key, value, config.COOKIE_EXPIRES)
+    else:
+        web.setcookie(key, '', 0)
 
 # 发送邮件，需要已设置exim4以及mail程序, 以及exim4.conf中的域名指向你的服务器ip
 # 安装命令: sudo aptitude install exim4 heirloom-mailx

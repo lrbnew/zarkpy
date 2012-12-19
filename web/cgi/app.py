@@ -55,6 +55,12 @@ sh.autoMkdir(page_render_path)
 sh.page = web.template.render(loc=page_render_path, base='Base', globals=template_enabled)
 sh.page_nobase = web.template.render(loc=page_render_path, globals=template_enabled)
 
+# processor
+import processor
+app.add_processor(processor.auto_login.loginByCookie)
+
+
+
 if __name__ == "__main__":
     from tool import init_database
     init_database.initTables()

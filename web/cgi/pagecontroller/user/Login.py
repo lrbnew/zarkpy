@@ -32,7 +32,7 @@ class Login:
             if user.dead == 'yes':
                 return sh.alert('登录失败,你已被列入黑名单,请联系管理员')
 
-            uc.login(user, inputs.get('remember_me', 'no') == 'yes')
+            uc.login(user, inputs.get('remember_me', '') == 'on')
 
             if sh.getReferer():
                 return sh.redirect(sh.getReferer())
