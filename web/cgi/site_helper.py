@@ -234,6 +234,32 @@ def sendMail(email, subject, content, sender=None):
     p.communicate()
     p.stdin.close()
 
+def inputs():
+    def __processImageFile(inputs):
+        if inputs.has_key('image_file'):
+            image_file = inputs.image_file
+            if isinstance(image_file, str) or not image_file.filename \
+                or len(image_file.value) < 10 or not image_file.type.startswith('image/'):
+                del inputs.image_file
+            else:
+                inputs.image_file = storage(dict(filename=image_file.filename, value=image_file.value, imagetype=image_file.type.partition('/')[2]))
+        return inputs
+    return __processImageFile(web.input(image_file={}))
+
+# 把data转为json字符串，cb为前端js回调函数名称
+def toJSON(data, cb=None):
+    def _init(data):
+        json_enable = [int, long, str, bool, list, dict, web.utils.Storage]
+        if isinstance(data, dict) or isinstance(data, web.Storage):
+            return dict([(k, _init(v)) for k,v in data.items()])
+        elif isinstance(data, list) or isinstance(data, tuple):
+            return list(_init(v) for v in data)
+        elif type(data) in json_enable:
+            return data
+        else:
+            return str(data)
+    data = _init(data)
+    return '%s(%s);' % (cb, json.dumps(data)) if cb else json.dumps(data)
 
 if __name__=='__main__':
     # 创建可能需要用到的文件夹，所以路径配置应该以_PATH结尾

@@ -1,19 +1,18 @@
 #coding=utf-8
-import web, re
+import re
 import site_helper as sh
-from pagecontroller import Insert
 
 # ../../page/user/Register.html
 # ../../controller/User.py
 # ../Insert.py
 
-class Register(Insert):
+class Register:
 
     def GET(self):
         return sh.page.user.Register()
 
     def POST(self, inputs=None):
-        if not inputs: inputs = self.getInputs()
+        if not inputs: inputs = sh.inputs()
 
         email = inputs.get('email', '')
         name = inputs.get('name', '').strip()

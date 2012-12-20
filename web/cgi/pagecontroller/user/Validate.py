@@ -1,6 +1,5 @@
 #coding=utf-8
 import site_helper as sh
-from pagecontroller import Insert
 
 # 验证用户邮箱，因为code只发给了注册用户的邮箱，所以只要exists就认为邮箱正确
 # ../../model/UserValidation.py
@@ -8,7 +7,7 @@ from pagecontroller import Insert
 class Validate(Insert):
 
     def GET(self):
-        inputs = self.getInputs()
+        inputs = sh.inputs()
         assert(inputs.has_key('Userid'))
         assert(inputs.has_key('code'))
 

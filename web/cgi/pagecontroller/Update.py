@@ -1,11 +1,10 @@
 #coding=utf-8
-from Insert import Insert
 import site_helper as sh
 
-class Update(Insert):
+class Update:
 
     def POST(self, inputs=None):
-        if not inputs: inputs = self.getInputs()
+        if not inputs: inputs = sh.inputs()
         self._update(inputs)
         return sh.refresh()
 
