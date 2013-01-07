@@ -1,5 +1,5 @@
 #coding=utf-8
-import web, glob, sys, os, copy as _copy, hashlib, subprocess
+import web, glob, sys, os, copy as _copy, hashlib, subprocess, json
 from urllib import quote as _quote, unquote as _unquote
 import socket, struct
 from urlparse import urlparse
@@ -17,8 +17,8 @@ config = web.Storage({
     'DB_PASSWORD' : 'zarkpy_db_password', # mysql数据库连接密码
     'DB_TIMEOUT' : 800 * 3600,   # 连接超时时间, 默认800小时
     'DB_CHARSET' : 'utf8',
-    'UPLOAD_IMAGE_PATH' : '/opt/zarkpy/web/img/upload/', # 其它上传文件存放目录
-    'UPLOAD_IMAGE_URL'  : '/img/upload/', # 访问其它上传文件的相对路径
+    'UPLOAD_IMAGE_PATH' : '/opt/zarkpy/web/img/upload/', # 其它上传图片存放目录
+    'UPLOAD_IMAGE_URL'  : '/img/upload/', # 访问其它上传图片的相对路径
     # 程序异常log,小心,如果有太多的error的话可能会导致写日志的死锁等待,导致程序响应慢
     'ERROR_LOG_PATH' :  '/opt/zarkpy/log/error.log',
     'FOOT_LOG_PATH' :   '',   # 访问log, 一般情况下可以不使用
@@ -50,7 +50,7 @@ def getDirModules(dir_path, dir_name, except_files=[]):
     for file_path in glob.glob(dir_path+'/*.py'):
         file_name = file_path.rpartition('/')[2].rpartition('.')[0]
         if file_name not in except_files:
-            __import__(dir_name.strip('.')+'.'+file_name)
+            __import__(dir_name.strip('.') + '.' + file_name)
             if file_name in dir(getattr(sys.modules[dir_name.strip('.')], file_name)):
                 ret_modules.append((file_name, getattr(getattr(sys.modules[dir_name.strip('.')], file_name), file_name)))
     return ret_modules
@@ -86,7 +86,7 @@ def model(model_name):
         return model
 
 # 获得controller模块中的实例
-def controller(name):
+def ctrl(name):
     import controller
     try:
         for name in name.split('.'):
@@ -153,7 +153,7 @@ def printDictOrList(d, index=0):
         for i in d:
             printDictOrList(i, index+4)
     else:
-        print ' ' * index + str(d)
+        print ' ' * index + unicodeToStr(d)
 
 # 返回一个可以用foo.abc代替foo['abc']的dict
 def storage(data={}):
@@ -177,7 +177,7 @@ def getReferer(referer=None):
     if not referer:
         referer = web.input().get('referer', None)
     if not referer:
-        referer = web.ctx.env['HTTP_REFERER']
+        referer = web.ctx.env.get('HTTP_REFERER', None)
         if referer and not referer.startswith(config.HOST_NAME):
             referer = None
     return referer
@@ -190,7 +190,7 @@ def toMD5(text):
 # 刷新当前页面，可以通过referer参数指定打开的页面
 def refresh(referer=None):
     referer = getReferer(referer)
-    return web.seeother(referer)
+    return web.seeother(referer if referer else '/')
 
 # 跳转到/alert页面，显示一条消息，然后再跳转到另一个页面
 def alert(msg, referer=None, stay=3):
@@ -206,7 +206,7 @@ def redirectTo404():
 
 def redirectToLogin(referer=None):
     referer = getReferer(referer)
-    url = '/login?referer=%s' % quote(referer if referer else '/login')
+    url = '/login?referer=%s' % quote(referer if referer else '/')
     web.seeother(url)
 
 def copy(obj):
@@ -238,7 +238,7 @@ def inputs():
     def __processImageFile(inputs):
         if inputs.has_key('image_file'):
             image_file = inputs.image_file
-            if isinstance(image_file, str) or not image_file.filename \
+            if isinstance(image_file, str) or isinstance(image_file, dict) or not image_file.filename \
                 or len(image_file.value) < 10 or not image_file.type.startswith('image/'):
                 del inputs.image_file
             else:
@@ -246,20 +246,23 @@ def inputs():
         return inputs
     return __processImageFile(web.input(image_file={}))
 
-# 把data转为json字符串，cb为前端js回调函数名称
-def toJSON(data, cb=None):
-    def _init(data):
+def toJsonp(data):
+    def __jsonEnabled(data):
         json_enable = [int, long, str, bool, list, dict, web.utils.Storage]
         if isinstance(data, dict) or isinstance(data, web.Storage):
-            return dict([(k, _init(v)) for k,v in data.items()])
+            return dict([(k, __jsonEnabled(v)) for k,v in data.items()])
         elif isinstance(data, list) or isinstance(data, tuple):
-            return list(_init(v) for v in data)
+            return list(__jsonEnabled(v) for v in data)
         elif type(data) in json_enable:
             return data
         else:
             return str(data)
-    data = _init(data)
+    data = __jsonEnabled(data)
+    cb = web.input().get('callback', None)
     return '%s(%s);' % (cb, json.dumps(data)) if cb else json.dumps(data)
+
+def splitAndStrip(string, chars=' '):
+    return [s.strip() for s in string.split(chars) if s.strip()]
 
 if __name__=='__main__':
     # 创建可能需要用到的文件夹，所以路径配置应该以_PATH结尾

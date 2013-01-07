@@ -17,7 +17,7 @@ class ResetPassword:
         inputs = web.input()
         assert(6 <= len(inputs.new_password) < 60)
         user_model = sh.model('User')
-        user_ctrl  = sh.controller('User')
+        user_ctrl  = sh.ctrl('User')
         if not sh.session.is_login:
             return sh.redirectToLogin()
 

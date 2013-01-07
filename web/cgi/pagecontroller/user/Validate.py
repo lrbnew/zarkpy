@@ -4,7 +4,7 @@ import site_helper as sh
 # 验证用户邮箱，因为code只发给了注册用户的邮箱，所以只要exists就认为邮箱正确
 # ../../model/UserValidation.py
 
-class Validate(Insert):
+class Validate:
 
     def GET(self):
         inputs = sh.inputs()

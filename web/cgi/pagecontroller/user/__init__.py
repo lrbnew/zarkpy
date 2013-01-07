@@ -1,3 +1,4 @@
+#coding=utf-8
 import site_helper, os
 
 EXCEPT_FILES = ['__init__']

@@ -33,14 +33,11 @@ class Register:
         new_id = model.insert(inputs)
         user = model.get(new_id)
 
-        uc = sh.controller('User')
+        uc = sh.ctrl('User')
         uc.login(user, inputs.get('remember_me', 'no') == 'yes')
 
         if model.validation_request:
             uc.sendValidationEmail(user)
             return sh.alert('注册成功,请查收您的验证邮件')
 
-        if sh.getReferer():
-            return sh.redirect(sh.getReferer())
-        else:
-            return sh.alert('注册成功')
+        return sh.alert('注册成功')

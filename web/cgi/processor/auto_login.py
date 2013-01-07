@@ -10,5 +10,5 @@ def loginByCookie(handler):
         if email and md5password:
             user = sh.model('User').getOneByWhere('email=%s and password=%s', [email, md5password])
             if user:
-                sh.controller('User').login(user)
+                sh.ctrl('User').login(user)
     return handler()

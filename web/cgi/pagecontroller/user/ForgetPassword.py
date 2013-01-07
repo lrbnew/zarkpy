@@ -16,7 +16,7 @@ class ForgetPassword:
         if inputs.action == 'send_code':
             user = sh.model('User').getByEmail(inputs.email.strip())
             if user:
-                sh.controller('User').sendForgetPasswordEmail(user)
+                sh.ctrl('User').sendForgetPasswordEmail(user)
             return sh.alert('发送成功,请查收您的邮件')
 
         elif inputs.action == 'reset_password':

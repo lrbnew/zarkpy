@@ -14,8 +14,7 @@ class Pagination(Decorator):
     # 通过给env添加limit来实现分页
     def all(self, env=None):
         env = sh.copy(env) if env is not None else {}
-        if env.get('paging', self.arguments.paging):
-            assert not env.has_key('limit'), '请勿指定limit或使用paging=False'
+        if not env.has_key('limit') and env.get('paging', self.arguments.paging):
             env['limit'] = self.__getLimit(self.__getPageNum(env), self.__getVolume(env))
         return self.model.all(env)
 

@@ -119,6 +119,39 @@ class Model:
             ret_query = ret_query.replace(variable, getattr(self, variable[2:-1]))
         return ret_query
 
+    # 根据表定义，获得字段类型
+    def getColumnTypes(self, column_names=None):
+        text_min_length = 500 # 字符串长度大于多少就识别为text
+        if column_names is None: column_names = self.column_names
+
+        table_template = self.replaceAttr(self.table_template)
+        columns = [sh.splitAndStrip(c) for c in self._splitTableTemplate(table_template) if all(map(lambda x: not c.lower().startswith(x), ['key ','key(','primary ','unique ']))]
+        columns = [c for c in columns if c[0] in column_names]
+        type_keys = {
+            'int': ['int', 'tinyint', 'smallint', 'mediumint', 'integer', 'bigint', 'year'], 
+            'str': ['char', 'varchar', 'enum', 'set', ],
+            'text': ['text', 'blob', 'tinytext', 'tinyblob', 'mediumblob', 'mediumtext', 'longblob', 'longtext', ],
+            'datetime': ['date', 'datetime', 'timestamp', 'time'],
+            'float': ['float', 'double', 'real', 'decimal', 'numeric'],
+        }
+
+        column_types = {}
+        for column in columns:
+            column_name = column[0]
+            for describle in column[1:]:
+                for key, values in type_keys.items():
+                    if describle.partition('(')[0] in values:
+                        column_types[column_name] = key
+                        length = describle.partition('(')[2].rpartition(')')[0].strip()
+                        if key == 'str' and length.isdigit() and int(length) > text_min_length:
+                            column_types[column_name] = 'text'
+                        break
+                if column_types.has_key(column_name): break
+            else:
+                raise Exception('找不到数据类型:%s' % ' '.join(column))
+
+        return column_types
+
     # 使用table_template字段创建数据表
     def createTable(self):
         assert(len(self.table_name)>0)
@@ -136,44 +169,46 @@ class Model:
         assert(len(self.table_name)>0)
         assert(len(self.table_template)>0)
         assert(self.db.isTableExists(self.table_name))
-        def getAlterQuerys(sql):
-            sql = re.sub(r'\s+', ' ', sql.partition('(')[2].rpartition(')')[0])
-            columns = []
-            column = []
-            bracket_count = 0
-            for c in sql + ',':
-                if c == '(':
-                    bracket_count += 1
-                    column.append(c)
-                elif c == ')':
-                    bracket_count -= 1
-                    column.append(c)
-                elif bracket_count == 0 and c == ',':
-                    column = ''.join(column).strip()
-                    if all(map(lambda x: not column.lower().startswith(x), ['key ','key(','primary ','unique '])):
-                        columns.append((column.split()[0], column))
-                    column = []
-                else:
-                    column.append(c)
-                if bracket_count < 0:
-                    raise Exception('table template is invalid. model name is: ' + self.table_name)
-            return columns
-
-        try:
+        def getAlterQuerys(table_template):
+            columns = self._splitTableTemplate(table_template)
+            columns = [(c.split()[0], c) for c in columns if all(map(lambda x: not c.lower().startswith(x), ['key ','key(','primary ','unique ']))]
             exists_columns = map(str.lower, self.db.getTableColumns(self.table_name))
+            return [c for c in columns if c[0].lower() not in exists_columns]
+        try:
             query = self.replaceAttr(self.table_template)
             for column_name, alter_query in getAlterQuerys(query):
-                if column_name.lower() not in exists_columns:
-                    try:
-                        self.db.executeQuery(self.replaceAttr('alter table {$table_name} add %s' % alter_query))
-                    except:
-                        print 'alter query is:'
-                        print 'alter table %s add %s' % (self.table_name, alter_query)
-                        raise
+                try:
+                    self.db.executeQuery(self.replaceAttr('alter table {$table_name} add %s' % alter_query))
+                except:
+                    print 'alter query is:'
+                    print 'alter table %s add %s' % (self.table_name, alter_query)
+                    raise
         except:
             print 'formated creat query is:'
             print query
             raise
+
+    def _splitTableTemplate(self, table_template):
+        table_template = re.sub(r'\s+', ' ', table_template.partition('(')[2].rpartition(')')[0])
+        columns= []
+        column = []
+        bracket_count = 0
+        for c in table_template + ',':
+            if c == '(':
+                bracket_count += 1
+                column.append(c)
+            elif c == ')':
+                bracket_count -= 1
+                column.append(c)
+            elif bracket_count == 0 and c == ',':
+                column = ''.join(column).strip()
+                columns.append(column)
+                column = []
+            else:
+                column.append(c)
+            if bracket_count < 0:
+                raise Exception('table template is invalid: ' + table_template)
+        return columns
 
     # 对insert的数据进行预处理
     def _formatInsertData(self, data):
@@ -245,14 +280,13 @@ class Model:
             primary key ({$table_name}id)
         )ENGINE=InnoDB; '''
 
-
 # model返回的数据类型,在dict的基础上实现通过d.abc代替d['abc']
 # 当返回值d拥有某个model的主键值时,比如Userid,则可以通过d.user.email来直接访问相关数据
 # 还可以通过后缀s访问一对多的数据,比如如果Comment表有一个Bookid属性
 # 那么可以通过b.comments来获得这本书的所有评论
 class ModelData(web.Storage):
     db = DBHelper.DBHelper()
-    table_names = {} # 在__init__文件中记录所有model的小写到大写的关系
+    model_names = {} # 在__init__文件中记录所有model的小写到大写的关系
 
     def __init__(self, data, model):
         assert(data is not None and isinstance(data, dict))
@@ -268,20 +302,23 @@ class ModelData(web.Storage):
             if key == 'id': key = self._primary_key
             return web.Storage.__getattr__(self, key)
         except AttributeError:
-            if ModelData.table_names.has_key(key):
-                table_name = ModelData.table_names[key]
+            key = key.replace('_', '') # 以方便item.abc_def替代item.abcdef
+            if ModelData.model_names.has_key(key):
+                model_name = ModelData.model_names[key]
+                table_name = model_name.rpartition('.')[2]
                 if self.has_key(table_name + 'id'):
                     try:
-                        return sh.model(table_name).get(self.get(table_name + 'id'))
+                        return sh.model(model_name).get(self.get(table_name + 'id'))
                     except:
                         print 'ERROR: ModelData找不到属性', key
                         raise
-            if key.endswith('s') and ModelData.table_names.has_key(key[:-1]):
-                table_name = ModelData.table_names[key[:-1]]
+            if key.endswith('s') and ModelData.model_names.has_key(key[:-1]):
+                model_name = ModelData.model_names[key[:-1]]
+                table_name = model_name.rpartition('.')[2]
                 id_key = self.get('_table_name') + 'id'
                 if self.db.isColumnExists(table_name, id_key):
                     try:
-                        return sh.model(table_name).all({'where': (id_key + '=%s', [self.id])})
+                        return sh.model(model_name).all({'where': (id_key + '=%s', [self.id])})
                     except:
                         print 'ERROR: ModelData找不到属性', key
                         raise

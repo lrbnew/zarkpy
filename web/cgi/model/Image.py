@@ -16,7 +16,7 @@ class Image(Model):
     convert_type    = 'jpg' # 保存的目标格式,为None则不转换
     convert_gif     = False # 是否转换gif图片，如果是，则仅取第一帧
     convert_quality = None  # 保存的目标质量,小于100时压缩,1表示最差
-    remove_info     = True  # 是否删除附加信息,能减小文件大小,但不影响图片质量
+    remove_info     = False # 是否删除附加信息,能减小文件大小,可能会降低图片质量
     known_types     = ['jpg', 'jpeg', 'png', 'gif', ]
 
     def insert(self, data):
@@ -45,6 +45,8 @@ class Image(Model):
     # 压缩图片的尺寸、质量、转换格式、删除文件附加信息
     def convertImage(self, file_path, convert_type, **convert_info):
         ci = convert_info
+        if not convert_type:
+            convert_type = file_path.rpartition('.')[2]
         # 如果是把gif转为非gif
         if file_path.endswith('.gif') and convert_type != 'gif':
             if ci.get('convert_gif', False):

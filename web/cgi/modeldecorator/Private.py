@@ -25,8 +25,6 @@ class Private(Decorator):
         ('Private', dict(user_id_key='Userid', primary_key='private_id') ),
     ]'''
 
-    rewrite_functions = ['insert', 'replaceInsert', 'delete', 'update', 'get', 'all', 'getOneByWhere', 'getCount', ]
-
     def __init__(self, model, arguments):
         Decorator.__init__(self, model, arguments)
         assert(self.arguments.primary_key in self.model.column_names)
@@ -50,8 +48,6 @@ class Private(Decorator):
     def update(self, item_id, data):
         data = sh.copy(data)
         assert(sh.session.is_login)
-        assert(not data.has_key(self.arguments.user_id_key))
-        assert(not data.has_key(self.arguments.primary_key))
         exists_item = self._getItemByPrivateid(item_id)
         return self.model.update(exists_item.id, data) if exists_item is not None else 0
 
@@ -68,10 +64,10 @@ class Private(Decorator):
         argv = argv + [user_id]
         return self._changePrimaryKey(self.model.getOneByWhere(where, argv))
 
-    def all(self, env):
+    def all(self, env=None):
         return self._changePrimaryKey(self.model.all(self._addUseridKeyToEnv(env)))
 
-    def getCount(self, env={}):
+    def getCount(self, env=None):
         return self.model.getCount(self._addUseridKeyToEnv(env))
 
     def _addUseridToData(self, data):
@@ -80,7 +76,7 @@ class Private(Decorator):
         pk = self.arguments.primary_key
         if not data.has_key(uk):
             assert(sh.session.is_login)
-            data[uk] = sh.session.user_id
+            data[uk] = sh.session.id
         assert(not data.has_key(pk)) # 你确定你要自己控制primary_key的值?
         max_item = self.model.all({
             'select': 'max(' + pk + ')',
@@ -92,13 +88,13 @@ class Private(Decorator):
         return data
 
     def _getItemByPrivateid(self, item_id):
-        return self.model.getOneByWhere(self.arguments.user_id_key+'=%s and '+self.arguments.primary_key+'=%s', [sh.session.user_id, item_id])
+        return self.model.getOneByWhere(self.arguments.user_id_key+'=%s and '+self.arguments.primary_key+'=%s', [sh.session.id, item_id])
 
     def _addUseridKeyToEnv(self, env):
-        env = sh.copy(env)
+        env = sh.copy(env) if env else {}
         assert(sh.session.is_login)
         uk = self.arguments.user_id_key
-        user_id = sh.session.user_id
+        user_id = sh.session.id
         if not env.get('_ignore_private_uk', False):
             if env.has_key('where'):
                 assert re.search(r'\b%s\b' % uk, env['where'][0]) is None, env['where'][0]

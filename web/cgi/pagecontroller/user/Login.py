@@ -7,11 +7,11 @@ import site_helper as sh
 class Login:
 
     def GET(self):
-        action = sh.getEnv('REQUEST_URI').strip('/')
+        action = sh.getEnv('REQUEST_URI').partition('?')[0].strip('/')
         if action == 'login':
             return sh.page.user.Login()
         if action == 'logout':
-            sh.controller('User').logout()
+            sh.ctrl('User').logout()
             return sh.redirect('/')
 
     def POST(self, inputs=None):
@@ -19,9 +19,9 @@ class Login:
         assert(inputs.get('email', '').strip())
         assert(inputs.get('password', ''))
 
-        uc = sh.controller('User')
+        uc = sh.ctrl('User')
         model = sh.model('User')
-        action = sh.getEnv('REQUEST_URI').strip('/')
+        action = sh.getEnv('REQUEST_URI').partition('?')[0].strip('/')
 
         if action == 'login':
             if not uc.validate(inputs.email, inputs.password):
