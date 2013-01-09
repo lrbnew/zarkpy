@@ -1,0 +1,27 @@
+$def with(error_info='', email='', referer='')
+
+
+<p>current page is: /admin/login</p>
+
+$if session.is_admin:
+    欢迎: $session.admin_name
+    <br/>
+    <a href="/admin/logout" >退出</a>
+    <br/>
+$else:
+    <form action="/admin/login" method="POST">
+        <span>$error_info</span>
+
+        $if referer:
+            <input type="hidden" name="referer" value="$referer" />
+
+        <p>email:</p>
+        <input type="text" name="email" value="$email" />
+        <br/>
+
+        <p>password:</p>
+        <input type="password" autocomplete="off" name="password" />
+        <br/>
+
+        <input type="submit" value="登录" />
+    </form>

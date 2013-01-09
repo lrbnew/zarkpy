@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 #coding=utf-8
-print 'starting app'
-import web
-import os
-import datetime
+print 'Starting...'
+import web, datetime
 from tool import nginx_uwsgi # nginx_uwsgi负责app.py和nginx之间的通信
 import site_helper as sh # 注意，和shell没有关系, 只是一个简写而已:)
-import pagecontroller
+import pagecontroller, editorcontroller, api
 
 # debug模式默认为True，你可以在开发中设置为True，在发布中设置为False
 # 当debug为True时, 网页的打开速度可能会很慢
@@ -14,6 +12,7 @@ import pagecontroller
 #web.config.debug = False
 
 urls = (
+# zarkpy reserved
 '/cgi/index','pagecontroller.Index', # pagecontroller/Index.py
 '/cgi/insert','pagecontroller.Insert', # pagecontroller/Insert.py
 '/cgi/update','pagecontroller.Update', # pagecontroller/Update.py
@@ -25,16 +24,22 @@ urls = (
 '/cgi/accounts/validate','pagecontroller.user.Validate', # pagecontroller/user/Validate.py
 '/cgi/accounts/forget-password','pagecontroller.user.ForgetPassword', # pagecontroller/user/ForgetPassword.py
 '/cgi/accounts/reset-password','pagecontroller.user.ResetPassword', # pagecontroller/user/ResetPassword.py
+'/cgi/admin','editorcontroller.Index', # editorcontroller/Index.py
+'/cgi/admin/login','editorcontroller.user.Login', # editorcontroller/user/Login.py
+'/cgi/admin/logout','editorcontroller.user.Login', # editorcontroller/user/Login.py
+'/cgi/admin/update','editorcontroller.Update', # editorcontroller/Update.py
+'/cgi/admin/insert','editorcontroller.Insert', # editorcontroller/Insert.py
+'/cgi/admin/delete','editorcontroller.Delete', # editorcontroller/Delete.py
 )
 
-# init app
 app = web.application(urls)
 
-default_session = dict(is_login=False, id=0, name='')
+default_session = dict(is_login=False, id=0, name='', is_admin=False, admin_id=0, admin_name='')
 sh.session = web.session.Session(app, web.session.DiskStore(sh.config.SESSION_PATH), initializer=default_session)
 
+from tool import subpage_data
 # 模版文件中可以直接访问的变量
-template_enabled = {
+temp_func = {
     'str':          str,
     'int':          int,
     'len':          len,
@@ -48,22 +53,38 @@ template_enabled = {
     'sh':           sh,
     'session':      sh.session,
     'datetime':     datetime.datetime,
+    'subpage_data': subpage_data,
 }
+
+render = web.template.render
+
+subpage_path = sh.config.APP_ROOT_PATH + 'web/cgi/subpage'
+sh.autoMkdir(subpage_path)
+temp_func['subpage'] = render(loc=subpage_path, globals=temp_func)
+# 为了能在subpage中使用subpage, 所以这里又render了一次
+temp_func['subpage'] = render(loc=subpage_path, globals=temp_func)
+sh.subpage = temp_func['subpage']
 
 page_render_path = sh.config.APP_ROOT_PATH + 'web/cgi/page'
 sh.autoMkdir(page_render_path)
-sh.page = web.template.render(loc=page_render_path, base='Base', globals=template_enabled)
-sh.page_nobase = web.template.render(loc=page_render_path, globals=template_enabled)
+sh.page = render(loc=page_render_path, base='Base', globals=temp_func)
+sh.page_nobase = render(loc=page_render_path, globals=temp_func)
 
-# processor
+editor_render_path = sh.config.APP_ROOT_PATH + 'web/cgi/editor'
+sh.autoMkdir(editor_render_path)
+sh.editor = render(loc=editor_render_path, base='Base', globals=temp_func)
+sh.editor_nobase = render(loc=editor_render_path, globals=temp_func)
+
 import processor
+app.add_processor(processor.profiler.profiler)
+app.add_processor(processor.validate.validate)
 app.add_processor(processor.auto_login.loginByCookie)
 
-
+app.notfound = lambda:web.seeother('/html/404.html')
 
 if __name__ == "__main__":
     from tool import init_database
     init_database.initTables()
     init_database.initDatas()
-    print 'ok'
+    print 'Ok'
     app.run()

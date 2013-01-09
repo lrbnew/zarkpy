@@ -66,7 +66,7 @@ def model(model_name):
         return CACHED_MODELS[cache_key]
     else:
         # 此import语句不能放到model函数外面去
-        # 否则会与model中的import site_helper语句形成互相依赖
+        # 否则会与model中的import site_helper形成互相依赖, 导致死循环
         import model
         import modeldecorator 
         try:
@@ -263,8 +263,3 @@ def toJsonp(data):
 
 def splitAndStrip(string, chars=' '):
     return [s.strip() for s in string.split(chars) if s.strip()]
-
-if __name__=='__main__':
-    # 创建可能需要用到的文件夹，所以路径配置应该以_PATH结尾
-    if len(sys.argv) == 2 and sys.argv[1] == 'init_dir':
-        map(autoMkdir, [v for k,v in config.items() if k.endswith('_PATH')])

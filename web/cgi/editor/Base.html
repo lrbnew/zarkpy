@@ -3,10 +3,8 @@ $def with(sub_page)
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link rel="favicon icon" type="image/png" href="/img/page/favicon.ico" />
-    <link rel="Shortcut Icon" type="image/x-icon" href="/img/page/favicon.ico" />
-    <meta name="description" content="" />
-    <meta name="keywords" content="" />
+    <link rel="favicon icon" type="image/png" href="/img/editor/favicon.ico" />
+    <link rel="Shortcut Icon" type="image/x-icon" href="/img/editor/favicon.ico" />
     <meta http-equiv="Cache-Control" content="no-cache"/>
     <meta content="sparker5.com" name="author" /> 
     <meta content="Copyright ©sparker5.com 版权所有" name="copyright"/>
@@ -15,9 +13,11 @@ $def with(sub_page)
     $if sub_page.get('cssfiles',None):
         $for f in sh.splitAndStrip(sub_page.cssfiles):
             <link rel="stylesheet" href="$f" type="text/css" media="screen" charset="utf-8"/>
+
     $if sub_page.get('jsfiles',None):
-        $for f in sh.splitAndStrip(sub_page.jsfiles):
-            <script type="text/javascript" src="$f" charset="utf-8"></script>
+        $for f in sh.splitAndStrip(sub_page.cssfiles):
+            <script type="text/javascript" src="$f"></script>
+
 </head>
 <body>
 

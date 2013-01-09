@@ -15,4 +15,3 @@ class AdminUser(User):
         sh.session.admin_id = 0
         sh.session.is_admin = False
         sh.session.admin_name = ''
-        #del sh.session

@@ -29,12 +29,12 @@ class AdminUser(User):
 
 
 if __name__=='__main__':
-    usage = 'Usage: python model/AdminUser.py {add|delete|resetpassword|name|show}'
+    usage = 'Usage: python model/AdminUser.py {add|delete|resetpassword|rename|show}'
     usage += '\n   add email name password'
     usage += '\n   delete email'
     usage += '\n   resetpassword email new_password'
-    usage += '\n   name email new_name'
+    usage += '\n   rename email new_name'
     usage += '\n   show email'
     import User as UserModule
     UserModule._operateUser(sh.model('AdminUser'), sys.argv, usage, 
-        ['add', 'delete', 'resetpassword', 'name', 'show',])
+        ['add', 'delete', 'resetpassword', 'rename', 'show',])

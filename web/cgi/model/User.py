@@ -101,7 +101,7 @@ def _operateUser(model, argv, usage, actions):
                 assert len(p) == 2 and p[1] in ['yes', 'no']
                 model.update(exists.id, dict(activated=p[1]))
 
-            elif action == 'name':
+            elif action == 'rename':
                 assert len(p) == 2
                 model.update(exists.id, dict(name=p[1]))
 
@@ -115,13 +115,13 @@ def _operateUser(model, argv, usage, actions):
         print usage
 
 if __name__=='__main__':
-    usage = 'Usage: python model/User.py {add|delete|resetpassword|dead|activated|name|show}'
+    usage = 'Usage: python model/User.py {add|delete|resetpassword|dead|activated|rename|show}'
     usage += '\n   add email name password'
     usage += '\n   delete email'
     usage += '\n   resetpassword email new_password'
     usage += '\n   dead email {yes|no}'
     usage += '\n   activated email {yes|no}'
-    usage += '\n   name email new_name'
+    usage += '\n   rename email new_name'
     usage += '\n   show email'
     _operateUser(sh.model('User'), sys.argv, usage, 
-        ['add', 'delete', 'resetpassword', 'dead', 'activated', 'name', 'show',])
+        ['add', 'delete', 'resetpassword', 'dead', 'activated', 'rename', 'show',])

@@ -31,7 +31,7 @@ server {
     rewrite ^/css/(.*)$ /css/$1 last;
     rewrite ^/plugins/(.*)$ /plugins/$1 last;
     rewrite ^/js/(.*)$ /js/$1 last;
-    rewrite ^/zarkpyapi/(.*)$ /api/$1 last;
+    rewrite ^/api/(.*)$ /api/$1 last;
     rewrite ^/$ /cgi/index last;
     rewrite ^/(.*)$ /cgi/$1 last;
 

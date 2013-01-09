@@ -13,7 +13,7 @@ import site_helper as sh
 class Tag(Decorator):
     ''' decorator = [
         ('Tag', dict(tag_id_key='Tagid', tag_model_name='Tag'
-                data_key='tags', split_char=' ', auto_operate='append') ),
+                data_key='tags', split_char=' ', auto_operate='reset') ),
     ] '''
 
     def get(self, item_id):

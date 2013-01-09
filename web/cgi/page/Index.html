@@ -3,18 +3,3 @@ $def with(argv)
 hello zarkpy, this time is: $datetime.now()
 <br/>
 current page is: /index or /
-
-<form action="/insert" method="POST" enctype="multipart/form-data" >
-    <input type="hidden" name="model_name" value="Book" />
-    <input type="text" name="title" value="" />
-    <input type="file" name="image_file" value="" />
-    <input type="submit" value="提交" />
-</form>
-
-$argv.p
-
-$for b in argv.books:
-    <p>$b.id</p>
-    <p>$b.title</p>
-    <br/>
-    

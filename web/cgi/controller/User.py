@@ -4,6 +4,7 @@ import site_helper as sh
 class User:
     model_name = 'User'
 
+    # 验证密码是否正确
     def validate(self, email, password):
         user = sh.model(self.model_name).getOneByWhere('email=%s', [email.strip().lower()])
         return user and self.__validatePassword(user.password, password)

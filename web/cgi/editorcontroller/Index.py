@@ -1,9 +1,10 @@
 #coding=utf-8
+import web
 import site_helper as sh
 
-# ../page/Index.html
+# ../editor/Index.html
 
 class Index:
 
     def GET(self):
-        return sh.page.Index(sh.storage(locals()))
+        return sh.editor.Index()
