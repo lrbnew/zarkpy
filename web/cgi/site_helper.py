@@ -177,6 +177,8 @@ def getReferer(referer=None):
     if not referer:
         referer = web.input().get('referer', None)
     if not referer:
+        referer = getUrlParams(web.ctx.env.get('HTTP_REFERER', '')).get('referer', None)
+    if not referer:
         referer = web.ctx.env.get('HTTP_REFERER', None)
         if referer and not referer.startswith(config.HOST_NAME):
             referer = None
@@ -263,3 +265,8 @@ def toJsonp(data):
 
 def splitAndStrip(string, chars=' '):
     return [s.strip() for s in string.split(chars) if s.strip()]
+
+'''auto mkdir'''
+for k, v in config.items():
+    if k.endswith('_PATH'):
+        autoMkdir(v)
