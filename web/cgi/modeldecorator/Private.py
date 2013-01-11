@@ -6,6 +6,7 @@ import site_helper as sh
 
 # 根据Userid对用户创建的数据私有化，即隐藏真实id，针对每个用户显示一个独立的id序列
 # 重写insert delete update get gets all，把以上函数的primary key改为Userid和private_id来实现数据对用户的私有化
+# Private装饰使用了Private表来记录每个用户对于每种model的max_id值，以便在insert时得到private_id,实现类似auto_increment的效果
 
 # 对于all和getCount函数,Private改写了其where语句,这会增加程序的"不透明"性
 # 因此为了避免用户不小心忘记了Private的存在，所以断言where中禁止出现user_id_key
@@ -15,10 +16,11 @@ import site_helper as sh
 # Private不应该改写self.model.primary_key, 这样会导致"被继承类"的行为不明确
 
 # 使用此装饰，必须在table_template中添加Userid和private_id字段, 并添加(Userid, private_id)唯一索引
-# 装饰后，primary_key将被改为private_id, id属性将调用private_id, 但是原有的Modelid值不变
+# 装饰后，primary_key将被改为private_id, id属性将调用private_id, 但是原有的{$table_name}id值不变
 # 也可自定义user_id_key和primary_key的列名
 
 # 注意，若要在已有表上添加Private装饰，请先处理好所有已有数据的Userid和private_id的值
+# 最后，记得添加类似索引: unique key  (Userid, private_id)
 
 class Private(Decorator):
     '''decorator = [
@@ -31,12 +33,16 @@ class Private(Decorator):
         assert(self.arguments.user_id_key in self.model.column_names)
 
     def insert(self, data):
-        data = self._addUseridToData(data)
+        data = sh.copy(data)
+        self._setUseridToData(data)
+        self._setPrivateidToData(data)
         self.model.insert(data)
         return data[self.arguments.primary_key]
 
     def replaceInsert(self, data):
-        data = self._addUseridToData(data)
+        data = sh.copy(data)
+        self._setUseridToData(data)
+        self._setPrivateidToData(data)
         self.model.replaceInsert(data)
         return data[self.arguments.primary_key]
 
@@ -65,39 +71,34 @@ class Private(Decorator):
         return self._changePrimaryKey(self.model.getOneByWhere(where, argv))
 
     def all(self, env=None):
-        return self._changePrimaryKey(self.model.all(self._addUseridKeyToEnv(env)))
+        return self._changePrimaryKey(self.model.all(self._setWhereWithUserid(env)))
 
     def getCount(self, env=None):
-        return self.model.getCount(self._addUseridKeyToEnv(env))
+        return self.model.getCount(self._setWhereWithUserid(env))
 
-    def _addUseridToData(self, data):
-        data = sh.copy(data)
+    def _setUseridToData(self, data):
+        uk = self.arguments.user_id_key
+        if not data.has_key(uk):
+            assert sh.session.is_login, '必须已登录，或显示给出%s' % uk
+            data[uk] = sh.session.id
+    
+    def _setPrivateidToData(self, data):
         uk = self.arguments.user_id_key
         pk = self.arguments.primary_key
-        if not data.has_key(uk):
-            assert(sh.session.is_login)
-            data[uk] = sh.session.id
-        assert(not data.has_key(pk)) # 你确定你要自己控制primary_key的值?
-        max_item = self.model.all({
-            'select': 'max(' + pk + ')',
-            'where': (uk+'=%s', [data.get(uk)]),
-            'limit': (0, 1),
-        })
-        max_pk = max_item[0].get('max(' + pk + ')')
-        data[pk] = max_pk + 1 if max_pk is not None else 1
-        return data
+        assert not data.has_key(pk), '你确定你要自己控制%s的值?' % pk
+        data[pk] = sh.model('Private').getPrivateid(self._getModelTableName(), data[uk])
 
-    def _getItemByPrivateid(self, item_id):
-        return self.model.getOneByWhere(self.arguments.user_id_key+'=%s and '+self.arguments.primary_key+'=%s', [sh.session.id, item_id])
+    def _getItemByPrivateid(self, pri_id):
+        return self.model.getOneByWhere(self.arguments.user_id_key+'=%s and '+self.arguments.primary_key+'=%s', [sh.session.id, pri_id])
 
-    def _addUseridKeyToEnv(self, env):
+    def _setWhereWithUserid(self, env):
         env = sh.copy(env) if env else {}
         assert(sh.session.is_login)
         uk = self.arguments.user_id_key
         user_id = sh.session.id
         if not env.get('_ignore_private_uk', False):
             if env.has_key('where'):
-                assert re.search(r'\b%s\b' % uk, env['where'][0]) is None, env['where'][0]
+                assert re.search(r'\b%s\b' % uk, env['where'][0]) is None, "想自定义Userid? 请使用env['_ignore_private_uk']=True" + env['where'][0] 
                 env['where'][0] = '(%s) and %s=%%s' % (env['where'][0], uk)
                 env['where'][1].append(user_id)
             else:
