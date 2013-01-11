@@ -51,7 +51,6 @@ temp_func = {
     'getattr':      getattr,
     'input':        web.input,
     'sh':           sh,
-    'session':      sh.session,
     'datetime':     datetime.datetime,
     'subpage_data': subpage_data,
 }

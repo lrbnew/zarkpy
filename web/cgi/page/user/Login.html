@@ -1,7 +1,7 @@
 $def with(error_info='', email='', referer='')
 
-$if session.is_login:
-    欢迎: $session.name
+$if sh.session.is_login:
+    欢迎: $sh.session.name
     <a href="/logout" >退出</a>
     <br/>
 $else:

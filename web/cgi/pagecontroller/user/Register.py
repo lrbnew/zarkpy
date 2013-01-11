@@ -23,6 +23,11 @@ class Register:
         if not re.match(r"^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$", email):
             return sh.page.user.Register('请输入正确的邮箱地址', email)
 
+        ''' 限制用户名字符，默认不启用
+        if not re.match(r'^[a-zA-Z0-9_]+$', i.username.encode('utf-8')):
+            return sh.page.user.Register('用户名只能使用字母、数字、下划线', email)
+        '''
+
         inputs.register_ip = sh.session.ip
 
         model = sh.model('User')
