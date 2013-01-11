@@ -24,4 +24,4 @@ class Decorator:
         return self.model._getRealModel() if isinstance(self.model, Decorator) else self.model
 
     def _getModelTableName(self):
-        return self.model._getModelTableName() if isinstance(self, Decorator) else self.table_name
+        return self._getRealModel().table_name
