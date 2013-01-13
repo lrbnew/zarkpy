@@ -52,4 +52,5 @@ def _getExistsTables():
 
 def initDatas():
     query = open(site_helper.config.APP_ROOT_PATH + 'web/cgi/tool/init_datas.sql').read().strip()
-    site_helper.getDBHelper().executeQuery(query)
+    if query:
+        site_helper.getDBHelper().executeQuery(query)

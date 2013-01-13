@@ -11,4 +11,4 @@ class Insert:
     def _insert(self, inputs=None):
         if inputs is None: inputs = sh.inputs()
         assert(inputs.has_key('model_name'))
-        return sh.getModel(inputs.model_name).insert(inputs)
+        return sh.model(inputs.model_name).insert(inputs)
