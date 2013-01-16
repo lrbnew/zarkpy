@@ -4,7 +4,7 @@ if [ "x$(whoami)" != "xroot" ]; then
     exit 1
 fi
 
-aptitude install update
+aptitude update
 aptitude install locales
 dpkg-reconfigure locales
 
