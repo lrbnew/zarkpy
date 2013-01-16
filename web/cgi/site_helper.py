@@ -17,9 +17,9 @@ config = web.Storage({
     'DB_PASSWORD' : 'zarkpy_db_password', # mysql数据库连接密码
     'DB_TIMEOUT' : 800 * 3600,   # 连接超时时间, 默认800小时
     'DB_CHARSET' : 'utf8',
-    'UPLOAD_IMAGE_PATH' : '/opt/zarkpy/web/img/upload/', # 其它上传图片存放目录
-    'UPLOAD_IMAGE_URL'  : '/img/upload/', # 访问其它上传图片的相对路径
-    # 程序异常log,小心,如果有太多的error的话可能会导致写日志的死锁等待,导致程序响应慢
+    'UPLOAD_IMAGE_PATH' : '/opt/zarkpy/web/img/upload/', # 上传图片存放目录
+    'UPLOAD_IMAGE_URL'  : '/img/upload/', # 访问上传图片的相对路径
+    # 程序异常log,小心,如果有太多的error的话可能会导致写日志的锁等待,导致程序响应慢
     'ERROR_LOG_PATH' :  '/opt/zarkpy/log/error.log',
     'FOOT_LOG_PATH' :   '',   # 访问log, 一般情况下可以不使用
     'SECRET_KEY' :      'zarkpy',   # 程序密匙,每个新项目务必修改此key

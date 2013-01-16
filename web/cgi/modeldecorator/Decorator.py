@@ -5,7 +5,7 @@ import site_helper as sh
 
 class Decorator:
 
-    test_me = False # 指明装饰是否需要测试,为False且测试时,sh.model函数就不会使用此装饰
+    test_me = False # 指明装饰是否需要测试,为False且测试时sh.model函数就不会使用此装饰
 
     # 构造函数，比方说，有一个model的实例a，传给此构造函数得到b
     # b可以重写a的函数f，并在重写的新函数f中添加新功能，然后再在f中引用a原来的函数

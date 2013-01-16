@@ -9,9 +9,10 @@ import site_helper as sh
 class ImgItem(Model):
     table_name      = ''
     column_names    = ['Imageid', ]
+    use_convert     = True  # 是否压缩以及修改图片
     max_width       = None  # 压缩后最大宽度
     max_height      = None  # 压缩后最大高度 (宽和高都不为None时才压缩图片)
-    convert_type    = 'jpg' # 保存的目标格式,为None则不转换
+    convert_type    = 'jpg' # 保存的目标格式,为None则保持原格式
     convert_gif     = False # 是否转换gif图片，如果是，则仅取第一帧
     convert_quality = None  # 保存的目标质量,小于100时压缩,1表示最差
     remove_info     = True  # 是否删除附加信息,能减小文件大小,但不影响图片质量

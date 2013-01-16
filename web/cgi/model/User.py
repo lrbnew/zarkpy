@@ -2,7 +2,9 @@
 #coding=utf-8
 import sys, os
 if __name__=='__main__':
-    sys.path.insert(0, os.path.split(os.path.realpath(__file__))[0].rpartition('/')[0])
+    father_dir = os.path.split(os.path.realpath(__file__))[0].rpartition('/')[0]
+    if father_dir not in sys.path:
+        sys.path.insert(0, father_dir)
 
 from ImgItem import ImgItem
 import site_helper as sh
@@ -16,6 +18,7 @@ class User(ImgItem):
         ('StringProcess', dict(lower=['email'], strip=['email']) )
     ]
 
+    use_convert     = True
     max_width       = None
     max_height      = None
     convert_type    = 'jpg'

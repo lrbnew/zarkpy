@@ -2,7 +2,9 @@
 #coding=utf-8
 import sys, os
 if __name__=='__main__':
-    sys.path.insert(0, os.path.split(os.path.realpath(__file__))[0].rpartition('/')[0])
+    father_dir = os.path.split(os.path.realpath(__file__))[0].rpartition('/')[0]
+    if father_dir not in sys.path:
+        sys.path.insert(0, father_dir)
 
 from User import User
 import site_helper as sh
