@@ -85,7 +85,6 @@ class Model:
     # env的可选参数以及样例分别有:
     # select: username, email
     # from: User
-    # join 
     # where: ('age>%s', (18,))
     # orderby: 'Userid desc'
     # limit: (0, 10)
