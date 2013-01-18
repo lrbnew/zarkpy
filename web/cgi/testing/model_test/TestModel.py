@@ -20,11 +20,15 @@ class TestModel(unittest.TestCase):
     # sh.model工厂返回的数据是单例模式
     def test_sh_model(self):
         new_image_model = sh.model('Image')
-        self.assertTrue(new_image_model is image_model)
+        self.assertIs(new_image_model, image_model)
 
     def test_get(self):
         id = db.insert('insert into Image (data_name) values (%s)', ('test_image'))
         self.assertEqual(image_model.get(id).data_name, 'test_image')
+        item1 = image_model.get(id)
+        item2 = image_model.get(id)
+        # 每次get都会返回不同的拷贝, 如果返回了同一个"指针"，将会给网站带来复杂的耦合与隐性bug
+        self.assertIsNot(item1, item2)
 
     def test_insert(self):
         data = {'data_name': 'test_image', image_model.image_key: test_image}

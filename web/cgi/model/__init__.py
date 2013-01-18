@@ -20,4 +20,5 @@ for module_name, module in sh.getDirModules(os.path.split(os.path.realpath(__fil
 2 然后在下面添加一句: import sub
 3 把model/sub/__init__.py中的 from Model import ModelData这句话改为: from .. import ModelData
 4 给tool/init_database.py文件中的INIT_DIR添加'model/sub'值
+然后便可通过sh.model('sub.ModelName')获得model
 '''

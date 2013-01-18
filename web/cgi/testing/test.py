@@ -2,14 +2,14 @@
 #coding=utf-8
 ''' 对testing中的测试用例进行测试，测试过程中会操作数据库与数据文件，
     因此需要新建测试专用的数据库与文件存放路径,请在运行此脚本之前检查:
-    1 是否所有的文件保存路径都以加入TEST_PATH变量？
-    2 以及对应的访问路径都以加入TEST_URL变量？
-    否则将可能导致您本机上的数据丢失 '''
+    1 是否所有的文件保存路径都已加入TEST_PATH列表？
+    2 以及对应的访问路径是否都已加入TEST_URL列表？
+    若为否,将可能导致您本地的数据丢失 '''
 
 TEST_PATH = ['UPLOAD_IMAGE_PATH']
 TEST_URL  = ['UPLOAD_IMAGE_URL']
 
-assert __name__ == "__main__", 'test.py只能运行，切勿导入'
+assert __name__ == "__main__", 'test.py只能运行,切勿导入,以免因不小心操作导致数据丢失'
 import os, re, sys
 from unittest import TestLoader, TestSuite, TextTestRunner, TestCase
 # 添加cgi文件夹所在路径, 以实现下面的import
@@ -66,28 +66,28 @@ def pathToModuleName(paths):
     return [p.rpartition('/testing/')[2] for p in paths]
 
 def mainTest():
-    if len(sys.argv) > 1:
-        module_names = pathToModuleName(getTestPaths(sys.argv[1:]))
-        module_names = ['testing.%s' % f.rpartition('.py')[0].replace('/', '.') for f in module_names]
-        suites = []
-        for module_name in module_names:
-            if '.' in module_name:
-                exec('from %s import %s as test_module' % module_name.rpartition('.')[::2])
-            else:
-                exec('import %s as test_module' % module_name)
-            class_name = module_name.rpartition('.')[2]
-            test_class = eval("test_module.%s" % class_name)
-            assert issubclass(test_class, TestCase), '仅能对unittest.TestCase的子类进行测试,忘记继承它了?'
-            suites.append( TestLoader().loadTestsFromTestCase(test_class) )
-        TextTestRunner().run( TestSuite(suites) )
-    else:
+    module_names = pathToModuleName(getTestPaths(sys.argv[1:]))
+    module_names = ['testing.%s' % f.rpartition('.py')[0].replace('/', '.') for f in module_names]
+    suites = []
+    for module_name in module_names:
+        if '.' in module_name:
+            exec('from %s import %s as test_module' % module_name.rpartition('.')[::2])
+        else:
+            exec('import %s as test_module' % module_name)
+        class_name = module_name.rpartition('.')[2]
+        test_class = eval("test_module.%s" % class_name)
+        assert issubclass(test_class, TestCase), '仅能对unittest.TestCase的子类进行测试,忘记继承它了?'
+        suites.append( TestLoader().loadTestsFromTestCase(test_class) )
+    TextTestRunner().run( TestSuite(suites) )
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
         print 'Usage:'
         print '    python testing/test.py [FILE] [FILE] ...'
         print '    FILE可以是测试文件名，也可以是文件夹'
         print '    如果是文件夹，则将自动查找里面的Test*.py文件'
-
-if __name__ == "__main__":
-    modifyConfigForTest()
-    rebulidTestDataBase()
-    emptyTestFileDir()
-    mainTest()
+    else:
+        modifyConfigForTest()
+        rebulidTestDataBase()
+        emptyTestFileDir()
+        mainTest()

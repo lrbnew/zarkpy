@@ -25,17 +25,19 @@ class ImgItem(Model):
         new_id = Model.insert(self, data)
 
         if data.has_key(img_model.image_key):
-            data['__ignore_convert_image'] = True
+            ignore_covert = data.get('__ignore_convert_image', False)
+            data['__ignore_convert_image'] = True # 不需要Image来convert，自己convert
             img_id = img_model.insert(data)
             Model.update(self, new_id, {'Imageid': img_id})
             img_model.update(img_id, {'data_id': new_id, 'data_name': self.table_name})
 
-            file_path = img_model.getFilePath(img_id)
-            convert_path = img_model.convertImage(file_path, self.convert_type, max_width=self.max_width, max_height=self.max_height, convert_quality=self.convert_quality, remove_info=self.remove_info, convert_gif=self.convert_gif)
+            if self.use_convert and not ignore_covert:
+                file_path = img_model.getFilePath(img_id)
+                convert_path = img_model.convertImage(file_path, self.convert_type, max_width=self.max_width, max_height=self.max_height, convert_quality=self.convert_quality, remove_info=self.remove_info, convert_gif=self.convert_gif)
 
-            if file_path != convert_path:
-                os.system('rm "%s"' % file_path)
-                img_model._updateUrl(data, img_id, convert_path.rpartition('.')[2])
+                if file_path != convert_path:
+                    os.system('rm "%s"' % file_path)
+                    img_model._updateUrl(data, img_id, convert_path.rpartition('.')[2])
 
         return new_id
 

@@ -22,13 +22,13 @@ class Image(Model):
 
     def insert(self, data):
         new_id = Model.insert(self, data)
-        # 保存图片,压缩,设置url字段值
+        # 保存图片,并压缩尺寸,压缩质量,转格式,设置url字段值
         if data.has_key(self.image_key):
             imf = data[self.image_key]
             file_path = '%s%d.%s' % (self._getSaveDir(data), new_id, imf.imagetype)
             self._saveImage(file_path, imf.value)
             self._updateUrl(data, new_id, imf.imagetype)
-            if not data.get('__ignore_convert_image', False):
+            if self.use_convert and not data.get('__ignore_convert_image', False):
                 convert_path = self.convertImage(file_path, self.convert_type, max_width=self.max_width, max_height=self.max_height, convert_quality=self.convert_quality, remove_info=self.remove_info, convert_gif=self.convert_gif)
                 if file_path != convert_path:
                     os.system('rm "%s"' % file_path)
@@ -45,33 +45,30 @@ class Image(Model):
             
     # 压缩图片的尺寸、质量、转换格式、删除文件附加信息
     def convertImage(self, file_path, convert_type, **convert_info):
-        if self.use_convert:
-            ci = convert_info
-            if not convert_type:
-                convert_type = file_path.rpartition('.')[2]
-            # 如果是把gif转为非gif
-            if file_path.endswith('.gif') and convert_type != 'gif':
-                if ci.get('convert_gif', False):
-                    convert = 'convert "%s[0]" ' % file_path
-                    new_path = file_path.rpartition('.')[0] + '.' + convert_type
-                else:
-                    convert = 'convert "%s" ' % file_path
-                    new_path = file_path
+        ci = convert_info
+        if not convert_type:
+            convert_type = file_path.rpartition('.')[2]
+        # 如果是把gif转为非gif
+        if file_path.endswith('.gif') and convert_type != 'gif':
+            if ci.get('convert_gif', False):
+                convert = 'convert "%s[0]" ' % file_path
+                new_path = file_path.rpartition('.')[0] + '.' + convert_type
             else:
                 convert = 'convert "%s" ' % file_path
-                new_path = file_path.rpartition('.')[0] + '.' + convert_type
-
-            if ci.get('convert_quality', 0):
-                convert += ' -quality %d ' % ci.get('convert_quality')
-            if ci.get('max_width', 0) and ci.get('max_height', 0):
-                convert += ' -resize "%dx%d>" ' % (ci.get('max_width', 0), ci.get('max_height', 0))
-            if ci.get('remove_info', False):
-                convert += ' +profile "*" '
-            convert += ' "%s" ' % new_path
-            os.system(convert)
-            assert os.path.exists(new_path), 'convert生成图片失败'
+                new_path = file_path
         else:
-            new_path = file_path
+            convert = 'convert "%s" ' % file_path
+            new_path = file_path.rpartition('.')[0] + '.' + convert_type
+
+        if ci.get('convert_quality', 0):
+            convert += ' -quality %d ' % ci.get('convert_quality')
+        if ci.get('max_width', 0) and ci.get('max_height', 0):
+            convert += ' -resize "%dx%d>" ' % (ci.get('max_width', 0), ci.get('max_height', 0))
+        if ci.get('remove_info', False):
+            convert += ' +profile "*" '
+        convert += ' "%s" ' % new_path
+        os.system(convert)
+        assert os.path.exists(new_path), 'convert生成图片失败'
         return new_path
 
     def _saveImage(self, file_path, image_value):
