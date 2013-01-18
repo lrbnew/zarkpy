@@ -83,7 +83,7 @@ def mainTest():
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         print 'Usage:'
-        print '    python testing/test.py [FILE] [FILE] ...'
+        print '    python test.py [FILE] [FILE] ...'
         print '    FILE可以是测试文件名，也可以是文件夹'
         print '    如果是文件夹，则将自动查找里面的Test*.py文件'
     else:

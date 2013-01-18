@@ -8,8 +8,6 @@ class Orderby(Decorator):
     ]
     '''
 
-    test_me = True
-
     def all(self, env=None):
         assert(isinstance(self.arguments.orderby, str))
         env = sh.copy(env) if env is not None else {}

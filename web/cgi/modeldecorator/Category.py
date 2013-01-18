@@ -34,7 +34,7 @@ class Category(Decorator):
     # 给model添加分类名称, 返回新分类id，若已存在则抛出异常
     def addNewCategory(self, name):
         exists = self._getExistsCategory(name)
-        assert exists is None, '插入了重复的分类: %s %s' % (self.getModelTableName(), name)
+        assert exists is None, '插入了重复的分类: %s %s' % (self._getModelTableName(), name)
         return self.__insertCategory(name)
 
     # 删除model的分类，并重置相关数据的分类id为0
@@ -47,7 +47,7 @@ class Category(Decorator):
 
     # 获得model的所有分类名称
     def getAllCategory(self):
-        return [c.name for c in self.__getCatModel().all({'where': ('data_name=%s', [self.getModelTableName()])})]
+        return [c.name for c in self.__getCatModel().all({'where': ('data_name=%s', [self._getModelTableName()])})]
 
     # 判断model是否已有莫个分类
     def hasCategory(self, name):
@@ -61,7 +61,7 @@ class Category(Decorator):
     # 设置数据的分类
     def setCategory(self, item_id, name):
         exists = self._getExistsCategory(name)
-        assert exists is not None, '分类不存在: %s %s' % (self.getModelTableName(), name)
+        assert exists is not None, '分类不存在: %s %s' % (self._getModelTableName(), name)
         return self.model.update(item_id, {self.arguments.cat_id_key: exists.id})
 
     # 取消数据的分类
@@ -84,16 +84,16 @@ class Category(Decorator):
                 self.setCategory(item_id, name)
 
     def __insertCategory(self, name):
-        return self.__getCatModel().insert(dict( data_name = self.getModelTableName(), name = name ))
+        return self.__getCatModel().insert(dict( data_name = self._getModelTableName(), name = name ))
 
     def _getExistsCategory(self, name):
         assert(isinstance(name, str) and len(name.strip()) > 0)
-        return self.__getCatModel().getOneByWhere('data_name=%s and name=%s', [self.getModelTableName(), name.strip()])
+        return self.__getCatModel().getOneByWhere('data_name=%s and name=%s', [self._getModelTableName(), name.strip()])
 
     def __getCatModel(self):
         return sh.model(self.arguments.cat_model_name)
 
     def __getCategoryId(self, name):
         exists = self._getExistsCategory(name)
-        assert exists is not None, '分类不存在: %s %s' % (self.getModelTableName(), name)
+        assert exists is not None, '分类不存在: %s %s' % (self._getModelTableName(), name)
         return exists.id

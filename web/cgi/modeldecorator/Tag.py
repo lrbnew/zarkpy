@@ -63,7 +63,7 @@ class Tag(Decorator):
 
     # 获得某个数据的tag
     def getTags(self, item_id):
-        return [t.name for t in self.__getTagModel().all({'where': ('data_name=%s and data_id=%s', [self.getModelTableName(), item_id])})]
+        return [t.name for t in self.__getTagModel().all({'where': ('data_name=%s and data_id=%s', [self._getModelTableName(), item_id])})]
 
     # 判断某个数据是否有某个tag
     def hasTag(self, item_id, tag):
@@ -79,7 +79,7 @@ class Tag(Decorator):
         assert(isinstance(tag, str) and len(tag.strip()) > 0)
         tag_model = self.__getTagModel()
         query = tag_model.replaceAttr('select data_id from {$table_name} where data_model=%s and name=%s')
-        item_ids = tag_model.db.fetchSomeFirst(query, [self.getModelTableName(), tag])
+        item_ids = tag_model.db.fetchSomeFirst(query, [self._getModelTableName(), tag])
         return self.model.gets(item_ids)
 
     def __autoOperateTags(self, item_id, tags):
@@ -95,17 +95,17 @@ class Tag(Decorator):
     def __clearTags(self, item_id):
         tag_model = self.__getTagModel()
         query = tag_model.replaceAttr('delete from {$table_name} where data_model=%s and data_id=%s')
-        return tag_model.db.delete(query, [self.getModelTableName(), item_id])
+        return tag_model.db.delete(query, [self._getModelTableName(), item_id])
 
     def __deleteTag(self, tag_id):
         return self.__getTagModel().delete(tag_id)
 
     def __getExistsTag(self, item_id, tag):
         assert(isinstance(tag, str) and len(tag.strip()) > 0)
-        return self.__getTagModel().getOneByWhere('data_name=%s and name=%s', [self.getModelTableName(), tag.strip()])
+        return self.__getTagModel().getOneByWhere('data_name=%s and name=%s', [self._getModelTableName(), tag.strip()])
 
     def __insertTag(self, item_id, tag):
-        return self.__getTagModel().insert(dict( data_name = self.getModelTableName(), data_id = item_id, name = tag ))
+        return self.__getTagModel().insert(dict( data_name = self._getModelTableName(), data_id = item_id, name = tag ))
 
     def __getTagModel(self):
         return sh.model(self.arguments.tag_model_name)

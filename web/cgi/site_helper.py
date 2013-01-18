@@ -59,10 +59,14 @@ def getDirModules(dir_path, dir_name, except_files=[]):
 CACHED_MODELS = {}
 # model函数从model文件夹中找到名称为model_name的model
 # 然后得到他的一个实例并用modeldecorator装饰后return
-def model(model_name):
+# decorator可以用来动态设置使用的装饰器，此时不使用cache
+# 但decorator仅能用于测试,否则将会导致代码不清晰
+# 比如你不知道是否某处因使用了decorator而与在model文件中看到的行为不一致
+def model(model_name, decorator=[]):
     cache_key = model_name
+    assert not decorator or config.IS_TEST, 'decorator仅能用于测试环境'
 
-    if CACHED_MODELS.has_key(cache_key):
+    if not decorator and CACHED_MODELS.has_key(cache_key):
         return CACHED_MODELS[cache_key]
     else:
         # 此import语句不能放到model函数外面去
@@ -78,11 +82,10 @@ def model(model_name):
             print 'the name is', name
             print 'the model name is', model_name
             raise
-        for d,arguments in model.decorator:
-            # 某些装饰器不用测试
-            if not config.IS_TEST or getattr(modeldecorator, d).test_me:
-                model = getattr(modeldecorator, d)(model, arguments)
-        CACHED_MODELS[cache_key] = model
+        for d,arguments in model.decorator if not config.IS_TEST else decorator:
+            model = getattr(modeldecorator, d)(model, arguments)
+        if not decorator:
+            CACHED_MODELS[cache_key] = model
         return model
 
 # 获得controller模块中的实例

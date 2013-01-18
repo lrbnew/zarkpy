@@ -15,7 +15,7 @@ image_model = sh.model('Image')
 
 test_data = dict(email='sdjllyh@gmail.com', name='sdjl', password='123456', register_ip='127.0.0.1')
 test_image_path = '%sweb/cgi/testing/model_test/test_image.jpg' % sh.config.APP_ROOT_PATH
-test_image = sh.storage(dict(filename=test_image_path, value=open(test_image_path).read(), imagetype='jpg'))
+test_image_data = sh.storage(dict(filename=test_image_path, value=open(test_image_path).read(), imagetype='jpg'))
 
 class TestImgItem(unittest.TestCase):
 
@@ -31,7 +31,7 @@ class TestImgItem(unittest.TestCase):
         imgitem_model.max_height = 60
 
         data = sh.copy(test_data)
-        data[image_model.image_key] = test_image
+        data[image_model.image_key] = test_image_data
         old_count = len(image_model.all())
         id = imgitem_model.insert(data)
 
@@ -63,7 +63,7 @@ class TestImgItem(unittest.TestCase):
 
         # 插入ImgItem数据
         data = sh.copy(test_data)
-        data[image_model.image_key] = test_image
+        data[image_model.image_key] = test_image_data
         id = imgitem_model.insert(data)
 
         item = imgitem_model.get(id)
@@ -96,10 +96,10 @@ class TestImgItem(unittest.TestCase):
         imgitem_model.max_width  = 50
         imgitem_model.max_height = 60
         data = sh.copy(test_data)
-        data[image_model.image_key] = test_image
+        data[image_model.image_key] = test_image_data
         data['__ignore_convert_image'] = True
         id = imgitem_model.insert(data)
         item = imgitem_model.get(id)
         image_path = sh.urlToPath(item.image.url)
         # 保存的文件数据与测试数据一致, 文件没有被convert
-        self.assertEqual(open(image_path).read(), test_image.value)
+        self.assertEqual(open(image_path).read(), test_image_data.value)
