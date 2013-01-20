@@ -11,7 +11,12 @@ TEST_URL  = ['UPLOAD_IMAGE_URL']
 
 assert __name__ == "__main__", 'test.py只能运行,切勿导入,以免因不小心操作导致数据丢失'
 import os, re, sys
+
+import web
+web.config.debug = False
+
 from unittest import TestLoader, TestSuite, TextTestRunner, TestCase
+
 # 添加cgi文件夹所在路径, 以实现下面的import
 sys.path.insert(0, os.path.split(os.path.realpath(__file__))[0].rpartition('/')[0])
 import site_helper as sh

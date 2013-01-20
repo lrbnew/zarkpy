@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 #coding=utf-8
-print 'Starting...'
-import web, datetime
+import web
 from tool import nginx_uwsgi # nginx_uwsgi负责app.py和nginx之间的通信
 import site_helper as sh # 注意，和shell没有关系, 只是一个简写而已:)
-import pagecontroller, editorcontroller, api
 
 # debug模式默认为True，你可以在开发中设置为True，在发布中设置为False
 # 当debug为True时, 网页的打开速度可能会很慢
@@ -33,57 +31,72 @@ urls = (
 )
 
 app = web.application(urls)
-
-default_session = dict(is_login=False, id=0, name='', is_admin=False, admin_id=0, admin_name='')
-sh.session = web.session.Session(app, web.session.DiskStore(sh.config.SESSION_PATH), initializer=default_session)
-
-from tool import subpage_data
-# 模版文件中可以直接访问的变量
-temp_func = {
-    'str':          str,
-    'int':          int,
-    'len':          len,
-    'type':         type,
-    'map':          map,
-    'all':          all,
-    'any':          any,
-    'hasattr':      hasattr,
-    'getattr':      getattr,
-    'input':        web.input,
-    'sh':           sh,
-    'datetime':     datetime.datetime,
-    'subpage_data': subpage_data,
-}
-
-render = web.template.render
-
-subpage_path = sh.config.APP_ROOT_PATH + 'web/cgi/subpage'
-sh.autoMkdir(subpage_path)
-temp_func['subpage'] = render(loc=subpage_path, globals=temp_func)
-# 为了能在subpage中使用subpage, 所以这里又render了一次
-temp_func['subpage'] = render(loc=subpage_path, globals=temp_func)
-sh.subpage = temp_func['subpage']
-
-page_render_path = sh.config.APP_ROOT_PATH + 'web/cgi/page'
-sh.autoMkdir(page_render_path)
-sh.page = render(loc=page_render_path, base='Base', globals=temp_func)
-sh.page_nobase = render(loc=page_render_path, globals=temp_func)
-
-editor_render_path = sh.config.APP_ROOT_PATH + 'web/cgi/editor'
-sh.autoMkdir(editor_render_path)
-sh.editor = render(loc=editor_render_path, base='Base', globals=temp_func)
-sh.editor_nobase = render(loc=editor_render_path, globals=temp_func)
-
-import processor
-app.add_processor(processor.profiler.profiler)
-app.add_processor(processor.validate.validate)
-app.add_processor(processor.auto_login.loginByCookie)
-
 app.notfound = lambda:web.seeother('/html/404.html')
+
+def initSession():
+    default_session = dict(is_login=False, id=0, name='', is_admin=False, admin_id=0, admin_name='')
+    sh.session = web.session.Session(app, web.session.DiskStore(sh.config.SESSION_PATH), initializer=default_session)
+
+def initRender():
+    import datetime
+    import pagecontroller, editorcontroller, api
+    from tool import subpage_data
+# 模版文件中可以直接访问的变量
+    temp_func = {
+        'str':          str,
+        'int':          int,
+        'len':          len,
+        'type':         type,
+        'map':          map,
+        'all':          all,
+        'any':          any,
+        'hasattr':      hasattr,
+        'getattr':      getattr,
+        'input':        web.input,
+        'sh':           sh,
+        'datetime':     datetime.datetime,
+        'subpage_data': subpage_data,
+    }
+
+    render = web.template.render
+
+    subpage_path = sh.config.APP_ROOT_PATH + 'web/cgi/subpage'
+    sh.autoMkdir(subpage_path)
+    temp_func['subpage'] = render(loc=subpage_path, globals=temp_func)
+# 为了能在subpage中使用subpage, 所以这里又render了一次
+    temp_func['subpage'] = render(loc=subpage_path, globals=temp_func)
+    sh.subpage = temp_func['subpage']
+
+    page_render_path = sh.config.APP_ROOT_PATH + 'web/cgi/page'
+    sh.autoMkdir(page_render_path)
+    sh.page = render(loc=page_render_path, base='Base', globals=temp_func)
+    sh.page_nobase = render(loc=page_render_path, globals=temp_func)
+
+    editor_render_path = sh.config.APP_ROOT_PATH + 'web/cgi/editor'
+    sh.autoMkdir(editor_render_path)
+    sh.editor = render(loc=editor_render_path, base='Base', globals=temp_func)
+    sh.editor_nobase = render(loc=editor_render_path, globals=temp_func)
+
+def addProcessor():
+    import processor
+    app.add_processor(processor.profiler.profiler)
+    app.add_processor(processor.validate.validate)
+    app.add_processor(processor.auto_login.loginByCookie)
+
+initSession()
+initRender()
+
+if not sh.config.IS_TEST:
+    addProcessor()
 
 if __name__ == "__main__":
     from tool import init_database
     init_database.initTables()
     init_database.initDatas()
-    print 'Ok'
-    app.run()
+    try:
+        print 'app running'
+        app.run()
+    finally:
+        db = sh.getDBHelper()
+        db.db_dict.close()
+        db.db_tuple.close()
