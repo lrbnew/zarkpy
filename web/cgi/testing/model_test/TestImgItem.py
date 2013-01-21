@@ -5,9 +5,11 @@ import imghdr
 import Image
 import site_helper as sh
 
-''' 因为ImgItem.table_name为空，所以没有具体的表，这里使用ImgItem的子类User代替
-    如果你打算修改User的基类，请找一个table_name不为空的ImgItem子类替换User
-    并修改test_data '''
+'''
+因为ImgItem.table_name为空，所以没有具体的表，这里使用ImgItem的子类User代替
+如果你打算修改User的基类，请找一个table_name不为空的ImgItem子类替换User
+并修改test_data
+'''
 
 db = sh.getDBHelper()
 imgitem_model = sh.model('User')
@@ -88,6 +90,8 @@ class TestImgItem(unittest.TestCase):
         # 新图片为jpg格式
         self.assertTrue(new_image_path.endswith('/%d.jpg' % (new_image_id)))
         self.assertEqual(imghdr.what(None, open(new_image_path).read()), 'jpeg')
+        # 新图片被裁剪
+        self.assertEqual(Image.open(new_image_path).size, (50, 50))
         
     # 可以通过__ignore_convert_image显示声明不转换图片
     def test_ignore_convert_image(self):

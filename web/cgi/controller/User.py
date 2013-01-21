@@ -1,4 +1,5 @@
 #coding=utf-8
+import re
 import site_helper as sh
 
 class User:
@@ -18,6 +19,11 @@ class User:
             sh.setCookie('md5password', user.password)
         if user.has_key('login_count'):
             sh.model(self.model_name).update(user.id, {'login_count': user.login_count+1})
+
+    def loginById(self, user_id, remember_me=False):
+        user = sh.model(self.model_name).get(user_id)
+        assert(user is not None)
+        sh.ctrl(self.model_name).login(user, remember_me)
         
     def logout(self):
         sh.session.id = 0
@@ -39,6 +45,38 @@ class User:
         sh.model('UserForgetPassword').replaceInsert(dict(Userid=user.id, code=code))
         mail_text = '%s您好，请申请了密码重置,此链接将在24小时候过期\n%s/accounts/forget-password?Userid=%d&code=%s\n若非您本人操作，请忽略本邮件' % (user.name, sh.config.HOST_NAME, user.id, code)
         sh.sendMail(user.email, '重置您的密码', mail_text)
+
+    # 检查新注册的用户数据是否正确，不正确时返回错误信息
+    def checkNewUser(self, data):
+        email = data.get('email', '').strip()
+        name = data.get('name', '').strip()
+        password = data.get('password', '')
+        model = sh.model(self.model_name)
+
+        if not re.match(r"^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$", email):
+            return '请输入正确的邮箱地址'
+
+        if model.getByEmail(email):
+            return '此邮箱已注册'
+
+        if model.getByName(name):
+            return '此用户名已注册'
+
+        if not (4 <= len(name) <=30):
+            return '用户名必须大于等于4个字符，小于等于30个字符'
+
+        if not(6 <= len(password) < 60):
+            return '密码必须大于等于6个字符，小于等于60个字符'
+
+        # 限制用户名字符
+        #if not re.match(r'^[a-zA-Z0-9_]+$', data.name.encode('utf-8')):
+        #    return '用户名只能使用字母、数字、下划线'
+
+        return None
+
+    def register(self, data):
+        data.register_ip = sh.session.ip
+        return sh.model(self.model_name).insert(data)
 
     def __getValidationCode(self, user):
         return sh.toMD5(str(user.id) + str(time.time()))

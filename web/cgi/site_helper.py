@@ -1,6 +1,6 @@
 #coding=utf-8
 import web, glob, sys, os, copy as _copy, hashlib, subprocess, json
-from urllib import quote as _quote, unquote as _unquote
+from urllib import quote as _quote, unquote as _unquote, urlencode
 import socket, struct
 from urlparse import urlparse
 
@@ -135,6 +135,9 @@ def getUrlParams(url=None):
     url = urlparse(url)
     return dict([(part.split('=')[0], _unquote(part.split('=')[1])) for part in url[4].split('&') if len(part.split('=')) == 2])
 
+def paramsToUrl(url, params={}):
+    return url + '?' + urlencode(params) if params else url
+
 # 把网络访问地址转为本地文件路径
 def urlToPath(url):
     assert(url.startswith('/'))
@@ -146,17 +149,17 @@ def pathToUrl(path):
     assert(path.startswith(config.APP_ROOT_PATH + 'web' + '/'))
     return path.partition(config.APP_ROOT_PATH + 'web')[2]
 
-# 打印一个dict或list的值，便于调试
-def printDictOrList(d, index=0):
-    if type(d) is dict or type(d) is web.Storage:
+# 打印某个数据
+def printObject(d, index=0):
+    if isinstance(d, (dict, web.Storage)):
         for k, v in d.items():
             print ' ' * index + k, ':'
-            printDictOrList(v, index+4)
-    elif type(d) is list or type(d) is tuple:
+            printObject(v, index+4)
+    elif isinstance(d, (list, tuple)):
         for i in d:
-            printDictOrList(i, index+4)
+            printObject(i, index+4)
     else:
-        print ' ' * index + unicodeToStr(d)
+        print (' ' * index) + (unicodeToStr(d) if isinstance(d, unicode) else str(d))
 
 # 返回一个可以用foo.abc代替foo['abc']的dict
 def storage(data={}):
@@ -265,6 +268,10 @@ def toJsonp(data):
     data = __jsonEnabled(data)
     cb = web.input().get('callback', None)
     return '%s(%s);' % (cb, json.dumps(data)) if cb else json.dumps(data)
+
+def loadsJson(json_str):
+    data = json.loads(json_str)
+    return storage(data) if isinstance(data, dict) else data
 
 def splitAndStrip(string, chars=' '):
     return [s.strip() for s in string.split(chars) if s.strip()]

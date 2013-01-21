@@ -22,12 +22,18 @@ urls = (
 '/cgi/accounts/validate','pagecontroller.user.Validate', # pagecontroller/user/Validate.py
 '/cgi/accounts/forget-password','pagecontroller.user.ForgetPassword', # pagecontroller/user/ForgetPassword.py
 '/cgi/accounts/reset-password','pagecontroller.user.ResetPassword', # pagecontroller/user/ResetPassword.py
+
 '/cgi/admin','editorcontroller.Index', # editorcontroller/Index.py
 '/cgi/admin/login','editorcontroller.user.Login', # editorcontroller/user/Login.py
 '/cgi/admin/logout','editorcontroller.user.Login', # editorcontroller/user/Login.py
 '/cgi/admin/update','editorcontroller.Update', # editorcontroller/Update.py
 '/cgi/admin/insert','editorcontroller.Insert', # editorcontroller/Insert.py
 '/cgi/admin/delete','editorcontroller.Delete', # editorcontroller/Delete.py
+
+'/api/user/register','api.user.Register', # api/user/Register.py
+'/api/user/login','api.user.Login', # api/user/Login.py
+'/api/user/logout','api.user.Login', # api/user/Login.py
+'/api/user/profile','api.user.Profile', # api/user/Profile.py
 )
 
 app = web.application(urls)
@@ -77,17 +83,19 @@ def initRender():
     sh.editor = render(loc=editor_render_path, base='Base', globals=temp_func)
     sh.editor_nobase = render(loc=editor_render_path, globals=temp_func)
 
+initSession()
+initRender()
+
+import processor
 def addProcessor():
-    import processor
     app.add_processor(processor.profiler.profiler)
     app.add_processor(processor.validate.validate)
     app.add_processor(processor.auto_login.loginByCookie)
 
-initSession()
-initRender()
-
+# 仅headers processor用于测试环境
 if not sh.config.IS_TEST:
     addProcessor()
+app.add_processor(processor.headers.appendHeader)
 
 if __name__ == "__main__":
     from tool import init_database

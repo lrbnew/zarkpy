@@ -21,7 +21,7 @@ class RecordRequestInfo(Decorator):
     def __writeInfo(self, data):
         data = sh.copy(data)
         for key, value in self.arguments.items():
-            assert not data.has_key(key)
+            assert not data.has_key(key), u'不应该显示给出%s，小心作弊' % key
             if sh.getEnv(value, None):
                 data[key] = sh.getEnv(value)
             elif sh.session.get(value, None):
