@@ -30,6 +30,7 @@ urls = (
 '/cgi/admin/delete','editorcontroller.Delete', # editorcontroller/Delete.py
 )
 
+# init app
 app = web.application(urls)
 app.notfound = lambda:web.seeother('/html/404.html')
 
@@ -41,7 +42,7 @@ def initRender():
     import datetime
     import pagecontroller, editorcontroller, api
     from tool import subpage_data
-# 模版文件中可以直接访问的变量
+    # 模版文件中可以直接访问的变量
     temp_func = {
         'str':          str,
         'int':          int,
@@ -80,8 +81,8 @@ def initRender():
 def addProcessor():
     import processor
     app.add_processor(processor.profiler.profiler)
+    app.add_processor(processor.auto_login.loginByCookie) # 应该放到validate的前面
     app.add_processor(processor.validate.validate)
-    app.add_processor(processor.auto_login.loginByCookie)
 
 initSession()
 initRender()

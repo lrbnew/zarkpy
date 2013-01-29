@@ -31,10 +31,6 @@ config = web.Storage({
 # 初始化一些重要变量
 web.config.session_parameters['timeout']    = config.SESSION_EXPIRES
 web.config.session_parameters['secret_key'] = config.SECRET_KEY
-session = None
-page = None
-page_nobase = None
-module = None
 
 # 根据path自动创建文件夹，使用此函数来避免抛出找不到文件夹的异常
 def autoMkdir(path):
@@ -167,20 +163,18 @@ def getSiteConfig(name, default=''):
     return exists.value.strip() if exists and exists.value.strip() else default
 
 def setSiteConfig(name, value):
-    model = model('SiteConfig')
+    conf_model = model('SiteConfig')
     assert(name.strip())
-    exists = model.getOneByWhere('name=%s', [name])
+    exists = conf_model.getOneByWhere('name=%s', [name])
     if exists:
-        model.update(exists.id, dict(value=value))
+        conf_model.update(exists.id, dict(value=str(value)))
         return exists.id
     else:
-        return model.insert(dict(name=name, value=value))
+        return conf_model.insert(dict(name=name, value=str(value)))
 
 def getReferer(referer=None):
     if not referer:
         referer = web.input().get('referer', None)
-    if not referer:
-        referer = getUrlParams(web.ctx.env.get('HTTP_REFERER', '')).get('referer', None)
     if not referer:
         referer = web.ctx.env.get('HTTP_REFERER', None)
         if referer and not referer.startswith(config.HOST_NAME):
@@ -268,6 +262,31 @@ def toJsonp(data):
 
 def splitAndStrip(string, chars=' '):
     return [s.strip() for s in string.split(chars) if s.strip()]
+
+# 伪装(登录)成另一个用户去运行一个函数
+# func是要运行的函数，params是传递给这个函数的参数
+def proxyDo(user_id, func, *params):
+    # 保存当前session
+    old_value = {}
+    for k, v in session.items():
+        old_value[k] = v
+
+    # 登录新用户并运行
+    try:
+        user = model('User').get(user_id)
+        assert user is not None, '伪装的用户不存在'
+        ctrl('User').login(user, ignore_cookie=True, inc_count=False)
+        res = func(*params)
+        ctrl('User').logout(ignore_cookie=True)
+    finally:
+        # 恢复session
+        for k, v in session.items():
+            if k not in old_value.keys():
+                del session[k]
+        for k, v in old_value.items():
+            session[k] = v
+
+    return res
 
 '''auto mkdir'''
 for k, v in config.items():

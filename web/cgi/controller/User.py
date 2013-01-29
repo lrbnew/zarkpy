@@ -9,22 +9,23 @@ class User:
         user = sh.model(self.model_name).getOneByWhere('email=%s', [email.strip().lower()])
         return user and self.__validatePassword(user.password, password)
 
-    def login(self, user, remember_me=False):
+    def login(self, user, remember_me=False, ignore_cookie=False, inc_count=True):
         sh.session.id = user.id
         sh.session.is_login = True
         sh.session.name = user.name
-        if remember_me:
+        if remember_me and not ignore_cookie:
             sh.setCookie('email', user.email)
             sh.setCookie('md5password', user.password)
-        if user.has_key('login_count'):
+        if user.has_key('login_count') and inc_count:
             sh.model(self.model_name).update(user.id, {'login_count': user.login_count+1})
         
-    def logout(self):
+    def logout(self, ignore_cookie=False):
         sh.session.id = 0
         sh.session.is_login = False
         sh.session.name = ''
-        sh.setCookie('email',  None)
-        sh.setCookie('md5password',  None)
+        if not ignore_cookie:
+            sh.setCookie('email',  None)
+            sh.setCookie('md5password',  None)
 
     # 向用户发送带有验证码的激活邮件
     def sendValidationEmail(self, user):

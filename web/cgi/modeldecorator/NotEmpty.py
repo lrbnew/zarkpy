@@ -27,4 +27,5 @@ class NotEmpty(Decorator):
             elif action == 'update':
                 if data.has_key(k):
                     assert data[k] is not None, '插入的%s数据不能为None' % k
-                    assert data[k].strip(), '插入的%s数据不能为空' % k
+                    if isinstance(data[k], str):
+                        assert data[k].strip(), '插入的%s数据不能为空' % k
