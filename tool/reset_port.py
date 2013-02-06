@@ -16,7 +16,7 @@ if __name__=='__main__':
         for file_name in REPORT_FILES:
             file_path = project_root + file_name
             print file_path
-            os.system('''sed -i "" -e "s/%s/%s/g" "%s"''' % (old_port, new_port, file_path))
+            os.system('''sed -i "" -e "s/%s/%s/g" "%s" 2>/dev/null''' % (old_port, new_port, file_path))
         also_count = os.popen('grep "%s" -rl "%s" | wc -l' % (old_port, project_root)).read().strip()
         print '\n替换后在%s中找到包含"%s"字符串的文件: %s 个' % (project_root, old_port, also_count)
         if also_count != '0':

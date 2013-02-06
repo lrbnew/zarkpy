@@ -15,6 +15,10 @@ server {
 
     server_name www.zarkpy.com zarkpy.com me.zarkpy.com;
 
+    if ($http_host ~ "^www\.zarkpy\.com$") {
+         rewrite ^/(.*)$ http://zarkpy.com permanent;
+    }
+
     #access_log /var/log/nginx/zarkpy_master.access_log;
     #error_log  /var/log/nginx/zarkpy_master.error_log;
 
