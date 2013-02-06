@@ -24,7 +24,7 @@ class User(ImgItem):
     convert_type    = 'jpg'
     convert_gif     = False
     convert_quality = None
-    remove_info     = True
+    remove_info     = False
     validation_request = False # 为True注册时发送验证邮件, 见 ../pagecontroller/user/Register.py
 
     def getByEmail(self, email):

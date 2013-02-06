@@ -34,7 +34,11 @@ class Login:
 
             uc.login(user, inputs.get('remember_me', '') == 'on')
 
-            if sh.getReferer():
+            # 获得打开login页面时url中指定的referer
+            referer = sh.getUrlParams(sh.getEnv('HTTP_REFERER')).get('referer', None)
+            if referer:
+                return sh.redirect(referer)
+            elif sh.getReferer():
                 return sh.redirect(sh.getReferer())
             else:
                 return sh.alert('登录成功. 欢迎回来!')

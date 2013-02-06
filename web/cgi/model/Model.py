@@ -62,10 +62,12 @@ class Model:
             self._updateValidate(data)
             update_cols =   [c       for c in self.column_names if c in data.keys()]
             update_values = [data[c] for c in self.column_names if c in data.keys()]
-            assert(len(update_cols) == len(update_values) > 0 )
-            query = self.replaceAttr('update {$table_name} set %s where {$primary_key}=%%s'
-                    % (','.join([c+'=%s' for c in update_cols])) )
-            affected = self.db.update(query, update_values + [item_id])
+            if len(update_cols) == len(update_values) > 0:
+                query = self.replaceAttr('update {$table_name} set %s where {$primary_key}=%%s'
+                        % (','.join([c+'=%s' for c in update_cols])) )
+                affected = self.db.update(query, update_values + [item_id])
+            else:
+                affected = 0
         except:
             print 'ERROR INFO:'
             print 'data is :', data

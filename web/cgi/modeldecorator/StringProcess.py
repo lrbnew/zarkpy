@@ -7,7 +7,7 @@ import site_helper as sh
 
 class StringProcess(Decorator):
     ''' decorator = [
-        ('StringProcess', dict(strip=['title']) )
+        ('StringProcess', dict(strip=['title']) ),
     ] '''
 
     def insert(self, data):

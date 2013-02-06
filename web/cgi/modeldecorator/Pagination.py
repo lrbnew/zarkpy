@@ -8,7 +8,7 @@ import site_helper as sh
 
 class Pagination(Decorator):
     ''' decorator = [
-        ('Pagination', dict(paging_key='page_num', paging_volume=20, paging=True) ),
+        ('Pagination', dict(paging_key='page_num', paging_volume=20, paging=False) ),
     ] '''
 
     # 通过给env添加limit来实现分页

@@ -18,7 +18,7 @@ if __name__=='__main__':
             for file_name in RENAME_FILES:
                 file_path = project_root + file_name
                 print file_path
-                os.system('''sed -i "" -e "s/%s/%s/g" "%s"''' % (old_name, new_name, file_path))
+                os.system('''sed -i "" -e "s/%s/%s/g" "%s" 2>/dev/null''' % (old_name, new_name, file_path))
             also_count = os.popen('grep "%s" -rl "%s" | wc -l' % (old_name, project_root)).read().strip()
             print '\n替换后在%s中找到包含"%s"字符串的文件: %s 个' % (project_root, old_name, also_count)
             if also_count != '0':

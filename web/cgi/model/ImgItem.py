@@ -25,21 +25,25 @@ class ImgItem(Model):
         new_id = Model.insert(self, data)
 
         if data.has_key(img_model.image_key):
-            ignore_covert = data.get('__ignore_convert_image', False)
             data['__ignore_convert_image'] = True # 不需要Image来convert，自己convert
             img_id = img_model.insert(data)
             Model.update(self, new_id, {'Imageid': img_id})
             img_model.update(img_id, {'data_id': new_id, 'data_name': self.table_name})
-
+            # convert image
+            ignore_covert = data.get('__ignore_convert_image', False)
             if self.use_convert and not ignore_covert:
-                file_path = img_model.getFilePath(img_id)
-                convert_path = img_model.convertImage(file_path, self.convert_type, max_width=self.max_width, max_height=self.max_height, convert_quality=self.convert_quality, remove_info=self.remove_info, convert_gif=self.convert_gif)
-
-                if file_path != convert_path:
-                    os.system('rm "%s"' % file_path)
-                    img_model._updateUrl(data, img_id, convert_path.rpartition('.')[2])
+                self.convertImage(data, img_id)
 
         return new_id
+
+    def convertImage(self, data, img_id):
+        img_model = sh.model('Image')
+        file_path = img_model.getFilePath(img_id)
+        convert_path = img_model.convertImage(file_path, self.convert_type, max_width=self.max_width, max_height=self.max_height, convert_quality=self.convert_quality, remove_info=self.remove_info, convert_gif=self.convert_gif)
+        if file_path != convert_path:
+            os.system('rm "%s"' % file_path)
+            img_model._updateUrl(data, img_id, convert_path.rpartition('.')[2])
+        return convert_path
 
     def update(self, item_id, data):
         img_model = sh.model('Image')
@@ -49,6 +53,10 @@ class ImgItem(Model):
             img_id = img_model.insert(data)
             self.update(item_id, {'Imageid': img_id})
             img_model.update(img_id, {'data_id': item_id, 'data_name': self.table_name})
+            # convert image
+            ignore_covert = data.get('__ignore_convert_image', False)
+            if self.use_convert and not ignore_covert:
+                self.convertImage(data, img_id)
         return Model.update(self, item_id, data)
 
     def getImageUrl(self, item_id):

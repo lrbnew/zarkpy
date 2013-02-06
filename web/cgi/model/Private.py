@@ -18,6 +18,10 @@ class Private(Model):
         self.update(id, dict(private_id = p_id))
         return p_id
 
+    def resetPrivateid(self, data_name, user_id):
+        exists = self.getOneByWhere('data_name=%s and user_id=%s', [data_name, user_id])
+        return self.delete(exists.id) > 0 if exists else False
+
     table_template = \
         '''CREATE TABLE {$table_name} (
             {$table_name}id int unsigned not null auto_increment,
