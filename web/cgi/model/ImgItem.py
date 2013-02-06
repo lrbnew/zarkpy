@@ -25,7 +25,6 @@ class ImgItem(Model):
         new_id = Model.insert(self, data)
 
         if data.has_key(img_model.image_key):
-            data['__ignore_convert_image'] = True # 不需要Image来convert，自己convert
             img_id = img_model.insert(data)
             Model.update(self, new_id, {'Imageid': img_id})
             img_model.update(img_id, {'data_id': new_id, 'data_name': self.table_name})

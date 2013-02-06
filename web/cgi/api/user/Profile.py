@@ -6,7 +6,7 @@ class Profile:
     def POST(self):
         inputs = sh.inputs()
 
-        if inputs['action'] == 'islogin':
+        if inputs['action'] == 'isLogin':
             if sh.session.is_login:
                 return sh.toJsonp({'is_login': True, 'name': sh.session.name, 'id': sh.session.id})
             else:

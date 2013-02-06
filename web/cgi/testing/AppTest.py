@@ -18,10 +18,10 @@ import site_helper as sh
 app_errors = StringIO.StringIO()
 app = TestApp(_app.wsgifunc(), extra_environ={'wsgi.errors': app_errors})
 
-# 用于自动注册\登录的用户信息
+# 用于默认注册\登录的用户信息
 default_user = dict(email='test@zarkpy.com', password='123456', name='zarkpy')
 
-# 因为app在post时不能准确地向webpy程序传递参数，这可能是一个bug, 对paste.fixture进行hack
+# 因为app在post时不能准确地向webpy程序传递参数，这可能是一个bug, 为paste.fixture hack
 def hackForInputs(f):
     def newInputs():
         if web.ctx.env.get('wsgi.input.zarkpy.post.hack', None):
@@ -49,20 +49,39 @@ class AppTest(unittest.TestCase):
         if error_msg:
             raise Exception(error_msg)
 
-    def get(self, url, params={}):
-        extra_environ = {'REQUEST_URI': sh.paramsToUrl(url, params)}
-        return app.get(url, params, extra_environ=extra_environ, expect_errors=True)
+    def get(self, url, params={}, extra_environ=None):
+        environ = {'REQUEST_URI': sh.paramsToUrl(url, params)}
+        if extra_environ:
+            environ.update(extra_environ)
 
-    def post(self, url, params={}):
+        res = app.get(url, params, extra_environ=environ, expect_errors=True)
+
+        if res.status == 200:
+            return str(res.body)
+        if res.status == 303:
+            return ''
+        else:
+            raise Exception("Request Error %d" % res.status + res.errors)
+
+    def post(self, url, params={}, extra_environ=None):
         assert(isinstance(params, (dict, web.Storage)))
-        extra_environ = {'REQUEST_URI': url, 'CONTENT_TYPE': 'text/plain; charset=utf-8', }
+        environ = {'REQUEST_URI': url, 'CONTENT_TYPE': 'text/plain; charset=utf-8', }
+        if extra_environ:
+            environ.update(extra_environ)
         if not isinstance(params, web.Storage):
             params = sh.storage(params)
         # hack for use paste.fixture module test app.py
-        extra_environ['wsgi.input.zarkpy.post.hack'] = params
-        res = app.post(url, params, extra_environ=extra_environ, expect_errors=True)
-        extra_environ['wsgi.input.zarkpy.post.hack'] = None
-        return res
+        environ['wsgi.input.zarkpy.post.hack'] = params
+
+        res = app.post(url, params, extra_environ=environ, expect_errors=True)
+
+        if res.status == 200:
+            return str(res.body)
+        if res.status == 303:
+            return ''
+        else:
+            sh.printObject(res)
+            raise Exception("Request Error %d" % res.status + res.errors)
 
     def register(self, email='', name='', password='', params={}, login=True):
         params['email'] = email if email else default_user['email']
@@ -71,17 +90,15 @@ class AppTest(unittest.TestCase):
         if not sh.model('User').getByEmail(params['email']):
             self.post('/api/user/register', params)
 
-    def login(self, email, password):
-        uc = sh.ctrl('User')
-        um = sh.model('User')
-        if uc.validate(email, password):
-            uc.login(um.getByEmail(email))
-            return True
-        else:
-            return False
+    def login(self, email='', password=''):
+        params = {'action': 'login'}
+        params['email'] = email if email else default_user['email']
+        params['password'] = password if password else default_user['password']
+        return sh.loadsJson(self.post('/api/user/profile', params)).is_login
 
     def logout(self):
-        pass
+        self.post('/api/user/profile', {'action':'logout'})
 
     def isLogin(self):
-        pass
+        return sh.loadsJson(self.post('/api/user/profile', {'action':'isLogin'})).is_login
+    

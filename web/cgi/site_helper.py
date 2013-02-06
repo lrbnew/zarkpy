@@ -78,7 +78,14 @@ def model(model_name, decorator=[]):
             print 'the name is', name
             print 'the model name is', model_name
             raise
-        for d,arguments in model.decorator if not config.IS_TEST else decorator:
+        # 仅在非测试时使用model.decorator
+        decorator = model.decorator if not config.IS_TEST else decorator
+        # 测试时强行使用test_decorator
+        if config.IS_TEST and hasattr(model, 'test_decorator'):
+            assert decorator == [], u'使用test_decorator时,不再允许指定decorator'
+            decorator = model.test_decorator
+        # 装饰decorator
+        for d,arguments in decorator:
             model = getattr(modeldecorator, d)(model, arguments)
         if not decorator:
             CACHED_MODELS[cache_key] = model
