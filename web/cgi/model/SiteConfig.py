@@ -1,7 +1,7 @@
 #coding=utf-8
 from Model import Model
 
-# 网站的配置信息
+''' 网站的配置信息 '''
 
 class SiteConfig(Model):
     table_name = 'SiteConfig'

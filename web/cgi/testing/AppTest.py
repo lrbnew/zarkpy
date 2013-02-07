@@ -7,6 +7,8 @@
 然后，在每个测试函数完成后由tearDown检查是否有error，若有则抛出原错误信息，测试失败
 如果不给TestApp提供app_errors参数，则TestApp将可能会抛出难以阅读的异常信息
 当app.py发生错误时，TestApp可能会对app.py发起多次请求
+
+TestApp程序会自动处理cookie
 '''
 import unittest
 import StringIO
@@ -42,6 +44,7 @@ class AppTest(unittest.TestCase):
     def setUp(self):
         self.appTestSetUp()
         app_errors.truncate(0)
+        app.reset()
 
     def tearDown(self):
         self.appTestTearDown()
@@ -49,21 +52,14 @@ class AppTest(unittest.TestCase):
         if error_msg:
             raise Exception(error_msg)
 
-    def get(self, url, params={}, extra_environ=None):
+    def get(self, url, params={}, extra_environ = None):
         environ = {'REQUEST_URI': sh.paramsToUrl(url, params)}
         if extra_environ:
             environ.update(extra_environ)
-
         res = app.get(url, params, extra_environ=environ, expect_errors=True)
+        return self._processResponse(res)
 
-        if res.status == 200:
-            return str(res.body)
-        if res.status == 303:
-            return ''
-        else:
-            raise Exception("Request Error %d" % res.status + res.errors)
-
-    def post(self, url, params={}, extra_environ=None):
+    def post(self, url, params={}, extra_environ = None):
         assert(isinstance(params, (dict, web.Storage)))
         environ = {'REQUEST_URI': url, 'CONTENT_TYPE': 'text/plain; charset=utf-8', }
         if extra_environ:
@@ -72,9 +68,10 @@ class AppTest(unittest.TestCase):
             params = sh.storage(params)
         # hack for use paste.fixture module test app.py
         environ['wsgi.input.zarkpy.post.hack'] = params
-
         res = app.post(url, params, extra_environ=environ, expect_errors=True)
+        return self._processResponse(res)
 
+    def _processResponse(self, res):
         if res.status == 200:
             return str(res.body)
         if res.status == 303:

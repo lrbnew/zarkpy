@@ -1,5 +1,4 @@
 #coding=utf-8
-import web
 import math
 from Decorator import Decorator
 import site_helper as sh
@@ -21,7 +20,7 @@ class Pagination(Decorator):
     # 对已有数据进行分页(切片)
     def pagingDatas(self, datas, page_num=None, volume=None):
         if page_num is None:
-            page_num = web.input().get(self.arguments.paging_key, 1)
+            page_num = sh.inputs().get(self.arguments.paging_key, 1)
         if volume is None:
             volume = self.arguments.paging_volume
         if page_num and volume:
@@ -36,11 +35,11 @@ class Pagination(Decorator):
         return '<div fx="pagination[style=default;max=%d;displaycount=10;firsttext=第一页;lasttext=末页;]"></div>' % max(1, math.ceil(self.getCount(env) * 1.0 / self.__getVolume(env))) if env.get('paging', self.arguments.paging) else ''
     
     def __getLimit(self, page_num, volume):
-        return (int(volume) * (int(page_num) -1), int(volume))
+        return (int(volume) * (int(page_num) - 1), int(volume))
 
     def __getPageNum(self, env):
         key = self.arguments.paging_key
-        return int(env.get(key, web.input().get(key, 1)))
+        return int(env[key] if env.has_key(key) else sh.inputs().get(key, 1))
 
     def __getVolume(self, env):
         return int(env.get('paging_volume', self.arguments.paging_volume))
