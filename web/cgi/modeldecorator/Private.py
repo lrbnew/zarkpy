@@ -37,6 +37,7 @@ class Private(Decorator):
         self._setUseridToData(data)
         self._setPrivateidToData(data)
         self.model.insert(data)
+        self._incPrivateid(data)
         return data[self.arguments.primary_key]
 
     def replaceInsert(self, data):
@@ -44,6 +45,7 @@ class Private(Decorator):
         self._setUseridToData(data)
         self._setPrivateidToData(data)
         self.model.replaceInsert(data)
+        self._incPrivateid(data)
         return data[self.arguments.primary_key]
 
     def delete(self, item_id):
@@ -60,14 +62,15 @@ class Private(Decorator):
     def get(self, item_id):
         assert(sh.session.is_login)
         exists_item = self._getItemByPrivateid(item_id)
-        return self._changePrimaryKey(self.model.get(exists_item.id)) if exists_item is not None else None
+        return self._changePrimaryKey(self.model.get(exists_item.id)) \
+                if exists_item is not None else None
     # def gets? 不需要重写gets函数，因为gets继承了get所做的事情
 
     def getOneByWhere(self, where, argv=[]):
         uk = self.arguments.user_id_key
-        assert re.search(r'\b%s\b' % uk, where) is None, '你不想让getOneByWhere为where自动添加Userid? 请使用all函数和_ignore_private_uk=True'
+        assert re.search(r'\b%s\b' % uk, where) is None, u'你不想让getOneByWhere为where自动添加Userid? 请使用all函数和_ignore_private_uk=True'
         where = '(%s) and %s=%%s' % (where, uk)
-        argv = argv + [user_id]
+        argv = argv + [sh.session.id]
         return self._changePrimaryKey(self.model.getOneByWhere(where, argv))
 
     def all(self, env=None):
@@ -79,14 +82,18 @@ class Private(Decorator):
     def _setUseridToData(self, data):
         uk = self.arguments.user_id_key
         if not data.has_key(uk):
-            assert sh.session.is_login, '必须已登录，或显示给出%s' % uk
+            assert sh.session.is_login, u'必须已登录，或显示给出%s' % uk
             data[uk] = sh.session.id
     
     def _setPrivateidToData(self, data):
         uk = self.arguments.user_id_key
         pk = self.arguments.primary_key
-        assert not data.has_key(pk), '你确定你要自己控制%s的值?' % pk
-        data[pk] = sh.model('Private').getPrivateid(self._getModelTableName(), data[uk])
+        assert not data.has_key(pk), u'你确定你要自己控制%s的值?' % pk
+        data[pk] = sh.model('Private').getNextPrivateid(self._getModelTableName(), data[uk])
+
+    def _incPrivateid(self, data):
+        uk = self.arguments.user_id_key
+        sh.model('Private').incPrivateid(self._getModelTableName(), data[uk])
 
     def _getItemByPrivateid(self, pri_id):
         return self.model.getOneByWhere(self.arguments.user_id_key+'=%s and '+self.arguments.primary_key+'=%s', [sh.session.id, pri_id])
@@ -98,7 +105,7 @@ class Private(Decorator):
         user_id = sh.session.id
         if not env.get('_ignore_private_uk', False):
             if env.has_key('where'):
-                assert re.search(r'\b%s\b' % uk, env['where'][0]) is None, "想自定义Userid? 请使用env['_ignore_private_uk']=True" + env['where'][0] 
+                assert re.search(r'\b%s\b' % uk, env['where'][0]) is None, u"想自定义Userid? 请使用env['_ignore_private_uk']=True%s" + env['where'][0] 
                 env['where'][0] = '(%s) and %s=%%s' % (env['where'][0], uk)
                 env['where'][1].append(user_id)
             else:

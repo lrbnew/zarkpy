@@ -1,10 +1,15 @@
 #!coding=utf-8
 import site_helper as sh
 from .. import AppTest
-AppTest = AppTest.AppTest
 from model import Model
 
-class TestRecordRequestInfo(AppTest):
+db = sh.getDBHelper()
+
+class TestRecordRequestInfo(AppTest.AppTest):
+
+    def appTestSetUp(self):
+        model = sh.model('ForTestRecordRequestInfo')
+        db.executeQuery('delete from %s' % model.table_name)
 
     def test_insert_and_update(self):
         # 注册，insert数据必须先登录
@@ -12,22 +17,21 @@ class TestRecordRequestInfo(AppTest):
         # 设置环境变量
         extra_environ = {'HTTP_USER_AGENT': 'firefox', 'HTTP_REFERER': 'http://sparker5.com'}
         # 插入数据
-        data = dict(title='hi', model_name='ForTestRecordRequestInfo')
-        self.post('/cgi/insert', data, extra_environ)
+        data = dict(title='hi')
+        new_id = self.insert('ForTestRecordRequestInfo', data, extra_environ)
         model = sh.model('ForTestRecordRequestInfo')
-        item = model.get(1)
+        item = model.get(new_id)
         # 验证RecordRequestInfo自动记录了环境变量的值
         self.assertEqual(item.user_agent, 'firefox')
         self.assertEqual(item.referer, 'http://sparker5.com')
         # 修改环境变量然后update
         extra_environ['HTTP_USER_AGENT'] = 'chrome'
-        data['model_id'] = 1
-        self.post('/cgi/update', data, extra_environ)
+        data['model_id'] = new_id
+        self.post('/api/update', data, extra_environ)
         # update时会修改记录值
-        item = model.get(1)
+        item = model.get(new_id)
         self.assertEqual(item.user_agent, 'chrome')
         self.assertEqual(item.referer, 'http://sparker5.com')
-
 
 # 用于测试RecordRequestInfo的类
 class ForTestRecordRequestInfo(Model):

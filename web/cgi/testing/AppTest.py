@@ -8,7 +8,8 @@
 如果不给TestApp提供app_errors参数，则TestApp将可能会抛出难以阅读的异常信息
 当app.py发生错误时，TestApp可能会对app.py发起多次请求
 
-TestApp程序会自动处理cookie
+TestApp程序会自动处理cookie, 当要求"assert sh.session.is_login"时可以用AppTest
+提供的各种函数请求app程序，也可以使用proxyDo模拟用户
 '''
 import unittest
 import StringIO
@@ -16,6 +17,7 @@ import web
 from paste.fixture import TestApp
 from app import app as _app
 import site_helper as sh
+from model import ModelData
 
 app_errors = StringIO.StringIO()
 app = TestApp(_app.wsgifunc(), extra_environ={'wsgi.errors': app_errors})
@@ -53,6 +55,7 @@ class AppTest(unittest.TestCase):
             raise Exception(error_msg)
 
     def get(self, url, params={}, extra_environ = None):
+        # 为webpy添加REQUEST_URI环境变量
         environ = {'REQUEST_URI': sh.paramsToUrl(url, params)}
         if extra_environ:
             environ.update(extra_environ)
@@ -61,6 +64,7 @@ class AppTest(unittest.TestCase):
 
     def post(self, url, params={}, extra_environ = None):
         assert(isinstance(params, (dict, web.Storage)))
+        # 为webpy添加REQUEST_URI环境变量
         environ = {'REQUEST_URI': url, 'CONTENT_TYPE': 'text/plain; charset=utf-8', }
         if extra_environ:
             environ.update(extra_environ)
@@ -81,21 +85,57 @@ class AppTest(unittest.TestCase):
             raise Exception("Request Error %d" % res.status + res.errors)
 
     def register(self, email='', name='', password='', params={}, login=True):
+        if email and not name:
+            name = email # 自定义email时应该使用不同的name，因为name可能是unique key
         params['email'] = email if email else default_user['email']
         params['name'] = name if name else default_user['name']
         params['password'] = password if password else default_user['password']
         if not sh.model('User').getByEmail(params['email']):
-            self.post('/api/user/register', params)
+            res = self.post('/api/user/register', params)
+        if login:
+            return self.login(params['email'], params['password'])
+        else:
+            return self.getUserid()
 
     def login(self, email='', password=''):
         params = {'action': 'login'}
         params['email'] = email if email else default_user['email']
         params['password'] = password if password else default_user['password']
-        return sh.loadsJson(self.post('/api/user/profile', params)).is_login
+        res = sh.loadsJson(self.post('/api/user/profile', params))
+        assert res.is_login
+        return res.id
 
     def logout(self):
         self.post('/api/user/profile', {'action':'logout'})
 
-    def isLogin(self):
-        return sh.loadsJson(self.post('/api/user/profile', {'action':'isLogin'})).is_login
-    
+    def getLoginState(self):
+        return sh.loadsJson(self.post('/api/user/profile', {'action':'isLogin'}))
+
+    def getUserid(self):
+        res = sh.loadsJson(self.post('/api/user/profile', {'action':'isLogin'}))
+        return res.id if res.is_login else 0
+
+    def insert(self, model_name, data, extra_environ={}):
+        assert isinstance(model_name, (str, unicode))
+        data['model_name'] = model_name
+        return sh.loadsJson(self.post('/api/insert', data, extra_environ)).new_id
+
+    def update(self, model_name, item_id, data, extra_environ={}):
+        assert isinstance(model_name, (str, unicode))
+        assert str(item_id).isdigit()
+        data['model_name'] = model_name
+        data['model_id'] = item_id
+        return sh.loadsJson(self.post('/api/update', data, extra_environ)).affected
+
+    def getItem(self, model_name, item_id):
+        assert isinstance(model_name, (str, unicode))
+        assert str(item_id).isdigit()
+        item = sh.loadsJson(self.get('/api/get', {'model_name': model_name, 'model_id': item_id}))
+        return ModelData(item, sh.model(model_name))
+
+    # 使用当前用户id，模拟登录运行func
+    def proxyDo(self, func, *params):
+        curr_user_id = self.getUserid()
+        assert curr_user_id, u'请先登录'
+        return sh.proxyDo(curr_user_id, func, *params)
+

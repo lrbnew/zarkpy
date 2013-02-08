@@ -7,16 +7,18 @@ class Private(Model):
     table_name = 'Private'
     column_names = ['data_name', 'user_id', 'private_id', ]
 
-    def getPrivateid(self, data_name, user_id):
+    def getNextPrivateid(self, data_name, user_id):
+        exists = self.getOneByWhere('data_name=%s and user_id=%s', [data_name, user_id])
+        return exists.private_id + 1 if exists else 1
+
+    def incPrivateid(self, data_name, user_id):
         exists = self.getOneByWhere('data_name=%s and user_id=%s', [data_name, user_id])
         if not exists:
-            id = self.insert(dict(data_name=data_name, user_id=user_id, private_id=0))
-            p_id = 1
+            self.insert(dict(data_name=data_name, user_id=user_id, private_id=1))
+            return 1
         else:
-            id = exists.id
-            p_id = exists.private_id + 1
-        self.update(id, dict(private_id = p_id))
-        return p_id
+            self.update(exists.id, dict(private_id = exists.private_id+1))
+            return exists.private_id + 1
 
     def resetPrivateid(self, data_name, user_id):
         exists = self.getOneByWhere('data_name=%s and user_id=%s', [data_name, user_id])

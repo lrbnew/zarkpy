@@ -59,6 +59,7 @@ CACHED_MODELS = {}
 # 但decorator仅能用于测试,否则将会导致代码不清晰
 # 比如你不知道是否某处因使用了decorator而与在model文件中看到的行为不一致
 def model(model_name, decorator=[]):
+    assert isinstance(model_name, (str, unicode))
     cache_key = model_name
     assert not decorator or config.IS_TEST, 'decorator仅能用于测试环境'
 

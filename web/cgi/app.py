@@ -30,6 +30,10 @@ urls = (
 '/cgi/admin/insert','editorcontroller.Insert', # editorcontroller/Insert.py
 '/cgi/admin/delete','editorcontroller.Delete', # editorcontroller/Delete.py
 
+'/api/get','api.Get', # api/Get.py
+'/api/insert','api.Insert', # api/Insert.py
+'/api/update','api.Update', # api/Update.py
+'/api/delete','api.Delete', # api/Delete.py
 '/api/user/register','api.user.Register', # api/user/Register.py
 '/api/user/login','api.user.Login', # api/user/Login.py
 '/api/user/logout','api.user.Login', # api/user/Login.py
