@@ -6,6 +6,9 @@ import site_helper as sh
 
 # model模块的基类
 # 子类的calss名称必须与文件名一致,包括大小写
+# model/Model.py 的gets getOneByWhere all函数会调用子类的get以继承子类get函数的效果
+# 但是不会继承装饰器get的效果，因为装饰器可能会使用以上函数，形成循环或重复调用
+
 class Model:
     table_name = ''    # 数据表名,应该与class名称和文件名一致.为空则不自动创建表
     column_names = ()  # 需要自动insert或update的字段列表,子类不能为空
@@ -290,7 +293,8 @@ class ModelData(web.Storage):
     model_names = {} # 在__init__文件中记录所有model的小写到大写的关系
 
     def __init__(self, data, model):
-        assert(data is not None and isinstance(data, dict))
+        assert(data is not None)
+        assert(isinstance(data, dict))
         assert(model is not None)
         web.Storage.__init__(self, data)
         self._table_name   = model.table_name

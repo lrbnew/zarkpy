@@ -12,7 +12,7 @@ class Decorator:
     def __init__(self, model, arguments):
         assert(isinstance(arguments, dict))
         self.model = model
-        self._getRealModel()._decorator_model = self
+        self._getRealModel()._decorator = self
         self.arguments = sh.storage(arguments)
 
     def __getattr__(self, attr):

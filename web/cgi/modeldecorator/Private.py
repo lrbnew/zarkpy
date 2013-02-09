@@ -2,6 +2,7 @@
 import web
 import re
 from Decorator import Decorator
+import model
 import site_helper as sh
 
 # 根据Userid对用户创建的数据私有化，即隐藏真实id，针对每个用户显示一个独立的id序列
@@ -50,20 +51,19 @@ class Private(Decorator):
 
     def delete(self, item_id):
         assert(sh.session.is_login)
-        exists_item = self._getItemByPrivateid(item_id)
-        return self.model.delete(exists_item.id) if exists_item is not None else 0
+        real_id = self._getRealId(item_id)
+        return self.model.delete(real_id) if real_id else 0
 
     def update(self, item_id, data):
         data = sh.copy(data)
         assert(sh.session.is_login)
-        exists_item = self._getItemByPrivateid(item_id)
-        return self.model.update(exists_item.id, data) if exists_item is not None else 0
+        real_id = self._getRealId(item_id)
+        return self.model.update(real_id, data) if real_id else 0
 
     def get(self, item_id):
         assert(sh.session.is_login)
-        exists_item = self._getItemByPrivateid(item_id)
-        return self._changePrimaryKey(self.model.get(exists_item.id)) \
-                if exists_item is not None else None
+        real_id = self._getRealId(item_id)
+        return self._changePrimaryKey(self.model.get(real_id)) if real_id else None
     # def gets? 不需要重写gets函数，因为gets继承了get所做的事情
 
     def getOneByWhere(self, where, argv=[]):
@@ -95,8 +95,10 @@ class Private(Decorator):
         uk = self.arguments.user_id_key
         sh.model('Private').incPrivateid(self._getModelTableName(), data[uk])
 
-    def _getItemByPrivateid(self, pri_id):
-        return self.model.getOneByWhere(self.arguments.user_id_key+'=%s and '+self.arguments.primary_key+'=%s', [sh.session.id, pri_id])
+    def _getRealId(self, pri_id):
+        query = 'select {$primary_key} from {$table_name} where %s=%%s and %s=%%s'\
+                % (self.arguments.user_id_key, self.arguments.primary_key)
+        return self.db.fetchFirst(self.replaceAttr(query), [sh.session.id, pri_id])
 
     def _setWhereWithUserid(self, env):
         env = sh.copy(env) if env else {}

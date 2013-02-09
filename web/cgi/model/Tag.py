@@ -6,7 +6,7 @@ class Tag(Model):
     column_names = ['data_name', 'data_id', 'name', ]
 
     table_template = \
-        '''CREATE TABLE {$table_name} (
+        ''' CREATE TABLE {$table_name} (
             {$table_name}id int unsigned not null auto_increment,
             data_name       varchar(30)  not null,
             data_id         int unsigned not null,

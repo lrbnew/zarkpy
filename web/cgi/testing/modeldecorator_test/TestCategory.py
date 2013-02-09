@@ -6,8 +6,9 @@ db = sh.getDBHelper()
 
 class TestCategory(unittest.TestCase):
 
-    def appTestSetUp(self):
-        db.executeQuery('delete from %s' % sh.model(test_model).table_name)
+    def setUp(self):
+        db.executeQuery('delete from %s' % 'ForTestCategory')
+        db.executeQuery('delete from %s' % 'ForTestCategory2')
         db.executeQuery('delete from %s' % sh.model('Category').table_name)
 
     # 测试: insert update setCategory getCategory getAllCategory hasCategory addNewCategory
@@ -66,6 +67,11 @@ class TestCategory(unittest.TestCase):
         item_2 = model.get(new_id_2)
         self.assertEqual(item_2.Categoryid , 0)
         self.assertEqual(model.getCategory(new_id_2), None)
+        # 给item2设置新分类，并删除item2数据
+        model.update(new_id_2, dict(cat='old'))
+        model.delete(new_id_2)
+        # item2的分类依然存在
+        self.assertTrue(model.hasCategory('old'))
 
     # 测试: get getsByCategory 
     def test_multi3(self):
@@ -135,4 +141,3 @@ class ForTestCategory2(ForTestCategory):
 from .. import registerModel
 registerModel(ForTestCategory)
 registerModel(ForTestCategory2)
-

@@ -2,7 +2,7 @@
 from Decorator import Decorator
 import site_helper as sh
 
-# 标签装饰, 如果相对你的数据打标签，可以用此装饰
+# 标签装饰, 如果想对你的数据打标签，可以用此装饰
 # 与Category装饰器一样，标签基于名称而忽略id
 # 使用此装饰不需要为model添加字段，所有model的tag数据存在Tag表中
 # 你可以在data中添加data_key指定的标签值来在insert和update时自动维护tag数据
@@ -12,8 +12,7 @@ import site_helper as sh
 
 class Tag(Decorator):
     ''' decorator = [
-        ('Tag', dict(tag_id_key='Tagid', tag_model_name='Tag'
-                data_key='tags', split_char=' ', auto_operate='reset') ),
+        ('Tag', dict(tag_model_name='Tag', data_key='tags', split_char=' ', auto_operate='reset') ),
     ] '''
 
     def get(self, item_id):
@@ -21,11 +20,22 @@ class Tag(Decorator):
         if exists: exists.tags = self.getTags(item_id)
         return exists
 
+    def gets(self, item_ids):
+        items = self.model.gets(item_ids)
+        self.__setTags(items)
+        return items
+
     def all(self, env=None):
         items = self.model.all(env)
-        for item in items:
-            if item: item.tags = self.getTags(item.id)
+        self.__setTags(items)
         return items
+
+    def __setTags(self, item):
+        if hasattr(item, '__iter__'):
+            for i in item:
+                if i: i.tags = self.getTags(i.id)
+        else:
+            if item: item.tags = self.getTags(item.id)
 
     # 插入数据并自动插入tag
     def insert(self, data):
@@ -52,7 +62,7 @@ class Tag(Decorator):
     # 为某个数据添加多个tag
     def addTags(self, item_id, tags):
         assert(isinstance(tags, list) or isinstance(tags, tuple))
-        return [self.addTag(item_id, tag) for tag in tags if self.__getExistsTag(item_id, tag) is None]
+        return [self.addTag(item_id, tag) for tag in tags if not self.__getExistsTag(item_id, tag)]
 
     # 重置某个数据的tag
     def resetTags(self, item_id, tags):
@@ -78,9 +88,11 @@ class Tag(Decorator):
     def getsByTag(self, tag):
         assert(isinstance(tag, str) and len(tag.strip()) > 0)
         tag_model = self.__getTagModel()
-        query = tag_model.replaceAttr('select data_id from {$table_name} where data_model=%s and name=%s')
+        query = tag_model.replaceAttr('select data_id from {$table_name} where data_name=%s and name=%s')
         item_ids = tag_model.db.fetchSomeFirst(query, [self._getModelTableName(), tag])
-        return self.model.gets(item_ids)
+        items = self.model.gets(item_ids)
+        self.__setTags(items)
+        return items
 
     def __autoOperateTags(self, item_id, tags):
         if isinstance(tags, str):
@@ -94,7 +106,7 @@ class Tag(Decorator):
     # 请使用resetTags(item_id, [])来清除tags
     def __clearTags(self, item_id):
         tag_model = self.__getTagModel()
-        query = tag_model.replaceAttr('delete from {$table_name} where data_model=%s and data_id=%s')
+        query = tag_model.replaceAttr('delete from {$table_name} where data_name=%s and data_id=%s')
         return tag_model.db.delete(query, [self._getModelTableName(), item_id])
 
     def __deleteTag(self, tag_id):
@@ -102,7 +114,7 @@ class Tag(Decorator):
 
     def __getExistsTag(self, item_id, tag):
         assert(isinstance(tag, str) and len(tag.strip()) > 0)
-        return self.__getTagModel().getOneByWhere('data_name=%s and name=%s', [self._getModelTableName(), tag.strip()])
+        return self.__getTagModel().getOneByWhere('data_name=%s and data_id=%s and name=%s', [self._getModelTableName(), item_id, tag.strip()])
 
     def __insertTag(self, item_id, tag):
         return self.__getTagModel().insert(dict( data_name = self._getModelTableName(), data_id = item_id, name = tag ))
