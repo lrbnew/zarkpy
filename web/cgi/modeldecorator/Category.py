@@ -4,14 +4,14 @@ import site_helper as sh
 
 # 分类装饰，如果你想对你的数据进行简单分类，那么可以使用此装饰
 # 此装饰的分类功能是基于分类名称的，而不强调分类的id，因此不提供与Categoryid有关的方法
-# 你需要在你的model中添加cat_id_key指定的分类主键，它将对应到cat_model_name表的主键
+# 你仅需在你的model中添加cat_id_key指定的分类主键，它将与cat_model_name表的主键关联
 # data_key是data中分类的属性名称，如果auto_new=True就会自动创建新分类,否则会忽略分类值
 # 多个model的分类数据共同保存在Category表中,用data_name和data_id与其它表关联
 # 你也可以通过get(id).category.name来得到分类名称
 
 class Category(Decorator):
     ''' decorator = [
-        ('Category',{'cat_id_key': 'Categoryid', 'cat_model_name': 'Category'
+        ('Category',{'cat_id_key': 'Categoryid', 'cat_model_name': 'Category',
                      'data_key': 'category_name', 'auto_new': True}),
     ] '''
 
@@ -56,7 +56,12 @@ class Category(Decorator):
     # 获得数据的分类名
     def getCategory(self, item_id):
         item = self.get(item_id)
-        return item.category.name if item and item.category else None
+        if self.arguments.cat_id_key == 'Categoryid' and self.arguments.cat_model_name=='Category':
+            return item.category.name if item and item.category else None
+        else:
+            cat_id = item[self.arguments.cat_id_key]
+            cat = self.__getCatModel().get(cat_id)
+            return cat.name if cat else None
 
     # 设置数据的分类
     def setCategory(self, item_id, name):

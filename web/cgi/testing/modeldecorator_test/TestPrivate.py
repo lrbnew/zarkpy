@@ -1,15 +1,15 @@
 #!coding=utf-8
 import site_helper as sh
 from .. import AppTest
-from model import Model
 
 db = sh.getDBHelper()
+test_model = 'ForTestPrivate'
 
 class TestPrivate(AppTest.AppTest):
 
     def appTestSetUp(self):
-        model = sh.model('ForTestPrivate')
-        db.executeQuery('delete from %s' % model.table_name)
+        db.executeQuery('delete from %s' % sh.model(test_model).table_name)
+        db.executeQuery('delete from %s' % sh.model('Private').table_name)
 
     def appTestTearDown(self):
         self.logout()
@@ -17,18 +17,18 @@ class TestPrivate(AppTest.AppTest):
     def test_insert(self):
         self.register()
         my_id = self.getUserid()
-        model = sh.model('ForTestPrivate')
+        model = sh.model(test_model)
         pri_model = sh.model('Private')
         # 插入一个数据
-        pri_1 = pri_model.getNextPrivateid('ForTestPrivate', my_id)
-        new_id = self.insert('ForTestPrivate', dict(title='test'))
+        pri_1 = pri_model.getNextPrivateid(test_model, my_id)
+        new_id = self.insert(test_model, dict(title='test'))
         # 新数据的id等于刚才得到的next private id
         self.assertEqual(pri_1, new_id)
         # Private表中的next private id增1
-        pri_2 = pri_model.getNextPrivateid('ForTestPrivate', my_id)
+        pri_2 = pri_model.getNextPrivateid(test_model, my_id)
         self.assertEqual(pri_1+1, pri_2)
         # 插入数据会自动记录private id
-        item = self.getItem('ForTestPrivate', new_id)
+        item = self.getItem(test_model, new_id)
         self.assertEqual(item.private_id, pri_1)
         # 因为self.getItem是客户端，拿不到Private包装过的item
         # 所以主键依然是ForTestPrivateid, 而这个主键在正式中应该是private_id
@@ -36,10 +36,10 @@ class TestPrivate(AppTest.AppTest):
 
     # 模拟多个用户操作
     # 同时测试以下函数: delete all getCount update getOneByWhere
-    def test_insert_mutil_user(self):
+    def test_insert_multi_user(self):
         # 登录user1插入一些数据
         self.register('user1@sparker5.com')
-        model = sh.model('ForTestPrivate')
+        model = sh.model(test_model)
         new_id = self.proxyDo(model.insert, dict(title='a1'))
         new_id = self.proxyDo(model.insert, dict(title='a2'))
         item_a1 = self.proxyDo(model.get, new_id)
@@ -76,7 +76,7 @@ class TestPrivate(AppTest.AppTest):
 
     def test_get(self):
         self.register()
-        model = sh.model('ForTestPrivate')
+        model = sh.model(test_model)
         new_id = self.proxyDo(model.insert, dict(title='test'))
         # 假装用户拿到item
         item = self.proxyDo(model.get, new_id)
@@ -86,7 +86,7 @@ class TestPrivate(AppTest.AppTest):
 
     def test_replaceInsert(self):
         self.register()
-        model = sh.model('ForTestPrivate')
+        model = sh.model(test_model)
 
         new_id_1 = self.proxyDo(model.insert, dict(title='test'))
         item_1 = self.proxyDo(model.get, new_id_1)
@@ -101,6 +101,7 @@ class TestPrivate(AppTest.AppTest):
         self.assertIsNone(self.proxyDo(model.get, new_id_1))
         
 # 用于测试Private的类
+from model import Model
 class ForTestPrivate(Model):
     table_name      = 'ForTestPrivate'
     column_names    = ['Userid','private_id','title',]
