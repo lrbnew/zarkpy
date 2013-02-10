@@ -1,7 +1,14 @@
 #coding=utf-8
-from Model import Model
-
+import sys, os
 ''' 网站的配置信息 '''
+# 导入cgi目录
+if __name__=='__main__':
+    father_dir = os.path.split(os.path.realpath(__file__))[0].rpartition('/')[0]
+    if father_dir not in sys.path:
+        sys.path.insert(0, father_dir)
+
+from Model import Model
+import site_helper as sh
 
 class SiteConfig(Model):
     table_name = 'SiteConfig'
@@ -15,3 +22,38 @@ class SiteConfig(Model):
            primary key      ({$table_name}id),
            unique key       (name)
         )ENGINE=InnoDB; '''
+
+def _operateSetting(argv, usage, actions):
+    try:
+        assert len(argv) == 3 or len(argv) == 4
+        assert argv[1] in actions
+        if len(argv) == 3:
+            argv.append('')
+        action, name, value = argv[1:]
+        model = sh.model('SiteConfig')
+
+        exists = model.getOneByWhere('name=%s', [name])
+
+        if action == 'get':
+            if exists:
+                print exists.value
+
+        elif action == 'set':
+            if exists:
+                model.update(exists.id, {'value': value})
+            else:
+                model.insert({'name': name, 'value': value})
+        
+        elif action == 'delete':
+            if exists:
+                model.delete(exists.id)
+
+    except Exception:
+        print usage
+
+if __name__=='__main__':
+    usage = 'Usage: python model/SiteConfig.py {set|get|delete}'
+    usage += '\n   set key value'
+    usage += '\n   get key'
+    usage += '\n   delete key'
+    _operateSetting(sys.argv, usage, ['set', 'get', 'delete'])
