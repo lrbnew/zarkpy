@@ -1,20 +1,19 @@
 #coding=utf-8
 import site_helper as sh
-import web
 
 # ../../page/user/ResetPassword.html
 
 class ResetPassword:
 
     def GET(self):
-        inputs = web.input()
+        inputs = sh.inputs()
         if sh.session.is_login:
             return sh.page.user.ResetPassword()
         else:
             return sh.redirectToLogin()
 
     def POST(self):
-        inputs = web.input()
+        inputs = sh.inputs()
         assert(6 <= len(inputs.new_password) < 60)
         user_model = sh.model('User')
         user_ctrl  = sh.ctrl('User')

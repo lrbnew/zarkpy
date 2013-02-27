@@ -1,5 +1,4 @@
 #coding=utf-8
-import web
 import site_helper as sh
 
 # ../../page/user/Login.html
@@ -15,7 +14,7 @@ class Login:
             return sh.redirect('/')
 
     def POST(self, inputs=None):
-        if not inputs: inputs = web.input()
+        if not inputs: inputs = sh.inputs()
         assert(inputs.get('email', '').strip())
         assert(inputs.get('password', ''))
 

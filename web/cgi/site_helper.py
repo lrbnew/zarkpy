@@ -303,6 +303,12 @@ def proxyDo(user_id, func, *params):
 
     return res
 
+def imageSize(image_url):
+    try:
+        return Image.open(urlToPath(image_url)).size
+    except:
+        return 0, 0
+
 '''auto mkdir'''
 for k, v in config.items():
     if k.endswith('_PATH'):

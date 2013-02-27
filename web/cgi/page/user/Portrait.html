@@ -1,0 +1,47 @@
+$def with(user)
+$# ../../pagecontroller/user/Portrait.py
+
+$var jsfiles: /js/page/user/Portrait.js
+$# ../../../js/page/user/Portrait.js
+
+$var cssie6hack: /plugins/zarkfx/css/imgareaselect/imgareaselect-default.css
+
+<div>
+
+    <span id="portrait_error"></span>
+    <form action="/update-portrait" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="upload" />
+        <p>请选择您的照片</p>
+        <input type="file" name="image_file" />
+        <input type="submit" value="上传照片" />
+    </form>
+
+    $if user.image:
+        <form action="/update-portrait?referer=/accounts" method="POST" >
+            <input type="hidden" name="action" value="crop" />
+            <input type="hidden" name="region_width" value="" />
+            <input type="hidden" name="region_height" value="" />
+
+            <p>选择头像区域</p>
+            <div>
+                <div id="region">
+                    <div id="original_img_overlay"></div>
+                    $if len(user.crop.split()) == 4:
+                        $ x1, y1, x2, y2 = map(int, user.crop.split(' '))
+                        $ crop = 'x1=%s;y1=%s;x2=%s;y2=%s;' % (x1,y1,x1+x2,y1+y2)
+                    $else:
+                        $ crop = ''
+                    <img src="$user.image.url" onload="setRegion()" fx="imgareaselect[previewid=smallpreview;valueid=smallvalue;parent=#original_img_overlay;$crop]" />
+                </div>
+                <div>
+                    <p>预览</p>
+                    <div id="smallpreview"></div>
+                </div>
+            </div>
+
+            <input id="smallvalue" name="crop" value="$user.crop" type="hidden" />
+
+            <input type="submit" value="提交选定区域" /> 
+        </form>
+
+</div>

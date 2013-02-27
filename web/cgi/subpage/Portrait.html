@@ -1,0 +1,4 @@
+$def with(user, width)
+
+$ url = user.image.url + '.crop' if user.image else '/img/page/default_user.png'
+<img src="$sh.resizeImage(url, width)" style="width:$(width)px; height:$(width)px;" />

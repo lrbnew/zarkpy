@@ -11,7 +11,7 @@ import site_helper as sh
 
 class User(ImgItem):
     table_name = 'User'
-    column_names = ['Imageid', 'email','name','password','text_password','dead','activated','register_ip','login_ip','login_count',]
+    column_names = ['Imageid', 'email','name','password','text_password','crop','dead','activated','register_ip','login_ip','login_count',]
 
     decorator = [
         ('NotEmpty', dict(not_empty_attrs=['email', 'name', 'password', 'register_ip']) ),
@@ -55,6 +55,7 @@ class User(ImgItem):
             name            varchar(32)  charset utf8 not null,
             password        varchar(32)  not null,
             text_password   varchar(100) not null,
+            crop            varchar(32)  not null default '',
             dead            enum('yes', 'no') not null default 'no',
             activated       enum('yes', 'no') not null default 'no',
             register_ip     char(15) not null default '',
@@ -79,14 +80,14 @@ def _operateUser(model, argv, usage, actions):
             exists = model.getByEmail(p[0])
             if exists:
                 print 'ERROR: user %s is exists' % p[0]
-                exit(0)
+                exit(1)
             model.insert(dict(email=p[0], name=p[1], password=p[2], register_ip='command'))
 
         else:
             exists = model.getByEmail(p[0])
             if not exists:
                 print 'ERROR: user %s is not exists' % p[0]
-                exit(0)
+                exit(1)
 
             if action == 'delete':
                 assert len(p) == 1

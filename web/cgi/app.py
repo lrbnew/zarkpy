@@ -22,6 +22,8 @@ urls = (
 '/cgi/accounts/validate','pagecontroller.user.Validate', # pagecontroller/user/Validate.py
 '/cgi/accounts/forget-password','pagecontroller.user.ForgetPassword', # pagecontroller/user/ForgetPassword.py
 '/cgi/accounts/reset-password','pagecontroller.user.ResetPassword', # pagecontroller/user/ResetPassword.py
+'/cgi/accounts/portrait','pagecontroller.user.Portrait', # pagecontroller/user/Portrait.py
+'/cgi/update-portrait','pagecontroller.user.Portrait', # pagecontroller/user/Portrait.py
 
 '/cgi/admin','editorcontroller.Index', # editorcontroller/Index.py
 '/cgi/admin/login','editorcontroller.user.Login', # editorcontroller/user/Login.py
@@ -50,7 +52,6 @@ def initSession():
 
 def initRender():
     import datetime
-    import pagecontroller, editorcontroller, api
     from tool import subpage_data
     # 模版文件中可以直接访问的变量
     temp_func = {
@@ -74,7 +75,7 @@ def initRender():
     subpage_path = sh.config.APP_ROOT_PATH + 'web/cgi/subpage'
     sh.autoMkdir(subpage_path)
     temp_func['subpage'] = render(loc=subpage_path, globals=temp_func)
-# 为了能在subpage中使用subpage, 所以这里又render了一次
+    # 为了能在subpage中使用subpage, 所以这里又render了一次
     temp_func['subpage'] = render(loc=subpage_path, globals=temp_func)
     sh.subpage = temp_func['subpage']
 
