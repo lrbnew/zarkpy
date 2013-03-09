@@ -17,7 +17,7 @@ class ForgetPassword:
             user = sh.model('User').getByEmail(inputs.email.strip())
             if user:
                 sh.ctrl('User').sendForgetPasswordEmail(user)
-            return sh.alert('发送成功,请查收您的邮件')
+            return sh.alert('发送成功,请查收您的邮件', '/')
 
         elif inputs.action == 'reset_password':
             assert(6 <= len(inputs.password) < 60)

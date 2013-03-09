@@ -9,7 +9,7 @@
 TEST_PATH = ['UPLOAD_IMAGE_PATH']
 TEST_URL  = ['UPLOAD_IMAGE_URL']
 
-assert __name__ == "__main__", 'test.py只能运行,切勿导入,以免因不小心操作导致数据丢失'
+assert __name__ == "__main__", u'test.py只能运行,切勿导入,以免因不小心操作导致数据丢失'
 import os, re, sys
 
 import web
@@ -31,7 +31,7 @@ def modifyConfigForTest():
 # 清空并重建测试数据库
 def rebulidTestDataBase():
     from tool import init_database
-    assert sh.config.DB_DATABASE.endswith('_test'), '你使用正式数据库来测试?'
+    assert sh.config.DB_DATABASE.endswith('_test'), u'你使用正式数据库来测试?'
     db = sh.getDBHelper()
     for table_name in db.fetchSomeFirst('show tables', ignore_assert=True):
         db.executeQuery('DROP TABLE %s' % table_name)
@@ -41,7 +41,7 @@ def rebulidTestDataBase():
 def emptyTestFileDir():
     for k in TEST_PATH:
         v = sh.config[k]
-        assert v.endswith('-testing/'), '你使用正式文件数据来测试?'
+        assert v.endswith('-testing/'), u'你使用正式文件数据来测试?'
         sh.autoMkdir(v)
         # 递归删除v中的所有文件,但保留空文件夹,以免下次测试时再创建
         os.system('find "%s" -type f | xargs rm -rf' % v)
@@ -54,7 +54,7 @@ def getTestPaths(paths):
         # 把相对路径改为绝对路径
         if not path.startswith('/'):
             path = os.path.join(cwd, path)
-        assert os.path.exists(path), '输入的测试文件不存在:%s' % path
+        assert os.path.exists(path), u'输入的测试文件不存在:%s' % path
         if os.path.isdir(path):
             find_cmd = 'find "%s" -name "Test*.py"' % path.rstrip('/')
             file_names += [f for f in os.popen(find_cmd).read().split('\n') if f]
@@ -81,7 +81,7 @@ def mainTest():
             exec('import %s as test_module' % module_name)
         class_name = module_name.rpartition('.')[2]
         test_class = eval("test_module.%s" % class_name)
-        assert issubclass(test_class, TestCase), '仅能对unittest.TestCase的子类进行测试,忘记继承它了?'
+        assert issubclass(test_class, TestCase), u'仅能对unittest.TestCase的子类进行测试,忘记继承它了?'
         suites.append( TestLoader().loadTestsFromTestCase(test_class) )
     TextTestRunner().run( TestSuite(suites) )
 

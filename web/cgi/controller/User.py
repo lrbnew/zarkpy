@@ -1,5 +1,6 @@
 #coding=utf-8
 import re
+import time
 import site_helper as sh
 
 class User:
@@ -44,7 +45,7 @@ class User:
     def sendForgetPasswordEmail(self, user):
         code = self.__getValidationCode(user)
         sh.model('UserForgetPassword').replaceInsert(dict(Userid=user.id, code=code))
-        mail_text = '%s您好，请申请了密码重置,此链接将在24小时候过期\n%s/accounts/forget-password?Userid=%d&code=%s\n若非您本人操作，请忽略本邮件' % (user.name, sh.config.HOST_NAME, user.id, code)
+        mail_text = '%s您好，请申请了密码重置,此链接将在24小时后过期\n%s/accounts/forget-password?Userid=%d&code=%s\n若非您本人操作，请忽略本邮件' % (user.name, sh.config.HOST_NAME, user.id, code)
         sh.sendMail(user.email, '重置您的密码', mail_text)
 
     # 检查新注册的用户数据是否正确，不正确时返回错误信息

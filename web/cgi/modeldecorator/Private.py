@@ -102,10 +102,10 @@ class Private(Decorator):
 
     def _setWhereWithUserid(self, env):
         env = sh.copy(env) if env else {}
-        assert(sh.session.is_login)
-        uk = self.arguments.user_id_key
-        user_id = sh.session.id
         if not env.get('_ignore_private_uk', False):
+            uk = self.arguments.user_id_key
+            assert(sh.session.is_login)
+            user_id = sh.session.id
             if env.has_key('where'):
                 assert re.search(r'\b%s\b' % uk, env['where'][0]) is None, u"想自定义Userid? 请使用env['_ignore_private_uk']=True%s" + env['where'][0] 
                 env['where'][0] = '(%s) and %s=%%s' % (env['where'][0], uk)

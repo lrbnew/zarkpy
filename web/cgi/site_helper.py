@@ -188,8 +188,6 @@ def getReferer(referer=None):
         referer = web.input().get('referer', None)
     if not referer:
         referer = web.ctx.env.get('HTTP_REFERER', None)
-        if referer and not referer.startswith(config.HOST_NAME):
-            referer = None
     return referer
 
 def toMD5(text):

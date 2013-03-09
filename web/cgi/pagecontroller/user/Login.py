@@ -37,7 +37,7 @@ class Login:
             referer = sh.getUrlParams(sh.getEnv('HTTP_REFERER')).get('referer', None)
             if referer:
                 return sh.redirect(referer)
-            elif sh.getReferer():
-                return sh.redirect(sh.getReferer())
+            elif sh.inputs().get('referer', None):
+                return sh.redirect(sh.inputs().get('referer', None))
             else:
                 return sh.alert('登录成功. 欢迎回来!')
