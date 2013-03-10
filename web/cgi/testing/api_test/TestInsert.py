@@ -23,6 +23,10 @@ class TestInsert(AppTest.AppTest):
         self.assertEqual(item.code, 'c')
         # 自动写入Userid
         self.assertEqual(item.Userid, my_id)
+        # 不能自定义Userid
+        res = self.get(api_url, {'model_name': 'UserForgetPassword', 'code': 'c', 'Userid': 1})
+        res = sh.loadsJson(res)
+        self.assertFalse(res.success)
         # 不登录的话是不能插入数据的
         old_count = model.getCount()
         self.logout()

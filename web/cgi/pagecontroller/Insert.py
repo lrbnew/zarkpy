@@ -11,6 +11,6 @@ class Insert:
     def _insert(self, inputs):
         assert(inputs.has_key('model_name'))
         assert(sh.session.is_login)
-        assert not inputs.has_key('Userid'), '请勿显示指定Userid，以免作弊'
+        assert not inputs.has_key('Userid'), u'请勿显示指定Userid，以免作弊'
         inputs.Userid = sh.session.id
         return sh.model(inputs.model_name).insert(inputs)

@@ -15,5 +15,9 @@ class Insert:
         assert inputs.has_key('model_name'), u'请指明需要插入的数据类型'
         if not sh.session.is_login:
             return sh.toJsonp({'success':False, 'error': '请先登录'})
+
+        if inputs.has_key('Userid'):
+            return sh.toJsonp({'success':False, 'error': '不能指定Userid'})
+
         inputs.Userid = sh.session.id
         return sh.toJsonp({'success':True, 'new_id': sh.model(inputs.model_name).insert(inputs)})
