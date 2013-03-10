@@ -60,7 +60,7 @@ def getTestPaths(paths):
             file_names += [f for f in os.popen(find_cmd).read().split('\n') if f]
         elif os.path.isfile(path):
             file_names.append(path)
-    return [os.path.abspath(f) for f in file_names]
+    return [os.path.abspath(f) for f in list(set(file_names))]
 
 def pathToModuleName(paths):
     for p in paths:

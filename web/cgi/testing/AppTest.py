@@ -43,6 +43,7 @@ class AppTest(unittest.TestCase):
     def appTestTearDown(self):
         pass
 
+    # 需要用setUp来设置
     def setUp(self):
         self.appTestSetUp()
         app_errors.truncate(0)
@@ -54,6 +55,7 @@ class AppTest(unittest.TestCase):
         if error_msg:
             raise Exception(error_msg)
 
+    # 向app程序发起一个GET请求
     def get(self, url, params={}, extra_environ = None):
         # 为webpy添加REQUEST_URI环境变量
         environ = {'REQUEST_URI': sh.paramsToUrl(url, params)}
@@ -62,6 +64,7 @@ class AppTest(unittest.TestCase):
         res = app.get(url, params, extra_environ=environ, expect_errors=True)
         return self._processResponse(res)
 
+    # 向app程序发起一个POST请求
     def post(self, url, params={}, extra_environ = None):
         assert(isinstance(params, (dict, web.Storage)))
         # 为webpy添加REQUEST_URI环境变量
@@ -84,6 +87,8 @@ class AppTest(unittest.TestCase):
             sh.printObject(res)
             raise Exception("Request Error %d" % res.status + res.errors)
 
+    # 向app程序发起注册请求,并登录后返回Userid
+    # 当不传入各项参数时就使用default_user中的默认值
     def register(self, email='', name='', password='', params={}, login=True):
         if email and not name:
             name = email # 自定义email时应该使用不同的name，因为name可能是unique key
@@ -97,6 +102,7 @@ class AppTest(unittest.TestCase):
         else:
             return self.getUserid()
 
+    # 向app程序发起登录请求，并返回登录用户的Userid
     def login(self, email='', password=''):
         params = {'action': 'login'}
         params['email'] = email if email else default_user['email']
