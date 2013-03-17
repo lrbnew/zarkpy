@@ -79,9 +79,7 @@ class TestCategory(unittest.TestCase):
         new_id_1 = model.insert(dict(title='python', cat='computer'))
         new_id_2 = model.insert(dict(title='c++', cat='computer'))
         new_id_3 = model.insert(dict(title='wii', cat='game'))
-        # get并不会添加category_name
         item = model.get(new_id_1)
-        self.assertNotIn('cat',  item.keys())
         # getsByCategory能得到所有某个分类的数据
         items = model.getsByCategory('computer')
         self.assertEqual(len(items), 2)
@@ -95,6 +93,8 @@ class TestCategory(unittest.TestCase):
         # 插入ForTestCategory2
         new_id = model.insert(dict(title='c++', cat='computer'))
         item = model.get(new_id)
+        # 当auto_set=False时，get并不会添加category_name
+        self.assertNotIn('cat',  item.keys())
         # 因为auto_new=False, 所以没有自动插入Category
         self.assertEqual(item.catid, 0)
         # 如果先addCategory, 就会设置分类
@@ -105,6 +105,17 @@ class TestCategory(unittest.TestCase):
         self.assertNotEqual(item_2.catid, 0)
         self.assertEqual(model.getCategory(new_id_2), 'computer')
 
+    # 如果设置了auto_set=True, 则get all getOneByWhere等函数得到的item
+    # 会自动把分类值赋值给data_key指定的字段
+    def test_auto_set(self):
+        model = sh.model('ForTestCategory')
+        # 插入ForTestCategory2
+        new_id = model.insert(dict(title='c++', cat='computer'))
+        self.assertEqual(model.get(new_id).cat, 'computer')
+        self.assertEqual(model.getOneByWhere('title=%s', ['c++']).cat, 'computer')
+        self.assertEqual(model.all()[0].cat, 'computer')
+        self.assertEqual(model.gets([new_id])[0].cat, 'computer')
+        
 
 # 用于测试Category的类
 from model import Model
@@ -113,7 +124,7 @@ class ForTestCategory(Model):
     column_names    = ['Categoryid', 'title', ]
     test_decorator  = [
         ('Category',{'cat_id_key': 'Categoryid', 'cat_model_name': 'Category', 
-                     'data_key': 'cat', 'auto_new': True}),
+            'data_key': 'cat', 'auto_new': True, 'auto_set': True}),
     ]
     table_template = \
         ''' CREATE TABLE {$table_name} (
@@ -128,7 +139,7 @@ class ForTestCategory2(ForTestCategory):
     column_names    = ['catid', 'title', ]
     test_decorator  = [
         ('Category',{'cat_id_key': 'catid', 'cat_model_name': 'Category', 
-                     'data_key': 'cat', 'auto_new': False}),
+            'data_key': 'cat', 'auto_new': False, 'auto_set': False}),
     ]
     table_template = \
         ''' CREATE TABLE {$table_name} (

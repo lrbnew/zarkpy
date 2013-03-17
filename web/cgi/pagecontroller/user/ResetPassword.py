@@ -28,4 +28,4 @@ class ResetPassword:
             return sh.page.user.ResetPassword('原密码输入错误, 请重新输入')
 
         user_model.update(Userid, dict(password=inputs.new_password))
-        return sh.alert('重置密码成功')
+        return sh.alert('重置密码成功', '/')

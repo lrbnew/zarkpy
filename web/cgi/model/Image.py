@@ -18,7 +18,7 @@ class Image(Model):
     convert_gif     = False # 是否转换gif图片，如果是，则仅取第一帧
     convert_quality = None  # 保存的目标质量,小于100时压缩,1表示最差
     remove_info     = False # 是否删除附加信息,能减小文件大小,可能会降低图片质量
-    known_types     = ['jpg', 'jpeg', 'png', 'gif', ]
+    known_types     = ['jpg', 'jpeg', 'png', 'gif', 'pjpeg', ]
 
     def insert(self, data):
         new_id = Model.insert(self, data)
