@@ -1,0 +1,111 @@
+$def with(model_name, column_names, column_types, mc, item, action)
+$# ../../editorcontroller/model/Edit.py
+$ cn_dict = sh.ctrl('Editor').getChineseColumnName()
+$ page = 'new' if action == 'insert' else 'edit'
+$ hidden = mc[page+'_hidden'] if mc[page+'_hidden'] else mc.hidden
+$ only_show = mc[page+'_only_show'] if mc[page+'_only_show'] else mc.only_show
+$ show_image = ('Imageid' in column_names and column_types['Imageid'].type == 'int' and 'Imageid' not in hidden) and (not only_show or 'Imageid' in only_show)
+
+<form action="/admin/$action?referer=/admin/model/$model_name" enctype="multipart/form-data" method="POST" class="edit_page" >
+
+    <!--页面标题-->
+    <legend>$(mc.get(page+'_title') if mc.get(page+'_title', '') else mc['_title'][1])</legend>
+
+    <!--页面提示-->
+    $if mc.get(page+'_tip', ''):
+        <div class="alert alert-info">
+            <button data-dismiss="alert" class="close" type="button">×</button>
+            $mc.get(page+'_tip', '')
+        </div>
+
+    <!--上半部分编辑区-->
+    <div class="clearfix">
+        <input type="hidden" name="model_name" value="$model_name" />
+        $if item and action=='update':
+            <input type="hidden" name="model_id" value="$item.id" />
+
+                
+        <!--如果有图片单张图片，图片显示在上边-->
+        $if show_image:
+            $if item and action == 'update' and item.image:
+                <a href="$item.image.url" target="_blank" class="cover thumbnail">
+                    <span class="cover_tip">预览图</span>
+                    <img class="file_img" src="$item.image.url" />
+                </a>
+
+            <label >上传图片</label>
+            <div class="file_box">
+                <input class="inp_file" type="file" name="image_file" />
+            </div>
+
+        <!--用only_show判断是否仅显示部分数据-->
+        $ show_columns = only_show if only_show else [n for n in column_names if n not in ['Imageid'] ]
+
+        <!--右边的其它数据, not in表示不在这里显示的数据-->
+        $for name in show_columns:
+            $ value = item.get(name, '') if item else ''
+            $ ct = column_types.get(name, sh.storage({'type':'str'}))
+
+            <!--排除用hidden指定不显示的字段-->
+            $if name in hidden: $ continue
+
+            <!--======以下各种类型每个字段仅显示其中一种======-->
+
+            <!--字段名称-->
+            <label>$cn_dict.get(name, name)：</label>
+
+            <!--整数-->
+            $if ct.type == 'int':
+                <input class="span6" type="text" name="$name" value="$value" />
+
+            <!--短字符串-->
+            $if ct.type == 'str':
+                <input class="span6" type="text" name="$name" value="$value" />
+
+            <!--长字符串-->
+            $if ct.type == 'text':
+                $if name in mc.richtext:
+                    <!--富文本-->
+                    <textarea name="$name" rows="30" fx="richtext" >$value</textarea>
+                $else:
+                    <!--普通文本-->
+                    <textarea name="$name" class="span6">$value</textarea>
+
+            <!--多项选一-->
+            $if ct.type == 'enum':
+                $for o in ct.options:
+                    $ checked = 'checked' if ct.get('default', None) == o else ''
+                    <label class="radio inline">
+                        <input type="radio" name="$name" value="$o" checked="$checked" />$o
+                    </label>
+                <br/>
+
+            <!--时间-->
+            $if ct.type == 'time':
+                <!--精确到秒-->
+                $if ct.accurate_type in ['datetime', 'timestamp']:
+                    $ fx = 'datetimepicker[style=overcast;changeMonth;changeYear;changeDay;language=chinese;dateFormat=yy-mm-dd;showSecond;]'
+                <!--精确到天-->
+                $if ct.accurate_type == 'date':
+                    $ fx = 'datepicker[style=overcast;changeMonth;changeYear;language=chinese;]'
+                <!--只有小时到秒-->
+                $if ct.accurate_type == 'time':
+                    $ fx = 'datetimepicker[style=overcast;changeMonth;changeYear;changeDay;language=chinese;dateFormat=yy-mm-dd;timeOnly;showSecond;]'
+
+                <input type="text" name="$name" value="$value" fx="$fx"/>
+
+            <!--带点小数-->
+            $if ct.type == 'float':
+                <input type="text" name="$name" value="$value"/>
+
+            <!--====== End ======-->
+
+            <br/>
+
+    </div><!--End 上半部分编辑区-->
+    <br/>
+
+    <!--下半部分，操作区-->
+    <button type="submit" class="btn btn-large btn-success">$('添加' if action == 'insert' else '修改')</button>
+
+</form>

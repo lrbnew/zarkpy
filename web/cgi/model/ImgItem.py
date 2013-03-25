@@ -1,5 +1,11 @@
+#!/usr/bin/env python
 #coding=utf-8
-import os
+import sys, os
+if __name__=='__main__':
+    father_dir = os.path.split(os.path.realpath(__file__))[0].rpartition('/')[0]
+    if father_dir not in sys.path:
+        sys.path.insert(0, father_dir)
+
 from Model import Model
 import site_helper as sh
 
@@ -9,7 +15,7 @@ import site_helper as sh
 class ImgItem(Model):
     table_name      = ''
     column_names    = ['Imageid', ]
-    use_convert     = True  # 是否压缩以及修改图片
+    use_convert     = False # 是否压缩以及修改图片
     max_width       = None  # 压缩后最大宽度
     max_height      = None  # 压缩后最大高度 (宽和高都不为None时才压缩图片)
     convert_type    = 'jpg' # 保存的目标格式,为None则保持原格式
@@ -72,3 +78,28 @@ class ImgItem(Model):
             Imageid         int unsigned not null default 0,
             primary key ({$table_name}id)
         )ENGINE=InnoDB; '''
+
+if __name__=='__main__':
+    usage = 'Usage: python model/ImgItem.py insert model_name img_file'
+    argv = [a for a in sys.argv if not a.startswith('-')]
+
+    if len(argv) != 4 or argv[1] != 'insert':
+        print usage
+        exit(1)
+    file_path = argv[3]
+    if not os.path.exists(file_path):
+        print 'ERROR: image file is not exists'
+        exit(1)
+    try:
+        model = sh.model(argv[2])
+    except:
+        print 'ERROR: model is not exists?'
+        exit(1)
+
+    import imghdr
+    image_content = value=open(file_path).read()
+    image_type = imghdr.what(None, image_content)
+    image_file = dict(filename=file_path, value=image_content, imagetype=image_type)
+    data = {sh.model('Image').image_key: sh.storage(image_file)}
+    data.update(dict([a[2:].split('=') for a in sys.argv if a.startswith('--') and '=' in a]))
+    model.insert(data)

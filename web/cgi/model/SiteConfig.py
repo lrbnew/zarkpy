@@ -12,15 +12,19 @@ import site_helper as sh
 
 class SiteConfig(Model):
     table_name = 'SiteConfig'
-    column_names = ['name', 'value', ]
+    column_names = ['name', 'value', 'title', ]
+    decorator = [
+        ('Pagination', dict(paging_key='page_num', paging_volume=1000, paging=False) ),
+    ]
 
     table_template = \
-        '''CREATE TABLE {$table_name} (
-           {$table_name}id  int unsigned not null auto_increment,
-           name             varchar(100) not null default '',
-           value            text charset utf8,
-           primary key      ({$table_name}id),
-           unique key       (name)
+        ''' CREATE TABLE {$table_name} (
+            {$table_name}id  int unsigned not null auto_increment,
+            name             varchar(100) not null default '',
+            value            text charset utf8,
+            title            varchar(300) charset utf8 not null default '',
+            primary key      ({$table_name}id),
+            unique key       (name)
         )ENGINE=InnoDB; '''
 
 def _operateSetting(argv, usage, actions):

@@ -131,12 +131,19 @@ class TestModel(unittest.TestCase):
     def test_getColumnTypes(self):
         # 使用默认列名, 返回字典字段类型
         types = image_model.getColumnTypes()
-        self.assertEqual(types['data_name'], 'str')
-        self.assertEqual(types['data_id'], 'int')
-        self.assertEqual(types['url'], 'str')
-        # 可以主动传入参数，并可返回datetime类型
-        types = user_model.getColumnTypes(['created'])
-        self.assertEqual(types['created'], 'datetime')
+        self.assertEqual(types.data_name,
+            {'type':'str', 'accurate_type':'varchar', 'length': 20, 'null': False, 'default': '' })
+        self.assertEqual(types['data_id'],
+            {'type':'int', 'accurate_type':'int', 'null': False, 'default': 0, 'unsigned': True})
+        self.assertEqual(types['url'],
+            {'type':'str', 'accurate_type':'varchar', 'length': 100, 'null': False, 'default': '' })
+        # 可以主动传入参数，并可返回time类型
+        types = user_model.getColumnTypes(['created', 'dead'])
+        self.assertEqual(len(types.keys()), 2)
+        self.assertEqual(types['created'],
+            {'type':'time', 'accurate_type':'timestamp', 'null': False, 'default': 'current_timestamp' })
+        self.assertEqual(types['dead'],
+            {'type':'enum', 'options':['yes', 'no'], 'accurate_type':'enum', 'null': False, 'default': 'no' })
 
     # createTable可以根据table_name和table_template创建数据表
     def test_createTable(self):

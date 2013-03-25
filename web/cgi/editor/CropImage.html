@@ -1,0 +1,45 @@
+$def with(inputs)
+<script type="text/javascript">
+    function setRegion(){
+        $$('[name=region_width]').val($$('#region').width());
+        $$('[name=region_height]').val($$('#region').height());
+    };
+</script>
+
+<div class="photo_page">
+    <div class="title_control_h3">
+        <!--页面标题-->
+        <h3 class="info_inline">选择裁剪区域</h3>
+    </div>
+
+    <form action="?" method="POST" >
+
+        <input type="hidden" name="model_name" value="$inputs.model_name" />
+        <input type="hidden" name="model_id" value="$inputs.model_id" />
+        <input type="hidden" name="column_name" value="$inputs.column_name" />
+        <input type="hidden" name="region_width" value="" />
+        <input type="hidden" name="region_height" value="" />
+
+        <div class="clearfix">
+            <div class="crop_large img-polaroid">
+                <div id="region" style="width: $(inputs.crop_width)px">
+                    <div id="original_img_overlay" style="position: relative;"></div>
+                    <img src="$inputs.image.url" onload="setRegion()" fx="imgareaselect[previewid=smallpreview;valueid=smallvalue;parent=#original_img_overlay;$inputs.fx_crop;$inputs.crop_settings]" />
+                </div>
+            </div>
+            <div class="crop_small">
+                <p>预览</p>
+                <!--去掉下面这个div里面的img的max-width:100%; 才能看到裁剪效果-->
+                <div class="img-polaroid" >
+                    <div id="smallpreview" style="width:$(inputs.preview_width)px; height:$(inputs.preview_height)px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <input id="smallvalue" name="crop" value="$inputs.crop" type="hidden" />
+
+        <br/>
+        <button class="btn btn-large btn-success" type="submit" >提交选定区域</button> 
+    </form>
+
+</div>

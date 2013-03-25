@@ -1,0 +1,22 @@
+$def with(value, menu_config)
+$# ../editorcontroller/IndentTable.py
+
+<div class="title_control_h3">
+    <!--页面标题-->
+    <h3 class="info_inline">$(menu_config.title if menu_config.title else menu_config['_title'][1])</h3>
+</div>
+
+$if menu_config.tip:
+    <div class="alert alert-info">
+        <button data-dismiss="alert" class="close" type="button">×</button>
+        $menu_config.tip
+    </div>
+
+<p id="error_tip"></p>
+
+<form action="?" method="POST" >
+    $ richtext = 'richtext' if 'value' in menu_config.richtext else ''
+    <textarea class="value_tx" name="value" fx="validation[type=regex;regex=^&[^\t&]*$$;invalid_id=error_tip;invalid_msg=表中不能包含tab字符;] $richtext " >$value</textarea>
+    <br/>
+    <input class="btn btn-large btn-success" type="submit" value="保存" />
+</form>

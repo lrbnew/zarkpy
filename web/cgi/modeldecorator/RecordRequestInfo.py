@@ -9,7 +9,7 @@ import site_helper as sh
 
 class RecordRequestInfo(Decorator):
     ''' decorator = [
-        ('RecordRequestInfo', dict(ip='ip', user_agent='HTTP_USER_AGENT', referer='HTTP_REFERER') ),
+        ('RecordRequestInfo', dict(ip='ip', user_agent='HTTP_USER_AGENT', referrer='HTTP_REFERER') ),
     ] '''
 
     def insert(self, data):

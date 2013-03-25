@@ -1,27 +1,69 @@
 $def with(error_info='', email='', referer='')
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
 
+    <!-- initial set  -->
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Cache-Control" content="no-cache"/>
 
-<p>current page is: /admin/login</p>
+    <!-- favicon -->
+    <link rel="favicon icon" type="image/png" href="/img/page/favicon.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="/img/page/favicon.ico" />
 
-$if sh.session.is_admin:
-    欢迎: $sh.session.admin_name
-    <br/>
-    <a href="/admin/logout" >退出</a>
-    <br/>
-$else:
-    <form action="/admin/login" method="POST">
-        <span>$error_info</span>
+    <!--seo -->
+    <title>后台管理程序</title>
+    <meta name="description" content="sparker5后台管理程序" />
+    <meta name="keywords" content="sparker5后台管理程序" />
+    <meta content="sparker5.com" name="author" /> 
+    <meta content="Copyright ©sparker5.com 版权所有" name="copyright"/>
 
-        $if referer:
-            <input type="hidden" name="referer" value="$referer" />
+    <!-- css -->
+    <link href="/css/editor/Login.css" rel="stylesheet" type="text/css" media="screen" charset="utf-8"/>
+    <link href="/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" media="screen" charset="UTF-8"/>
 
-        <p>email:</p>
-        <input type="text" name="email" value="$email" />
+    <!-- js -->
+    <script type="text/javascript" src="/plugins/jquery-plugins/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/plugins/zarkfx/zarkfx.js"></script>
+    <script type="text/javascript" src="/js/editor/Base.js"></script>
+</head>
+<body>
+
+    $if sh.session.is_admin:
+        欢迎: $sh.session.admin_name
         <br/>
-
-        <p>password:</p>
-        <input type="password" autocomplete="off" name="password" />
+        <a href="/admin/logout" >退出</a>
         <br/>
+    $else:
+        <div class="login_box">
+            <form action="/admin/login" method="POST" class="">
 
-        <input type="submit" value="登录" />
-    </form>
+                $if referer:
+                    <input type="hidden" name="referer" value="$referer" />
+
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <legend>登录 Login</legend>
+
+                <input class="span2" type="text" name="email" value="$email" placeholder="邮箱" />
+                <br/>
+                <input class="span2" type="password" autocomplete="off" name="password" placeholder="密码" />
+                <br/>
+                <br/>
+
+                <button class="btn" type="submit" >登录</button>
+                <br/>
+                <br/>
+
+                $if error_info:
+                    <div class="alert alert-error">$error_info</div>
+
+            </form>
+        </div>
+
+</body>
+</html>

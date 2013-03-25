@@ -1,4 +1,5 @@
-$def with(sub_page)
+$def with(sub_page_content)
+$ curr_title = sh.ctrl('Editor').getCurrTopMenuTitle()
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -9,19 +10,81 @@ $def with(sub_page)
     <meta content="sparker5.com" name="author" /> 
     <meta content="Copyright ©sparker5.com 版权所有" name="copyright"/>
 
-    <!-- sub_page js and css -->
-    $if sub_page.get('cssfiles',None):
-        $for f in sh.splitAndStrip(sub_page.cssfiles):
+    <link href="/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" media="screen" charset="UTF-8"/>
+    <link href="/css/editor/Base.css" rel="stylesheet" type="text/css" media="screen" charset="utf-8"/>
+    <link href="/css/editor/Core.css" rel="stylesheet" type="text/css" media="screen" charset="utf-8"/>
+
+    <script type="text/javascript" src="/plugins/jquery-plugins/jquery-1.7.1.js"></script>
+    <script type="text/javascript" src="/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/plugins/zarkfx/zarkfx.js"></script>
+    <script type="text/javascript" src="/js/editor/Base.js"></script>
+
+    <!-- sub_page_content js and css -->
+    $if sub_page_content.get('cssfiles', None):
+        $for f in sh.splitAndStrip(sub_page_content.cssfiles):
             <link rel="stylesheet" href="$f" type="text/css" media="screen" charset="utf-8"/>
 
-    $if sub_page.get('jsfiles',None):
-        $for f in sh.splitAndStrip(sub_page.cssfiles):
+    $if sub_page_content.get('jsfiles', None):
+        $for f in sh.splitAndStrip(sub_page_content.jsfiles):
             <script type="text/javascript" src="$f"></script>
 
 </head>
 <body>
 
-    $:sub_page
+    <!--HEADER-->
+    <div class="header clearfix">
+        <div class="inner">
+            <a href="$sh.editor_config.index" class="logo">$sh.editor_config.title</a>
+
+            <!--editor_config.menu为四级配置时在这里显示第一级-->
+            $if sh.ctrl('Editor').getTopMenuTitles():
+                <ul class="navi pull-left">
+                    $for title, url in sh.ctrl('Editor').getTopMenuTitles():
+                        $ selected = 'selected' if title == curr_title else ''
+                        <li><a href="$url?top_menu=$title" class="$selected">$title</a></li>
+                </ul>
+
+            <form action="?" class="navbar-search pull-left hidden" id="search_box">
+                <input type="text" name="searchword"  placeholder="Search" class="search-query span2">
+            </form>
+
+            <ul class="navi pull-right">
+                $if sh.session.is_admin:
+                    <li class="divider-vertical"></li>
+                    <li><a href="/admin/logout" class="quit trans">退出系统</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!--ACCORDION-->
+    <div class="accordion_control clearfix" >
+        <div fx="accordion[style=zarkpy;finished=show;down_img=/plugins/zarkfx/img/accordion/down_tui.png;right_img=/plugins/zarkfx/img/accordion/right_tui.png]" style="width:100%; display:none;" >
+            $for title, sub_menu in sh.ctrl('Editor').getAdminMenuList():
+                <ul>
+                    <li><a>$title</a>
+                        <div>
+                            <ul>
+                                $for sub_title, page in sub_menu:
+                                    $ param = '?top_menu=' + curr_title if curr_title else ''
+                                    <li><a href="$page.url$param">$sub_title</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+
+    <div id="sub_page_content" class="sub_content">
+        <div class="inner">
+            <a href="javascript:void(0);" onclick="$$('#sub_inner').scrollTop(0);" class="scrollup_editor"></a>
+            <div id="sub_inner" class="clearfix">
+                $:sub_page_content
+            </div>
+        </div>
+    </div>
+
+    <div fx="scroll[bottom=30;right=30;]"></div>
 
 </body>
 </html>

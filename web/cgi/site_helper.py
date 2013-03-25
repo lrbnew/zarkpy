@@ -1,8 +1,9 @@
 #coding=utf-8
-import web, glob, sys, os, copy as _copy, hashlib, subprocess, json
+import web, glob, sys, os, copy as _copy, hashlib, subprocess, json, re, datetime
 from urllib import quote as _quote, unquote as _unquote, urlencode
 import socket, struct
 from urlparse import urlparse
+from PIL import Image
 
 # 程序的配置表. 注意文件夹路径必须以/结束
 config = web.Storage({
@@ -26,7 +27,28 @@ config = web.Storage({
     'HOST_NAME' :       'http://me.zarkpy.com',
     'MAIL_SENDER' :     'noreply@zarkpy.com', # 邮件的默认发送者
     'IS_TEST' :       False, # 是否正在测试，测试时会被修改为True
+    'MODIFY_TIME_LIMIT' :    3600, # 发布内容后可修改时限
 })
+
+editor_config = web.Storage({
+    'title' :     'ZarkPy后台', # 显示在后台左上角的文字
+    'index' :     '/admin',  # 点击title跳转的地址
+})
+
+# 后台目录配置表，基础可选配置分别有(其中model和url有且仅有其一):
+# model url hidden only_show orderby richtext list_view list_link search layout
+# new_hidden new_only_show edit_hidden edit_only_show list_hidden list_only_show
+# new_title new_tip edit_title edit_tip list_title list_tip
+# 其中hidden和only_show同时控制new、edit、list，但优先级较低
+# 对ImgItem使用crop指定裁剪字段时，图片可裁剪
+editor_config.menu = '''
+    内容管理
+        图片中心
+            model: EditorImage
+            search: title
+        网站配置
+            url: /admin/site-config/all
+'''
 
 # 初始化一些重要变量
 web.config.session_parameters['timeout']    = config.SESSION_EXPIRES
@@ -93,17 +115,22 @@ def model(model_name, decorator=[]):
         return model
 
 # 获得controller模块中的实例
+CACHED_CTRLS = {}
 def ctrl(name):
     import controller
-    try:
-        for name in name.split('.'):
-            assert(hasattr(controller, name))
-            controller = getattr(controller, name)
-    except:
-        print 'the name is', name
-        print 'the controller name is', name
-        raise
-    return controller()
+    if CACHED_CTRLS.has_key(name):
+        return CACHED_CTRLS[name]
+    else:
+        try:
+            for name in name.split('.'):
+                assert(hasattr(controller, name))
+                controller = getattr(controller, name)
+        except:
+            print 'the name is', name
+            print 'the controller name is', name
+            raise
+        CACHED_CTRLS[name] = controller()
+        return CACHED_CTRLS[name]
 
 def getDBHelper():
     from model import DBHelper
@@ -165,9 +192,23 @@ def printObject(d, index=0):
     else:
         print (' ' * index) + (unicodeToStr(d) if isinstance(d, unicode) else str(d))
 
+# 删除私有数据
+def removePrivateValues(d):
+    if isinstance(d, (dict, web.Storage)):
+        for k in [k for k in d.keys() if k.startswith('_')]:
+            del d[k]
+        for k, v in d.items():
+            removePrivateValues(v)
+        return d
+    elif isinstance(d, (list, tuple)):
+        return map(removePrivateValues, d)
+    else:
+        return d
+
 # 返回一个可以用foo.abc代替foo['abc']的dict
 def storage(data={}):
     return web.Storage(data)
+storage_class = web.Storage
 
 def getSiteConfig(name, default=''):
     exists = model('SiteConfig').getOneByWhere('name=%s', [name])
@@ -177,11 +218,25 @@ def setSiteConfig(name, value):
     conf_model = model('SiteConfig')
     assert(name.strip())
     exists = conf_model.getOneByWhere('name=%s', [name])
+    if isinstance(value, unicode): value = unicodeToStr(value)
     if exists:
         conf_model.update(exists.id, dict(value=str(value)))
         return exists.id
     else:
         return conf_model.insert(dict(name=name, value=str(value)))
+
+def calcTimeIntervalSimple(late, early):
+    diff = late - early
+    if diff.days > 30:
+        return '以前'
+    elif diff.days > 0:
+        return '%s天前' % diff.days
+    elif diff.seconds > 3600:
+        return '%s小时前' % (diff.seconds / 3600)
+    elif diff.seconds > 600:
+        return '%s分钟前' % (diff.seconds / 60)
+    else:
+        return '刚刚'
 
 def getReferer(referer=None):
     if not referer:
@@ -195,16 +250,22 @@ def toMD5(text):
     m.update(config.SECRET_KEY + unicodeToStr(text))
     return m.hexdigest()
 
-# 刷新当前页面，可以通过referer参数指定打开的页面
-def refresh(referer=None):
-    referer = getReferer(referer)
-    return web.seeother(referer if referer else '/')
-
 # 跳转到/alert页面，显示一条消息，然后再跳转到另一个页面
 def alert(msg, referer=None, stay=3):
     referer = getReferer(referer)
     if not referer: referer = '/'
     return web.seeother('/alert?msg=%s&referer=%s&stay=%s' % quote(msg, referer, str(stay)))
+
+# 刷新当前页面，可以通过referer参数指定打开的页面
+def refresh(referer=None):
+    if getUrlParams().get('alert', ''):
+        referer = getReferer(referer)
+        if not referer:
+            referer = getEnv('HTTP_REFERER')
+        alert(getUrlParams().get('alert'), referer)
+    else:
+        referer = getReferer(referer)
+        return web.seeother(referer if referer else '/')
 
 def redirect(url):
     web.seeother(url)
@@ -306,6 +367,22 @@ def imageSize(image_url):
         return Image.open(urlToPath(image_url)).size
     except:
         return 0, 0
+
+# 把string中的url变成可点击的，需要webpy模版中使用“不转义”，函数中已使用websafe
+def enableUrlClick(string):
+    pattern = '''(?<![a-zA-z])(http://|https://|www\.)([;/?:@&=+$,-_.!~*’#()%a-z0-9A-Z]+)'''
+    replace = r'<a href="\1\2" target="_blank" style="color:#2690DC;" >\1\2</a>'
+    regex = re.compile(pattern, re.I | re.S | re.X)
+    safe_html = regex.sub(replace, web.websafe(string))
+    # 把www开头的地址改为绝对地址
+    pattern = '''(?<=<a\ )([^>]*href=")(www\..*?)(".*?>)'''
+    replace = r'\1http://\2\3'
+    regex = re.compile(pattern, re.I | re.S | re.X)
+    return regex.sub(replace, safe_html)
+
+def inModifyTime(t):
+    now = datetime.datetime.now()
+    return int((now - t).total_seconds()) < config.MODIFY_TIME_LIMIT
 
 '''auto mkdir'''
 for k, v in config.items():

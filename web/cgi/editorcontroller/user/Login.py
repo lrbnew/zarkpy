@@ -10,7 +10,7 @@ class Login:
     def GET(self):
         action = sh.getEnv('REQUEST_URI').partition('?')[0].strip('/')
         if action == 'admin/login':
-            return sh.editor.user.Login()
+            return sh.editor_nobase.user.Login()
         if action == 'admin/logout':
             sh.ctrl('AdminUser').logout()
             return sh.redirect('/')
@@ -26,7 +26,7 @@ class Login:
 
         if action == 'admin/login':
             if not uc.validate(inputs.email, inputs.password):
-                return sh.editor.user.Login('密码不对', inputs.email)
+                return sh.editor_nobase.user.Login('密码不对', inputs.email)
             user = model.getByEmail(inputs.email)
             uc.login(user)
             return sh.redirect('/admin')

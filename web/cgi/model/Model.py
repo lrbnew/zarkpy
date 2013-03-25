@@ -123,32 +123,66 @@ class Model:
             ret_query = ret_query.replace(variable, getattr(self, variable[2:-1]))
         return ret_query
 
-    # 根据表定义，获得字段类型
+    # 根据表定义，获得字段类型,及其相关属性
     def getColumnTypes(self, column_names=None):
         text_min_length = 500 # 字符串长度大于多少就识别为text
         if column_names is None: column_names = self.column_names
 
         table_template = self.replaceAttr(self.table_template)
-        columns = [sh.splitAndStrip(c) for c in self._splitTableTemplate(table_template) if all(map(lambda x: not c.lower().startswith(x), ['key ','key(','primary ','unique ']))]
+        columns = [sh.splitAndStrip(c) for c in self._splitTableTemplate(table_template) \
+                if not any(map(lambda x: c.lower().startswith(x), ['key ','key(','primary ','unique ']))]
         columns = [c for c in columns if c[0] in column_names]
         type_keys = {
             'int': ['int', 'tinyint', 'smallint', 'mediumint', 'integer', 'bigint', 'year'], 
-            'str': ['char', 'varchar', 'enum', 'set', ],
+            'str': ['char', 'varchar', 'set', ],
             'text': ['text', 'blob', 'tinytext', 'tinyblob', 'mediumblob', 'mediumtext', 'longblob', 'longtext', ],
-            'datetime': ['date', 'datetime', 'timestamp', 'time'],
+            'enum': ['enum', ],
+            'time': ['date', 'datetime', 'timestamp', 'time'],
             'float': ['float', 'double', 'real', 'decimal', 'numeric'],
         }
 
-        column_types = {}
+        column_types = sh.storage()
         for column in columns:
             column_name = column[0]
-            for describle in column[1:]:
+            all_describle = [c.lower() for c in column[1:]]
+            for index, describle in enumerate(all_describle):
                 for key, values in type_keys.items():
-                    if describle.partition('(')[0] in values:
-                        column_types[column_name] = key
-                        length = describle.partition('(')[2].rpartition(')')[0].strip()
-                        if key == 'str' and length.isdigit() and int(length) > text_min_length:
-                            column_types[column_name] = 'text'
+                    accurate_type = describle.partition('(')[0].lower()
+                    if accurate_type in values:
+
+
+                        ct = sh.storage({'type': key})
+
+                        type_comment = describle.partition('(')[2].rpartition(')')[0].strip()
+                        if type_comment.isdigit():
+                            ct.length = int(type_comment)
+
+                        if key == 'str' and ct.get('length', 0) > text_min_length:
+                            ct['type'] = 'text'
+
+                        ct.accurate_type = accurate_type
+
+                        ct.null = not ('null' in all_describle and 'not' in all_describle \
+                            and all_describle.index('null') == all_describle.index('not')+1)
+
+                        if 'default' in all_describle:
+                            ct.default = all_describle[all_describle.index('default')+1]
+                            if ct.default.isdigit():
+                                ct.default = int(ct.default)
+                            else:
+                                ct.default = ct.default.strip("'")
+
+                        if key == 'int':
+                            ct.unsigned = 'unsigned' in all_describle
+
+                        if key == 'enum':
+                            ct.options = [describle.partition("'")[2].partition("'")[0]]
+                            i = index
+                            while ')' not in all_describle[i]:
+                                i += 1
+                                ct.options.append(all_describle[i].partition("'")[2].partition("'")[0])
+
+                        column_types[column_name] = ct
                         break
                 if column_types.has_key(column_name): break
             else:

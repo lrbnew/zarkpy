@@ -1,0 +1,48 @@
+$def with(model_name, column_names, column_types, menu_config, items, pagination_html)
+$# ../../editorcontroller/model/List.py
+
+<div class="title_control_h3">
+    <!--页面标题-->
+    <h3 class="info_inline">$(menu_config.list_title if menu_config.get('list_title', '') else menu_config['_title'][1])</h3>
+    <!--添加新项按钮-->
+    <a href="/admin/model/$model_name/new" class="btn btn-success info_inline btn_else" >添加+</a>
+    <!--搜索-->
+    $if menu_config.search:
+        <div class="input-append">
+            <form action="?" method="GET" >
+                <input type="hidden" name="action" value="search" />
+                <input class="span2" type="text" name="query" value="$sh.inputs().get('query','')" />
+                <button class="btn" type="submit" >搜索</button>
+                $if sh.inputs().get('query', ''):
+                    <a class="btn" href="?" >取消搜索</a>
+            </form>
+        </div>
+</div>
+
+<!--页面提示-->
+$if menu_config.get('list_tip', ''):
+    <div class="alert alert-info">
+        <button data-dismiss="alert" class="close" type="button">×</button>
+        $menu_config.get('list_tip', '')
+    </div>
+
+
+
+$if items:
+    <div class="box_list" >
+        <ul>
+
+            $for item in items:
+                <li class="floor" >
+                    <!--显示数据-->
+                    $:subpage.editor.ViewItem(model_name, column_names, column_types, menu_config, item)
+                    $# ../../subpage/editor/ViewItem.html
+
+                </li>
+
+        </ul>
+    </div>
+
+<div class="pagination pagination-large">
+    $:pagination_html
+</div>

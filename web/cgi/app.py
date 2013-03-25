@@ -7,7 +7,7 @@ import site_helper as sh # 注意，和shell没有关系, 只是一个简写而�
 # debug模式默认为True，你可以在开发中设置为True，在发布中设置为False
 # 当debug为True时, 网页的打开速度可能会很慢
 # 当debug为False时，修改模版后必须重启程序才生效
-#web.config.debug = False
+web.config.debug = False
 
 urls = (
 # zarkpy reserved
@@ -25,13 +25,21 @@ urls = (
 '/cgi/accounts/portrait','pagecontroller.user.Portrait', # pagecontroller/user/Portrait.py
 '/cgi/update-portrait','pagecontroller.user.Portrait', # pagecontroller/user/Portrait.py
 
+# admin
+'/cgi/insert-richtext-image','editorcontroller.EditorImage', # editorcontroller/EditorImage.py
 '/cgi/admin','editorcontroller.Index', # editorcontroller/Index.py
 '/cgi/admin/login','editorcontroller.user.Login', # editorcontroller/user/Login.py
 '/cgi/admin/logout','editorcontroller.user.Login', # editorcontroller/user/Login.py
 '/cgi/admin/update','editorcontroller.Update', # editorcontroller/Update.py
 '/cgi/admin/insert','editorcontroller.Insert', # editorcontroller/Insert.py
 '/cgi/admin/delete','editorcontroller.Delete', # editorcontroller/Delete.py
-
+'/cgi/admin/model/([^/]+)','editorcontroller.model.List', # editorcontroller/model/List.py
+'/cgi/admin/model/([^/]+)/new','editorcontroller.model.Edit', # editorcontroller/model/Edit.py
+'/cgi/admin/model/([^/]+)/edit/(\d+)','editorcontroller.model.Edit', # editorcontroller/model/Edit.py
+'/cgi/admin/site-config/([-\w]+)','editorcontroller.SiteConfig', # editorcontroller/SiteConfig.py
+'/cgi/admin/indent-table/([-\w]+)','editorcontroller.IndentTable', # editorcontroller/IndentTable.py
+'/cgi/admin/crop-image','editorcontroller.CropImage', # editorcontroller/CropImage.py
+# api
 '/api/get','api.Get', # api/Get.py
 '/api/insert','api.Insert', # api/Insert.py
 '/api/update','api.Update', # api/Update.py

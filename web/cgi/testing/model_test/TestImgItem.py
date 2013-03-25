@@ -5,11 +5,9 @@ import imghdr
 import Image
 import site_helper as sh
 
-'''
-因为ImgItem.table_name为空，所以没有具体的表，这里使用ImgItem的子类User代替
-如果你打算修改User的基类，请找一个table_name不为空的ImgItem子类替换User
-并修改test_data
-'''
+''' 因为ImgItem.table_name为空，所以没有具体的表，这里使用ImgItem的子类User代替
+    如果你打算修改User的基类，请找一个table_name不为空的ImgItem子类替换User
+    并修改test_data '''
 
 db = sh.getDBHelper()
 imgitem_model = sh.model('User')

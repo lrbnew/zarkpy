@@ -1,0 +1,77 @@
+$def with(items, pagination_html, mc)
+$# ../editorcontroller/SiteConfig.py
+
+<div class="title_control_h3">
+    <!--页面标题-->
+    <h3 class="info_inline">$(mc.title if mc.title else mc['_title'][1])</h3>
+    <!--添加新项按钮-->
+    <a class="btn btn-success info_inline btn_else" fx="toggle[target=#new_config;toggleHtml=收起;]">添加配置+</a>
+</div>
+
+$if mc.tip:
+    <div class="alert alert-info">
+        <button data-dismiss="alert" class="close" type="button">×</button>
+        $mc.tip
+    </div>
+
+
+<form id="new_config" class="append_new alert alert-success hidden" action="/admin/insert" method="POST">
+    <input type="hidden" name="model_name" value="SiteConfig" />
+    <label>唯一英文名称：<small>(请确保在增加和修改时都不会重名，否则会报错)</small></label>
+    <input type="text" name="name" value="" />
+    <label>描述：</label>
+    <input type="text" name="title" value="" />
+    <br/>
+    <label>配置值：</label>
+    <textarea class="value_tx" name="value" ></textarea>
+    <button class="btn btn-success" type="submit" >添加</button>
+</form>
+
+<!--配置数据-->
+<div class="box_list">
+    <ul>
+        $for i in items:
+            <li class="floor">
+
+                <!--显示配置值-->
+                <div id="view_config_$i.id">
+                    <div class="info_control info_inline">
+                        <label class="muted">配置名:</label>
+                        <p>$i.name</p>
+                    </div>
+                    <div class="info_control info_inline">
+                        <label class="muted">说明:</label>
+                        <p>$i.title</p>
+                    </div>
+                    <br/>
+                    <label class="muted">配置值:</label>
+                    <pre>$i.value</pre>
+                </div>
+
+                <!--修改配置值-->
+                <form id="edit_config_$i.id"  class="hidden" action="/admin/update" method="POST">
+                    <input type="hidden" name="model_name" value="SiteConfig" />
+                    <input type="hidden" name="model_id" value="$i.id" />
+                    <div class="info_control info_inline">
+                        <label class="muted">配置名:</label>
+                        <input type="text" name="name" value="$i.name" />
+                    </div>
+                    <div class="info_control info_inline">
+                        <label class="muted">说明:</label>
+                        <input type="text" name="title" value="$i.title" />
+                    </div>
+                    <label class="muted">配置值:</label>
+                    <textarea name="value" class="value_tx" >$i.value</textarea>
+                </form>
+
+                <!--操作-->
+                <br/>
+                <a class="btn" fx="toggle[target=#view_config_$i.id,#edit_config_$i.id,#post_btn_$i.id,#del_btn_$i.id;toggleHtml=放弃;]">编辑</a>
+                <a class="btn btn-success hidden" style="" id="post_btn_$i.id" href="javascript:void(0);" onclick="$$('#edit_config_$i.id').submit();">提交</a>
+                <a id="del_btn_$i.id" class="btn btn-danger" href="/admin/delete?model_name=SiteConfig&model_id=$i.id" fx="confirm[msg=确定删除配置$(i.name)?]">删除</a>
+                <br/>
+                <br/>
+
+            </li>
+    </ul>
+</div>

@@ -1,0 +1,85 @@
+$def with(model_name, column_names, column_types, mc, item)
+$ cn_dict = sh.ctrl('Editor').getChineseColumnName()
+$ hidden = mc.list_hidden if mc.list_hidden else mc.hidden
+$ only_show = mc.list_only_show if mc.list_only_show else mc.only_show
+$ show_image = 'Imageid' in column_names and 'Imageid' not in hidden and (not only_show or 'Imageid' in only_show)
+
+<div class="controls controls-row" >
+    <!--如果有图片则在左边显示小图-->
+    $if show_image:
+        $ image = item.image
+        $if image:
+            <div class="span2 cover">
+                $ image_url = image.url+'.crop' if mc.get('crop', '') else image.url
+                <a class="thumbnail" href="$image.url" target="_blank" ><img src="$image_url" /></a>
+                <div class="tool_box clearfix">
+                    <!--复制-->
+                    <a class="tool tool_copy" title="复制图片" fx="zeroclipboard[text=$image.url;]" ><span></span></a>
+                    <!--裁剪-->
+                    $if mc.get('crop', '') and image:
+                        <a class="tool tool_crop" style="margin-left:15px;" title="裁剪图片" href="/admin/crop-image?model_name=$model_name&model_id=$item.id&crop=$sh.quote(mc.crop)" target="_blank" ><span></span></a>
+                </div>
+
+            </div>
+        $else:
+            <div class="span2 cover">
+                <a class="thumbnail" href="/admin/model/$model_name/edit/$item.id" target="_blank" ><img src="/img/editor/model/default_img140x140.jpg" /></a>
+            </div>
+
+    $ style = 'margin-left:180px' if show_image else ''
+    <div class="left" style="$style">
+        <!--显示ID-->
+        <strong class="text-info">ID: $item.id</strong>
+        <br/>
+        <br/>
+
+        <!--用only_show判断是否仅显示部分数据-->
+        $ show_columns = only_show if only_show else [n for n in column_names if n not in ['Imageid'] ]
+
+        <!--根据layout判断是否自定义布局-->
+        $if mc.layout:
+            $ show_columns = [c for c in mc.layout if c in show_columns+['|']]
+
+        <!--======下面显示除了小图的其它数据======-->
+        $for name in show_columns:
+            $if name == '|':
+                <br/>
+                $continue
+
+            $ value = item.get(name) if item else ''
+            $ ct = column_types.get(name,  sh.storage({'type':'str'}))
+            <!--排除用hidden指定不显示的字段-->
+            $if name in hidden: $ continue
+            $ _c = 'info_control info_inline' if ct.type != 'text' else ''
+            <div class="$_c">
+
+                <!--数据名称-->
+                <label class="muted" title="$name">$cn_dict.get(name, name)：</label>
+
+                $if name in mc.list_link:
+                    <!--显示连接-->
+                    <a href="$value" class="text-info" >$value</a>
+                $elif ct.type == 'text': 
+                    <pre>$value</pre>
+                $else:
+                    <p>$value</p>
+
+            </div>
+
+
+        <!--====== End ======-->
+
+        <!--操作按钮区域-->
+        <br/>
+        <div class="btn-group" >
+            <a class="btn" href="/admin/model/$model_name/edit/$item.id" >编辑</a>
+            $if mc.list_view:
+                <a class="btn" href="$(mc.list_view.replace('{$id}', str(item.id)))" target="_blank" >查看</a>
+        </div>
+        <a class="btn btn-danger" href="/admin/delete?model_id=$item.id&model_name=$model_name" fx="confirm[msg=确定删除 ID: $item.id ?]">删除</a>
+        <br/>
+        <br/>
+
+    </div>
+
+</div>
