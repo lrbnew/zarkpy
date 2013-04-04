@@ -107,7 +107,7 @@ class IndentTable:
                 return ret_dict
 
         _indentsToDict._index = 0
-        return _indentsToDict('root', indents) if len(indents) > 0 else None
+        return _indentsToDict('root', indents) if len(indents) > 0 else {}
 
     def indentsToList(self, indents):
 
@@ -146,7 +146,7 @@ class IndentTable:
                     return default_model.get(ld)
                 else:
                     return ld
-            elif isinstance(ld, (dict, web.Storage)) \
+            elif isinstance(ld, (dict, sh.storage_class)) \
                     and ld.has_key('model') and ld.has_key('id') and ld.id.isdigit():
                  item = sh.model(ld.model).get(ld.id)
                  del ld['model'], ld['id']
@@ -155,7 +155,7 @@ class IndentTable:
             elif isinstance(ld, (list, tuple)) and len(ld) == 2 \
                     and isinstance(ld[0], str) \
                     and ld[0].isdigit() and default_model \
-                    and isinstance(ld[1], (dict, web.Storage)):
+                    and isinstance(ld[1], (dict, sh.storage_class)):
                 item = default_model.get(ld[0])
                 if item: item.update(ld[1])
                 return item

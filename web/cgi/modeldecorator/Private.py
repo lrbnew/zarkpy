@@ -24,9 +24,9 @@ import site_helper as sh
 # 最后，记得添加类似索引: unique key  (Userid, private_id)
 
 class Private(Decorator):
-    '''decorator = [
-        ('Private', dict(user_id_key='Userid', primary_key='private_id') ),
-    ]'''
+    ''' decorator = [
+        ('Private', dict(user_id_key='Userid', primary_key='private_id', use_private=True) ),
+    ] '''
 
     def __init__(self, model, arguments):
         Decorator.__init__(self, model, arguments)
@@ -74,10 +74,19 @@ class Private(Decorator):
         return self._changePrimaryKey(self.model.getOneByWhere(where, argv))
 
     def all(self, env=None):
-        return self._changePrimaryKey(self.model.all(self._setWhereWithUserid(env)))
+        if self._usePrivate(env):
+            return self._changePrimaryKey(self.model.all(self._setWhereWithUserid(env)))
+        else:
+            return self.model.all(env)
 
     def getCount(self, env=None):
-        return self.model.getCount(self._setWhereWithUserid(env))
+        if self._usePrivate(env):
+            return self.model.getCount(self._setWhereWithUserid(env))
+        else:
+            return self.model.getCount(env)
+
+    def _usePrivate(self, env):
+        return env.get('use_private', self.arguments.use_private) if env else self.arguments.use_private
 
     def _setUseridToData(self, data):
         uk = self.arguments.user_id_key
@@ -120,6 +129,6 @@ class Private(Decorator):
                 for d in datas:
                     if d is not None:
                         d._primary_key = self.arguments.primary_key
-            elif isinstance(datas, dict) or isinstance(datas, web.Storage):
+            elif isinstance(datas, dict) or isinstance(datas, sh.storage_class):
                 datas._primary_key = self.arguments.primary_key
         return datas

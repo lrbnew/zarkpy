@@ -1,4 +1,4 @@
-#!coding=utf-8
+#coding=utf-8
 '''
 用于测试app的基类，子类请使用appTestSetUp和appTestTearDown代替setUp和tearDown
 子类可以使用self.get、self.post函数向app程序发起request
@@ -28,6 +28,8 @@ default_user = dict(email='test@zarkpy.com', password='123456', name='zarkpy')
 # 因为app在post时不能准确地向webpy程序传递参数，这可能是一个bug, 为paste.fixture hack
 def hackForInputs(f):
     def newInputs():
+        if not web.ctx.has_key('env'):
+            return {}
         if web.ctx.env.get('wsgi.input.zarkpy.post.hack', None):
             return web.ctx.env.get('wsgi.input.zarkpy.post.hack')
         else:
@@ -66,12 +68,12 @@ class AppTest(unittest.TestCase):
 
     # 向app程序发起一个POST请求
     def post(self, url, params={}, extra_environ = None):
-        assert(isinstance(params, (dict, web.Storage)))
+        assert(isinstance(params, (dict, sh.storage_class)))
         # 为webpy添加REQUEST_URI环境变量
         environ = {'REQUEST_URI': url, 'CONTENT_TYPE': 'text/plain; charset=utf-8', }
         if extra_environ:
             environ.update(extra_environ)
-        if not isinstance(params, web.Storage):
+        if not isinstance(params, sh.storage_class):
             params = sh.storage(params)
         # hack for use paste.fixture module test app.py
         environ['wsgi.input.zarkpy.post.hack'] = params
@@ -84,7 +86,7 @@ class AppTest(unittest.TestCase):
         if res.status == 303:
             return ''
         else:
-            sh.printObject(res)
+            print sh.printObject(res)
             raise Exception("Request Error %d" % res.status + res.errors)
 
     # 向app程序发起注册请求,并登录后返回Userid

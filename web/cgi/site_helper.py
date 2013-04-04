@@ -1,9 +1,10 @@
 #coding=utf-8
 import web, glob, sys, os, copy as _copy, hashlib, subprocess, json, re, datetime
-from urllib import quote as _quote, unquote as _unquote, urlencode
+from urllib import quote as _quote, unquote as _unquote, urlencode, urlopen
 import socket, struct
 from urlparse import urlparse
 from PIL import Image
+import imghdr
 
 # 程序的配置表. 注意文件夹路径必须以/结束
 config = web.Storage({
@@ -43,23 +44,41 @@ editor_config = web.Storage({
 # 对ImgItem使用crop指定裁剪字段时，图片可裁剪
 editor_config.menu = '''
     内容管理
+        API文档
+            model: APIDoc
+            layout: title request_url require_login | content necessary options | example |
+            list_link: example
+            list_btn_hidden: delete
+            search: APIDocid title example content
+            list_tip: API路径一律以"域名+/api/"开头，请把"http://eye.sparker5.com"和"/api/"考虑为可以随时修改的变量。app中请使用POST方式，返回结果一律为json字典，更多细节请自行测试。所有支持分页的api均以page_num作为页码，若不指定page_num则仅返回第一页数据。注意，换一个没有登录后台的浏览器访问即可获得真正的json数据。所有api访问请用cookie自动处理webpy_session_id值。
+        API索引
+            url: /admin/api-index
         图片中心
             model: EditorImage
-            search: title
+            search: EditorImageid title
         网站配置
             url: /admin/site-config/all
+            list_tip: 可以用浏览器的"ctrl+f"或"command+f"搜索
+        公告列表
+            model: Notice
+            list_hidden: content Imageid
+            hidden: Imageid
+            richtext: content
+            list_view: /admin/notice/{$id}
 '''
 
 # 初始化一些重要变量
 web.config.session_parameters['timeout']    = config.SESSION_EXPIRES
 web.config.session_parameters['secret_key'] = config.SECRET_KEY
 
-# 根据path自动创建文件夹，使用此函数来避免抛出找不到文件夹的异常
+# 根据path自动创建文件夹，使用此函数来避免抛出"找不到文件夹"的异常
 def autoMkdir(path):
     path = path.rpartition('/')[0].strip()
     if path and not os.path.exists(path):
         print 'WARNING: auto create dir', path
         os.system('mkdir -p "%s"' % path)
+# 用config中以_PATH结尾的路径自动创建文件夹
+map(autoMkdir, [v for k,v in config.items() if k.endswith('_PATH')])
 
 # 获得一个文件夹下所有的module,主要用于__init__.py文件自动import所有class
 def getDirModules(dir_path, dir_name, except_files=[]):
@@ -123,7 +142,7 @@ def ctrl(name):
     else:
         try:
             for name in name.split('.'):
-                assert(hasattr(controller, name))
+                assert hasattr(controller, name), name
                 controller = getattr(controller, name)
         except:
             print 'the name is', name
@@ -169,6 +188,19 @@ def getUrlParams(url=None):
 def paramsToUrl(url, params={}):
     return url + '?' + urlencode(params) if params else url
 
+# 把url地址和参数拼接为GET请求的字符串
+# querys可以是字典，也可以是2n个字符串
+def joinUrl(request_url, querys):
+    if not querys:
+        return request_url
+    assert not ('?' in request_url and querys)
+    if isinstance(querys, (list, tuple)):
+        assert len(querys) % 2 == 0
+        querys = dict(zip(querys[::2], querys[1::2]))
+    assert isinstance(querys, dict)
+    query = '&'.join([str(k)+'='+quote(str(v)) for k,v in querys.items()])
+    return request_url + '?' + query
+
 # 把网络访问地址转为本地文件路径
 def urlToPath(url):
     assert(url.startswith('/'))
@@ -180,19 +212,28 @@ def pathToUrl(path):
     assert(path.startswith(config.APP_ROOT_PATH + 'web' + '/'))
     return path.partition(config.APP_ROOT_PATH + 'web')[2]
 
-# 打印某个数据
-def printObject(d, index=0):
-    if isinstance(d, (dict, web.Storage)):
-        for k, v in d.items():
-            print ' ' * index + k, ':'
-            printObject(v, index+4)
-    elif isinstance(d, (list, tuple)):
-        for i in d:
-            printObject(i, index+4)
-    else:
-        print (' ' * index) + (unicodeToStr(d) if isinstance(d, unicode) else str(d))
+# 返回一个obj带有缩进的字符串格式
+def printObject(obj, not_user_column_names=False):
+    def _replaceBr(s, index):
+        return s.replace('\n', '\n' + ' ' * index)
 
-# 删除私有数据
+    def _printObject(d, index):
+        if isinstance(d, dict):
+            # 如果有_column_names，则仅显示_column_names里面的字段
+            if not not_user_column_names and d.has_key('_column_names'):
+                return ''.join([' ' * index + unicodeToStr(k) + ' :\n' + _printObject(d[k], index+4) for k in d['_column_names'] if d.has_key(k)])
+            else:
+                return ''.join([' ' * index + unicodeToStr(k) + ' :\n' + _printObject(v, index+4)  for k, v in d.items() if not k.startswith('_')])
+        elif isinstance(d, (list, tuple)):
+            return ''.join([_printObject(i, index+4) for i in d])
+        else:
+            s = unicodeToStr(d) if isinstance(d, unicode) else str(d)
+            s = _replaceBr(s, index)
+            return  ' ' * index + s + '\n\n'
+
+    return _printObject(obj, 0)
+
+# 删除字典中以"_"开头的私有数据
 def removePrivateValues(d):
     if isinstance(d, (dict, web.Storage)):
         for k in [k for k in d.keys() if k.startswith('_')]:
@@ -318,10 +359,12 @@ def inputs():
 def toJsonp(data):
     def __jsonEnabled(data):
         json_enable = [int, long, str, bool, list, dict, web.utils.Storage]
-        if isinstance(data, dict) or isinstance(data, web.Storage):
+        if isinstance(data, (dict, storage_class)):
             return dict([(k, __jsonEnabled(v)) for k,v in data.items()])
-        elif isinstance(data, list) or isinstance(data, tuple):
+        elif isinstance(data, (list, tuple)):
             return list(__jsonEnabled(v) for v in data)
+        elif isinstance(data, unicode):
+            return unicodeToStr(data)
         elif type(data) in json_enable:
             return data
         else:
@@ -368,7 +411,7 @@ def imageSize(image_url):
     except:
         return 0, 0
 
-# 把string中的url变成可点击的，需要webpy模版中使用“不转义”，函数中已使用websafe
+# 把string中的url变成可点击的，需要webpy模版中使用“$:(不转义)”，返回结果是websafe的
 def enableUrlClick(string):
     pattern = '''(?<![a-zA-z])(http://|https://|www\.)([;/?:@&=+$,-_.!~*’#()%a-z0-9A-Z]+)'''
     replace = r'<a href="\1\2" target="_blank" style="color:#2690DC;" >\1\2</a>'
@@ -384,7 +427,43 @@ def inModifyTime(t):
     now = datetime.datetime.now()
     return int((now - t).total_seconds()) < config.MODIFY_TIME_LIMIT
 
-'''auto mkdir'''
-for k, v in config.items():
-    if k.endswith('_PATH'):
-        autoMkdir(v)
+# 删除obj中的一些属性值，obj可以为dict，也可以为dict组成的list
+def removeKeys(obj, keys):
+    def _remove(d):
+        for k in keys:
+            if d.has_key(k):
+                del d[k]
+    if isinstance(obj, list):
+        for o in obj:
+            _remove(o)
+    else:
+        _remove(obj)
+
+def requestHtmlContent(url, data=None, method='GET'):
+    import httplib2
+    if method == 'GET':
+        response, content = httplib2.Http().request(joinUrl(url, data))
+    elif method == 'POST':
+        content = urlopen(url, urlencode(data if data else {})).read()
+    else:
+        raise Exception('unknow request method:', method)
+    return content
+
+# 获得网络中的一张图片，返回inputs函数中的图片格式
+def requestImageFile(url):
+    try:
+        content = requestHtmlContent(url)
+        return storage(dict(filename=url, value=content,
+                imagetype=imghdr.what(None, content))) if content else None
+    except:
+        return None
+
+# resize参考man convert，如果传入一个整数，则默认为最大宽度
+def resizeImage(url, resize, _format='jpg'):
+    from tool import image_convert
+    if isinstance(resize, int):
+        resize = '%dx>' % resize
+    env = {'resize':resize, 'format':_format, 'profile': '*'}
+    path = image_convert.convert(urlToPath(url), env)
+    return pathToUrl(path)
+

@@ -90,8 +90,9 @@ class Model:
     # env的可选参数以及样例分别有:
     # select: username, email
     # from: User
-    # where: ('age>%s', (18,))
+    # where: ['age>%s', (18,)]
     # orderby: 'Userid desc'
+    # groupby: 'Userid'
     # limit: (0, 10)
     # distinct: True
     def all(self, env=None):
@@ -144,16 +145,16 @@ class Model:
         column_types = sh.storage()
         for column in columns:
             column_name = column[0]
-            all_describle = [c.lower() for c in column[1:]]
+            all_describle = column[1:]
             for index, describle in enumerate(all_describle):
                 for key, values in type_keys.items():
-                    accurate_type = describle.partition('(')[0].lower()
+                    accurate_type = describle.lower().partition('(')[0].lower()
                     if accurate_type in values:
 
 
                         ct = sh.storage({'type': key})
 
-                        type_comment = describle.partition('(')[2].rpartition(')')[0].strip()
+                        type_comment = describle.lower().partition('(')[2].rpartition(')')[0].strip()
                         if type_comment.isdigit():
                             ct.length = int(type_comment)
 
@@ -176,17 +177,23 @@ class Model:
                             ct.unsigned = 'unsigned' in all_describle
 
                         if key == 'enum':
-                            ct.options = [describle.partition("'")[2].partition("'")[0]]
+                            ct.options = []
                             i = index
-                            while ')' not in all_describle[i]:
+                            while True:
+                                ct.options.append(all_describle[i])
+                                if ')' in all_describle[i]:
+                                    break
                                 i += 1
-                                ct.options.append(all_describle[i].partition("'")[2].partition("'")[0])
+                            ct.options = ''.join(ct.options).partition('(')[2].partition(')')[0]
+                            ct.options = [o.strip("'") for o in ct.options.split(',')]
 
                         column_types[column_name] = ct
                         break
                 if column_types.has_key(column_name): break
             else:
                 raise Exception('找不到数据类型:%s' % ' '.join(column))
+
+        column_types['__column_names'] = [c for c in column_names if column_types.has_key(c)]
 
         return column_types
 
@@ -278,7 +285,7 @@ class Model:
             env = {}
         query = 'select '
         argv = []
-        assert(type(env) in [dict, web.Storage])
+        assert(type(env) in [dict, sh.storage_class])
 
         if env.get('select', None):
             query += env['select'] + ' '
@@ -293,11 +300,14 @@ class Model:
             query += 'from '+ self.table_name + ' '
 
         if env.get('where', None) != None:
-            assert( type(env['where']) in (tuple, list) and  len(env['where']) == 2 )
-            assert( type(env['where'][0]) is str )
-            assert( type(env['where'][1]) in (tuple, list) )
+            assert isinstance(env['where'], (tuple, list)) and  len(env['where']) == 2 
+            assert isinstance(env['where'][0], str)
+            assert isinstance(env['where'][1], (tuple, list))
             query += ' where ' + env['where'][0] + ' '
             argv.extend(env['where'][1])
+
+        if env.get('groupby', None):
+            query += ' group by '+env.get('groupby')
 
         if env.get('orderby', None):
             query += ' order by '+env.get('orderby')
@@ -357,7 +367,7 @@ class ModelData(web.Storage):
                 id_key = self.get('_table_name') + 'id'
                 if self.db.isColumnExists(table_name, id_key):
                     try:
-                        return sh.model(model_name).all({'where': (id_key + '=%s', [self.id])})
+                        return sh.model(model_name).all({'where': [id_key + '=%s', [self.id]]})
                     except:
                         print 'ERROR: ModelData找不到属性', key
                         raise

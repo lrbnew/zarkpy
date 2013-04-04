@@ -1,4 +1,4 @@
-#!coding=utf-8
+#coding=utf-8
 import unittest
 import site_helper as sh
 

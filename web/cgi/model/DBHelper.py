@@ -1,27 +1,27 @@
 #coding=utf-8
 import MySQLdb, MySQLdb.cursors
 import web
-import site_helper
+import site_helper as sh
 
 # 数据库配置,若想把DBHelper.py单独用于你的其它项目中,仅需修改此配置即可
-DB_PASSWORD = site_helper.config.DB_PASSWORD
-DB_DATABASE = site_helper.config.DB_DATABASE
-DB_HOST     = site_helper.config.DB_HOST
-DB_USER     = site_helper.config.DB_USER
-DB_CHARSET  = site_helper.config.DB_CHARSET
-DB_TIMEOUT  = site_helper.config.DB_TIMEOUT
+DB_PASSWORD = sh.config.DB_PASSWORD
+DB_DATABASE = sh.config.DB_DATABASE
+DB_HOST     = sh.config.DB_HOST
+DB_USER     = sh.config.DB_USER
+DB_CHARSET  = sh.config.DB_CHARSET
+DB_TIMEOUT  = sh.config.DB_TIMEOUT
 
 def _exceptMySQLdbException(e):
     if len(e.args) > 0:
         if e.args[0] in [1044, 1045]:
-            print 'ERROR: 没有访问数据库%s的权限,请检查site_helper.config中的数据库配置是否正确' % DB_DATABASE
-            print '或者使用 mysql -uroot -p < %sdoc/sql/init_database.sql 来初始化数据库' % site_helper.config.APP_ROOT_PATH
+            print 'ERROR: 没有访问数据库%s的权限,请检查sh.config中的数据库配置是否正确' % DB_DATABASE
+            print '或者使用 mysql -uroot -p < %sdoc/sql/init_database.sql 来初始化数据库' % sh.config.APP_ROOT_PATH
             exit(0)
         elif e.args[0] == 1049:
-            print 'ERROR: 数据库%s不存在,请检查site_helper.config中的数据库配置是否正确' % DB_DATABASE
+            print 'ERROR: 数据库%s不存在,请检查sh.config中的数据库配置是否正确' % DB_DATABASE
             exit(0)
         elif e.args[0] == 2003:
-            print 'ERROR: 找不到数据库服务器%s,请检查site_helper.config中的数据库配置是否正确' % DB_HOST
+            print 'ERROR: 找不到数据库服务器%s,请检查sh.config中的数据库配置是否正确' % DB_HOST
             exit(0)
 
 def createDictDB():
@@ -68,7 +68,7 @@ class DBHelper:
             raise
         one = cursor.fetchone()
         if one is not None:
-            one = web.Storage(self._toUtf8(one))
+            one = sh.storage(self._toUtf8(one))
         return one
 
     def fetchSome(self, query_string, argv=(), ignore_assert=False):

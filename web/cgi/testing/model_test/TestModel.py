@@ -1,4 +1,4 @@
-#!coding=utf-8
+#coding=utf-8
 import unittest
 import site_helper as sh
 
@@ -139,7 +139,7 @@ class TestModel(unittest.TestCase):
             {'type':'str', 'accurate_type':'varchar', 'length': 100, 'null': False, 'default': '' })
         # 可以主动传入参数，并可返回time类型
         types = user_model.getColumnTypes(['created', 'dead'])
-        self.assertEqual(len(types.keys()), 2)
+        self.assertEqual(len(types.keys()), 3) # 还有 __column_names
         self.assertEqual(types['created'],
             {'type':'time', 'accurate_type':'timestamp', 'null': False, 'default': 'current_timestamp' })
         self.assertEqual(types['dead'],

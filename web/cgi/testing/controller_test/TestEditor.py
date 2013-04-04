@@ -1,4 +1,4 @@
-#!coding=utf-8
+#coding=utf-8
 # ../../controller/Editor.py
 import unittest
 import site_helper as sh
@@ -96,7 +96,7 @@ class TestEditor(unittest.TestCase):
 
         target = dict(_title=['内容', '新闻'], model='News',
                 richtext=[], list_link=[], search=[], layout=[], append_column=[],
-                hidden=[], new_hidden=[], edit_hidden=[], list_hidden=[],
+                hidden=[], new_hidden=[], edit_hidden=[], list_hidden=[], list_btn_hidden=[],
                 only_show=[], new_only_show=[], edit_only_show=[], list_only_show=[], 
                 list_view='', title='', tip='', orderby='')
 

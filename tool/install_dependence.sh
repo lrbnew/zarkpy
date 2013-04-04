@@ -21,6 +21,7 @@ aptitude install python-mysqldb
 aptitude install python-setuptools
 aptitude install python-imaging
 aptitude install python-memcache
+aptitude install python-paste
 easy_install pip
 
 aptitude install sphinxsearch

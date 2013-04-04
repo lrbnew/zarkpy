@@ -1,4 +1,4 @@
-#!coding=utf-8
+#coding=utf-8
 # ../../controller/IndentTable.py
 import unittest
 import site_helper as sh

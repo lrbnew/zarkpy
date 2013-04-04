@@ -14,7 +14,7 @@ class Register:
             return sh.toJsonp({'is_login': False, 'error': error})
 
         new_id = uc.register(inputs)
-        uc.loginById(new_id, inputs.get('remember_me', 'no') == 'yes')
+        uc.loginById(new_id, inputs.get('remember_me', 'off') == 'on')
 
         if sh.model('User').validation_request:
             uc.sendValidationEmail(user)

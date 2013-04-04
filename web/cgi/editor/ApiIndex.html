@@ -1,0 +1,19 @@
+$def with(api_docs)
+
+<div class="title_control_h3">
+    <h3 class="info_inline">API索引</h3>
+    <div class="alert alert-info">
+        <button data-dismiss="alert" class="close" type="button">×</button>
+        只是为了更好的找到你需要的API。可以用浏览器的"ctrl+f"或"command+f"搜索
+    </div>
+</div>
+
+<div class="edit_page">
+
+    $for a in api_docs:
+        <strong class="text-info">ID: $a.id</strong>
+        <a target="_blank" href="/admin/model/APIDoc#model_$a.id" >$a.title</a>
+        <a href="$a.example" class="muted" target="_blank" >$a.example</a>
+        <br/>
+
+</div>

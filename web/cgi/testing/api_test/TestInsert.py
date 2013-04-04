@@ -1,4 +1,4 @@
-#!coding=utf-8
+#coding=utf-8
 # ../../api/Delete.py
 import site_helper as sh
 from .. import AppTest

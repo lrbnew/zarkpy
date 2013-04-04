@@ -39,14 +39,14 @@ urls = (
 '/cgi/admin/site-config/([-\w]+)','editorcontroller.SiteConfig', # editorcontroller/SiteConfig.py
 '/cgi/admin/indent-table/([-\w]+)','editorcontroller.IndentTable', # editorcontroller/IndentTable.py
 '/cgi/admin/crop-image','editorcontroller.CropImage', # editorcontroller/CropImage.py
+'/cgi/admin/api-index','editorcontroller.ApiIndex', # editorcontroller/ApiIndex.py
+
 # api
 '/api/get','api.Get', # api/Get.py
 '/api/insert','api.Insert', # api/Insert.py
 '/api/update','api.Update', # api/Update.py
 '/api/delete','api.Delete', # api/Delete.py
 '/api/user/register','api.user.Register', # api/user/Register.py
-'/api/user/login','api.user.Login', # api/user/Login.py
-'/api/user/logout','api.user.Login', # api/user/Login.py
 '/api/user/profile','api.user.Profile', # api/user/Profile.py
 )
 
@@ -105,6 +105,7 @@ def addProcessor():
     app.add_processor(processor.profiler.profiler)
     app.add_processor(processor.auto_login.loginByCookie) # 应该放到validate的前面
     app.add_processor(processor.validate.validate)
+    app.add_processor(processor.print_api.printDict)
 
 # 仅headers processor用于测试环境
 if not sh.config.IS_TEST:

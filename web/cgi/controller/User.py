@@ -67,7 +67,7 @@ class User:
         if not (4 <= len(name) <=30):
             return '用户名必须大于等于4个字符，小于等于30个字符'
 
-        if not(6 <= len(password) < 60):
+        if not(6 <= len(password) <= 60):
             return '密码必须大于等于6个字符，小于等于60个字符'
 
         # 限制用户名字符

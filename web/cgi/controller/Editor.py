@@ -7,7 +7,7 @@ import site_helper as sh
 class Editor:
     # 不填写配置时的默认值, 仅用于editor/model/Edit.html页面
     default_menu_config = dict(richtext=[], list_link=[], search=[], layout=[],append_column=[], 
-        hidden=[], new_hidden=[], edit_hidden=[], list_hidden=[],
+        hidden=[], new_hidden=[], edit_hidden=[], list_hidden=[], list_btn_hidden=[],
         only_show=[], new_only_show=[], edit_only_show=[], list_only_show=[], 
         list_view='', title='', tip='', orderby='' )
 
@@ -84,7 +84,7 @@ class Editor:
             for sub_title, page in sub_menu:
                 if not page.has_key('url'):
                     model_name = page.get('model', '')
-                    assert hasattr(model, model_name), u'后台目录%s配置中缺少url或model名称不正确' % sub_title
+                    assert sh.model(model_name), '后台目录%s配置中缺少url或model名称不正确: %s' % (sub_title, model_name)
                     page.url = '/admin/model/%s' % model_name
         return menu_list
 

@@ -74,9 +74,12 @@ $ show_image = ('Imageid' in column_names and column_types['Imageid'].type == 'i
             <!--多项选一-->
             $if ct.type == 'enum':
                 $for o in ct.options:
-                    $ checked = 'checked' if ct.get('default', None) == o else ''
+                    $if value:
+                        $ checked = 'checked' if value == o else ''
+                    $else:
+                        $ checked = 'checked' if ct.get('default', None) == o else ''
                     <label class="radio inline">
-                        <input type="radio" name="$name" value="$o" checked="$checked" />$o
+                        <input type="radio" name="$name" value="$o" $checked />$o
                     </label>
                 <br/>
 

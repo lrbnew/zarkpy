@@ -27,7 +27,7 @@ class Profile:
             if user.dead == 'yes':
                 return sh.toJsonp({'is_login':False, 'error':'你已被列入黑名单'})
 
-            uc.login(user, inputs.get('remember_me', '') == 'on')
+            uc.login(user, inputs.get('remember_me', 'off') == 'on')
 
             return sh.toJsonp({'is_login':True, 'name': user.name, 'id': user.id})
 

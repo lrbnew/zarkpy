@@ -1,4 +1,5 @@
 #coding=utf-8
+# ../testing/modeldecorator_test/TestCascade.py
 from Decorator import Decorator
 import site_helper as sh
 
@@ -38,9 +39,8 @@ class Cascade(Decorator):
             assert(all([len(x)==2 for x in self.arguments.delete]))
             for other_table, attr in self.arguments.delete:
                 other_model = sh.model(other_table)
-                other_item = other_model.getOneByWhere(attr + '=%s', [item_id])
-                if other_item:
-                    other_model.delete(other_item.id)
+                for item in other_model.all(dict(where=[attr+'=%s', [item_id]])):
+                    other_model.delete(item.id)
         return affected
 
     def __otherInc(self, data, other_table, attr, increment):
