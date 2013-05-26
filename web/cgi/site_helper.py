@@ -59,12 +59,6 @@ editor_config.menu = '''
         网站配置
             url: /admin/site-config/all
             list_tip: 可以用浏览器的"ctrl+f"或"command+f"搜索
-        公告列表
-            model: Notice
-            list_hidden: content Imageid
-            hidden: Imageid
-            richtext: content
-            list_view: /admin/notice/{$id}
 '''
 
 # 初始化一些重要变量

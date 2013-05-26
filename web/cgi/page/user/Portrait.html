@@ -31,7 +31,7 @@ $var cssie6hack: /plugins/zarkfx/css/imgareaselect/imgareaselect-default.css
                         $ crop = 'x1=%s;y1=%s;x2=%s;y2=%s;' % (x1,y1,x1+x2,y1+y2)
                     $else:
                         $ crop = ''
-                    <img src="$user.image.url" onload="setRegion()" fx="imgareaselect[previewid=smallpreview;valueid=smallvalue;parent=#original_img_overlay;$crop]" />
+                    <img src="$user.image.url" onload="setRegion()" fx="imgareaselect[preview=#smallpreview;valueElement=#smallvalue;wrapper=#original_img_overlay;$crop]" />
                 </div>
                 <div>
                     <p>预览</p>

@@ -66,7 +66,7 @@ $ show_image = ('Imageid' in column_names and column_types['Imageid'].type == 'i
             $if ct.type == 'text':
                 $if name in mc.richtext:
                     <!--富文本-->
-                    <textarea name="$name" rows="30" fx="richtext" >$value</textarea>
+                    <textarea name="$name" rows="30" >$value</textarea>
                 $else:
                     <!--普通文本-->
                     <textarea name="$name" class="span6">$value</textarea>
@@ -87,13 +87,13 @@ $ show_image = ('Imageid' in column_names and column_types['Imageid'].type == 'i
             $if ct.type == 'time':
                 <!--精确到秒-->
                 $if ct.accurate_type in ['datetime', 'timestamp']:
-                    $ fx = 'datetimepicker[style=overcast;changeMonth;changeYear;changeDay;language=chinese;dateFormat=yy-mm-dd;showSecond;]'
+                    $ fx = 'datetimepicker[style=overcast;changeMonth;changeYear;changeDay;dateFormat=yy-mm-dd;showSecond;]'
                 <!--精确到天-->
                 $if ct.accurate_type == 'date':
-                    $ fx = 'datepicker[style=overcast;changeMonth;changeYear;language=chinese;]'
+                    $ fx = 'datepicker[style=overcast;changeMonth;changeYear;]'
                 <!--只有小时到秒-->
                 $if ct.accurate_type == 'time':
-                    $ fx = 'datetimepicker[style=overcast;changeMonth;changeYear;changeDay;language=chinese;dateFormat=yy-mm-dd;timeOnly;showSecond;]'
+                    $ fx = 'datetimepicker[style=overcast;changeMonth;changeYear;changeDay;dateFormat=yy-mm-dd;timeOnly;showSecond;]'
 
                 <input type="text" name="$name" value="$value" fx="$fx"/>
 

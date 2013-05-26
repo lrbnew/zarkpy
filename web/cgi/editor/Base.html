@@ -58,19 +58,14 @@ $ curr_title = sh.ctrl('Editor').getCurrTopMenuTitle()
 
     <!--ACCORDION-->
     <div class="accordion_control clearfix" >
-        <div fx="accordion[style=zarkpy;finished=show;down_img=/plugins/zarkfx/img/accordion/down_tui.png;right_img=/plugins/zarkfx/img/accordion/right_tui.png]" style="width:100%; display:none;" >
+        <div fx="accordion[style=zarkpy; title=a;]" style="width:100%;" >
             $for title, sub_menu in sh.ctrl('Editor').getAdminMenuList():
-                <ul>
-                    <li><a>$title</a>
-                        <div>
-                            <ul>
-                                $for sub_title, page in sub_menu:
-                                    $ param = '?top_menu=' + curr_title if curr_title else ''
-                                    <li><a href="$page.url$param">$sub_title</a></li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
+                <a>$title</a>
+                <div>
+                    $for sub_title, page in sub_menu:
+                        $ param = '?top_menu=' + curr_title if curr_title else ''
+                        <a href="$page.url$param">$sub_title</a>
+                </div>
         </div>
         <div class="clearfix"></div>
     </div>

@@ -15,19 +15,17 @@ $# ../../pagecontroller/oauth/Register.py
             <input type="hidden" name="access_token" value="$access_token" />
             <input type="hidden" name="state" value="$state" />
 
-            <!--
             <span>Email</span>
-            <input name="email" type="text" value="$primary_value" fx="validation[type=email;invalid_id=error_tip;invalid_msg=请输入正确的Email地址]" />
-            -->
+            <input name="email" type="text" value="$primary_value" fx="check[type=email;tip=#error_tip;msg=请输入正确的Email地址]" />
 
             <span>用户名</span>
-            <input name="name" type="text" value="$primary_value" fx="validation[type=notempty;invalid_id=error_tip;invalid_msg=请输入用户名]" />
+            <input name="name" type="text" value="$primary_value" fx="check[type=notempty;tip=#error_tip;msg=请输入用户名]" />
 
             <span>密码</span>
-            <input id="password" name="password" type="password" fx="validation[type=notempty;invalid_id=error_tip;invalid_msg=请输入密码] validation[type=minlen;len=6;invalid_id=error_tip;invalid_msg=密码的长度不能低于6个字符]" />
+            <input id="password" name="password" type="password" fx="check[type=notempty;tip=#error_tip;msg=请输入密码] check[type=minlen;len=6;tip=#error_tip;msg=密码的长度不能低于6个字符]" />
 
             <span>再次输入密码</span>
-            <input name="password_again" type="password" fx="validation[type=identical;another_id=password;invalid_id=error_tip;invalid_msg=两次输入的密码不相同]" />
+            <input name="password_again" type="password" fx="check[type=equal;another=#password;tip=#error_tip;msg=两次输入的密码不相同]" />
 
             <input type="submit" value="提交" />
 

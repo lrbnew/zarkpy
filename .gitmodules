@@ -1,0 +1,3 @@
+[submodule "web/plugins/zarkfx"]
+	path = web/plugins/zarkfx
+	url = git@github.com:sdjl/zarkfx.git

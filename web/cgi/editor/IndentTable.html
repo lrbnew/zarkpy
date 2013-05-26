@@ -16,7 +16,7 @@ $if menu_config.tip:
 
 <form action="?" method="POST" >
     $ richtext = 'richtext' if 'value' in menu_config.richtext else ''
-    <textarea class="value_tx" name="value" fx="validation[type=regex;regex=^&[^\t&]*$$;invalid_id=error_tip;invalid_msg=表中不能包含tab字符;] $richtext " >$value</textarea>
+    <textarea class="value_tx" name="value" fx="check[type=regex;regex=^&[^\t&]*$$;tip=#error_tip;msg=表中不能包含tab字符;] $richtext " >$value</textarea>
     <br/>
     <input class="btn btn-large btn-success" type="submit" value="保存" />
 </form>

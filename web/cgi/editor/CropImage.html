@@ -24,7 +24,7 @@ $def with(inputs)
             <div class="crop_large img-polaroid">
                 <div id="region" style="width: $(inputs.crop_width)px">
                     <div id="original_img_overlay" style="position: relative;"></div>
-                    <img src="$inputs.image.url" onload="setRegion()" fx="imgareaselect[previewid=smallpreview;valueid=smallvalue;parent=#original_img_overlay;$inputs.fx_crop;$inputs.crop_settings]" />
+                    <img src="$inputs.image.url" onload="setRegion()" fx="imgareaselect[preview=#smallpreview;valueElement=#smallvalue;wrapper=#original_img_overlay;$inputs.fx_crop;$inputs.crop_settings]" />
                 </div>
             </div>
             <div class="crop_small">
