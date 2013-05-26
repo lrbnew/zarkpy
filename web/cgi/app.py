@@ -40,6 +40,10 @@ urls = (
 '/cgi/admin/indent-table/([-\w]+)','editorcontroller.IndentTable', # editorcontroller/IndentTable.py
 '/cgi/admin/crop-image','editorcontroller.CropImage', # editorcontroller/CropImage.py
 '/cgi/admin/api-index','editorcontroller.ApiIndex', # editorcontroller/ApiIndex.py
+# oauth2
+'/cgi/oauth/login','pagecontroller.oauth.Login', # pagecontroller/oauth/Login.py
+'/cgi/oauth/register','pagecontroller.oauth.Register', # pagecontroller/oauth/Register.py
+'/api/oauth/login','api.oauth.Login', # api/oauth/Login.py
 
 # api
 '/api/get','api.Get', # api/Get.py

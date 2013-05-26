@@ -1,7 +1,7 @@
 #coding=utf8
 import site_helper, sys, glob, re
 
-INIT_DIR = ['model',] # 需要自动创建表的文件夹, 不会递归处理，需要手动添加子文件夹
+INIT_DIR = ['model','model/oauth',] # 需要自动创建表的文件夹, 不会递归处理，需要手动添加子文件夹
 PRIORITY = [] # 优先创建表的model列表，用于_sort函数
 
 # 把file_paths中的preference_list值排到前面来,应对自动创建数据库表时的外键依赖
