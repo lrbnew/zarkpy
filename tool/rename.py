@@ -5,7 +5,7 @@
 import os
 import sys
 
-RENAME_FILES = ['conf/nginx/exp', 'conf/nginx/master', 'doc/sql/init_database.sql', 'tool/auto_restart.py', 'tool/export.sh', 'tool/export_first.sh', 'tool/install.sh', 'tool/launch-exp.sh', 'tool/launch.sh', 'tool/set_git_to_share.sh', 'web/cgi/site_helper.py', 'tool/reset_port.py', 'tool/launch-local.sh', 'conf/exim4.conf', ]
+RENAME_FILES = ['conf/nginx/exp', 'conf/nginx/master', 'doc/sql/init_database.sql', 'tool/auto_restart.py', 'tool/export.sh', 'tool/export_first.sh', 'tool/install.sh', 'tool/launch-exp.sh', 'tool/launch.sh', 'tool/set_git_to_share.sh', 'web/cgi/site_helper.py', 'tool/reset_port.py', 'tool/launch-local.sh', 'conf/exim4.conf', 'web/cgi/processor/cache.py', ]
 
 if __name__=='__main__':
     if len(sys.argv) == 3:

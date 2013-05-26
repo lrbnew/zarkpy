@@ -73,7 +73,7 @@ class Image(Model):
 
     def _saveImage(self, file_path, image_value):
         sh.autoMkdir(file_path)
-        assert(not os.path.exists(file_path))
+        assert not os.path.exists(file_path), file_path  
         with open(file_path, 'w') as f:
             f.write(image_value)
 

@@ -1,5 +1,5 @@
 #coding=utf-8
-import web, glob, sys, os, copy as _copy, hashlib, subprocess, json, re, datetime
+import web, glob, sys, os, copy as _copy, hashlib, subprocess, json, re, datetime, time
 from urllib import quote as _quote, unquote as _unquote, urlencode, urlopen
 import socket, struct
 from urlparse import urlparse
@@ -21,6 +21,8 @@ config = web.Storage({
     'DB_CHARSET' : 'utf8',
     'UPLOAD_IMAGE_PATH' : '/opt/zarkpy/web/img/upload/', # 上传图片存放目录
     'UPLOAD_IMAGE_URL'  : '/img/upload/', # 访问上传图片的相对路径
+    'USER_IMAGE_PATH' : '/opt/zarkpy/web/img/user/userupload/', # 用户上传图片存放目录
+    'USER_IMAGE_URL'  : '/img/user/userupload/', # 访问用户上传图片的相对路径
     # 程序异常log,小心,如果有太多的error的话可能会导致写日志的锁等待,导致程序响应慢
     'ERROR_LOG_PATH' :  '/opt/zarkpy/log/error.log',
     'FOOT_LOG_PATH' :   '',   # 访问log, 一般情况下可以不使用
@@ -50,7 +52,6 @@ editor_config.menu = '''
             list_link: example
             list_btn_hidden: delete
             search: APIDocid title example content
-            list_tip: API路径一律以"域名+/api/"开头，请把"http://eye.sparker5.com"和"/api/"考虑为可以随时修改的变量。app中请使用POST方式，返回结果一律为json字典，更多细节请自行测试。所有支持分页的api均以page_num作为页码，若不指定page_num则仅返回第一页数据。注意，换一个没有登录后台的浏览器访问即可获得真正的json数据。所有api访问请用cookie自动处理webpy_session_id值。
         API索引
             url: /admin/api-index
         图片中心
@@ -138,11 +139,11 @@ def ctrl(name):
             for name in name.split('.'):
                 assert hasattr(controller, name), name
                 controller = getattr(controller, name)
+            CACHED_CTRLS[name] = controller()
         except:
             print 'the name is', name
             print 'the controller name is', name
             raise
-        CACHED_CTRLS[name] = controller()
         return CACHED_CTRLS[name]
 
 def getDBHelper():
@@ -260,7 +261,8 @@ def setSiteConfig(name, value):
     else:
         return conf_model.insert(dict(name=name, value=str(value)))
 
-def calcTimeIntervalSimple(late, early):
+def calcTimeIntervalSimple(late, early=None):
+    if not early: early = datetime.datetime.now()
     diff = late - early
     if diff.days > 30:
         return '以前'
@@ -374,6 +376,21 @@ def loadsJson(json_str):
 def splitAndStrip(string, chars=' '):
     return [s.strip() for s in string.split(chars) if s.strip()]
 
+def getUserSetting(key, default=''):
+    if not session.is_login:
+        return ''
+    item = model('Setting').getOneByWhere('Userid=%s and type=%s', [session.id, key])
+    return item.value if item else default
+
+# resize参考man convert，如果传入一个整数，则默认为最大宽度
+def resizeImage(url, resize):
+    from tool import image_convert
+    if isinstance(resize, int):
+        resize = '%dx>' % resize
+    env = {'resize':resize}
+    path = image_convert.convert(urlToPath(url), env)
+    return pathToUrl(path)
+
 # 伪装(登录)成另一个用户去运行一个函数
 # func是要运行的函数，params是传递给这个函数的参数
 def proxyDo(user_id, func, *params):
@@ -451,13 +468,4 @@ def requestImageFile(url):
                 imagetype=imghdr.what(None, content))) if content else None
     except:
         return None
-
-# resize参考man convert，如果传入一个整数，则默认为最大宽度
-def resizeImage(url, resize, _format='jpg'):
-    from tool import image_convert
-    if isinstance(resize, int):
-        resize = '%dx>' % resize
-    env = {'resize':resize, 'format':_format, 'profile': '*'}
-    path = image_convert.convert(urlToPath(url), env)
-    return pathToUrl(path)
 

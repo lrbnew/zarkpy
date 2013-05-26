@@ -70,8 +70,10 @@ class TestCascade(unittest.TestCase):
         # 插入一张图片, 并关联data_id为Userid
         image_data = {image_model.image_key: test_image_data, 'data_id': id1}
         id2 = image_model.insert(image_data)
+        id3 = image_model.insert(image_data)
         # 删除user
         user_model = sh.model('User', decorator)
         user_model.delete(id1)
         # 图片数据也被删除
         self.assertIsNone(image_model.get(id2))
+        self.assertIsNone(image_model.get(id3))

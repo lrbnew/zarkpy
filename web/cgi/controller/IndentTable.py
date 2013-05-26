@@ -8,7 +8,7 @@ class IndentTable:
 
     # 根据config返回递归的二元组list
     def indent(self, config):
-        assert isinstance(config, str), u'config必须是一个字符串缩进表'
+        assert isinstance(config, (str, unicode)), u'config必须是一个字符串缩进表'
         queue = []
         ret_list = []
         for l in config.replace('\r','').split('\n'):

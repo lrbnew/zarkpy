@@ -58,7 +58,7 @@ $ show_image = 'Imageid' in column_names and 'Imageid' not in hidden and (not on
 
                 $if name in mc.list_link:
                     <!--显示连接-->
-                    <a href="$value" class="text-info" >$value</a>
+                    <a href="$value" class="text-info" target="_blank"  >$value</a>
                 $elif ct.type == 'text': 
                     <pre>$value</pre>
                 $else:
@@ -72,11 +72,13 @@ $ show_image = 'Imageid' in column_names and 'Imageid' not in hidden and (not on
         <!--操作按钮区域-->
         <br/>
         <div class="btn-group" >
-            <a class="btn" href="/admin/model/$model_name/edit/$item.id" >编辑</a>
+            $if 'edit' not in mc.list_btn_hidden:
+                <a class="btn" href="/admin/model/$model_name/edit/$item.id" >编辑</a>
             $if mc.list_view:
                 <a class="btn" href="$(mc.list_view.replace('{$id}', str(item.id)))" target="_blank" >查看</a>
         </div>
-        <a class="btn btn-danger" href="/admin/delete?model_id=$item.id&model_name=$model_name" fx="confirm[msg=确定删除 ID: $item.id ?]">删除</a>
+        $if 'delete' not in mc.list_btn_hidden:
+            <a class="btn btn-danger" href="/admin/delete?model_id=$item.id&model_name=$model_name" fx="confirm[msg=确定删除 ID: $item.id ?]">删除</a>
         <br/>
         <br/>
 

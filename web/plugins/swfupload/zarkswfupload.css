@@ -1,0 +1,70 @@
+#swfupload_thumbnails img{
+    height:110px; max-height:110px; min-height:110px;
+    _height:expression(this.scrollHeight > 110 ? "110px" : (this.scrollHeight < 1? "1px" : "auto"));
+}
+
+#swfupload_progress_container .progressWrapper {
+	width: 357px;
+	overflow: hidden;
+}
+
+#swfupload_progress_container .progressContainer {
+	margin: 5px;
+	overflow: hidden;
+}
+#swfupload_progress_container .progressName {
+	font-size: 8pt;
+	font-weight: 700;
+	color: #555;
+	width: 323px;
+	height: 14px;
+	text-align: left;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+#swfupload_progress_container .progressBarInProgress,
+#swfupload_progress_container .progressBarComplete,
+#swfupload_progress_container .progressBarError {
+	font-size: 0;
+	width: 0%;
+	height: 2px;
+	background-color: blue;
+	margin-top: 2px;
+}
+
+#swfupload_progress_container .progressBarComplete {
+	width: 100%;
+	background-color: green;
+	visibility: hidden;
+}
+
+#swfupload_progress_container .progressBarError {
+	width: 100%;
+	background-color: red;
+	visibility: hidden;
+}
+
+#swfupload_progress_container .progressBarStatus {
+	margin-top: 2px;
+	width: 337px;
+	font-size: 7pt;
+	font-family: Arial;
+	text-align: left;
+	white-space: nowrap;
+}
+
+#swfupload_progress_container a.progressCancel {
+	font-size: 0;
+	display: block;
+	height: 14px;
+	width: 14px;
+	background-image: url(../images/cancelbutton.gif);
+	background-repeat: no-repeat;
+	background-position: -14px 0px;
+	float: right;
+}
+
+#swfupload_progress_container a.progressCancel:hover {
+	background-position: 0px 0px;
+}

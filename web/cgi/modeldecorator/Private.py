@@ -23,6 +23,8 @@ import site_helper as sh
 # 注意，若要在已有表上添加Private装饰，请先处理好所有已有数据的Userid和private_id的值
 # 最后，记得添加类似索引: unique key  (Userid, private_id)
 
+# 警告: 如果同时与Pagination装饰一起使用，那么必须放在Pagination的上面，否则分页页码不对
+
 class Private(Decorator):
     ''' decorator = [
         ('Private', dict(user_id_key='Userid', primary_key='private_id', use_private=True) ),

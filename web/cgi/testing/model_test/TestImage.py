@@ -21,7 +21,8 @@ class TestImage(unittest.TestCase):
     def test_insert_savesuccess(self):
         image_modle = sh.model('Image')
         image_model.use_convert = False # 不改变图片
-        data = sh.storage({'data_name': 'User', 'data_id': 1, image_model.image_key: test_image_data})
+        data = sh.storage({'data_name': 'User', 'data_id': 1,
+            image_model.image_key: test_image_data})
         id = image_model.insert(data)
         item = image_model.get(id)
         # 访问路径以sh.config.UPLOAD_IMAGE_URL开头

@@ -8,9 +8,11 @@ import site_helper as sh
 # 不要让data中的值优先于自动记录值，以免作弊
 
 class RecordRequestInfo(Decorator):
-    ''' decorator = [
+    '''
+    decorator = [
         ('RecordRequestInfo', dict(ip='ip', user_agent='HTTP_USER_AGENT', referrer='HTTP_REFERER') ),
-    ] '''
+    ]
+    '''
 
     def insert(self, data):
         return self.model.insert(self.__writeInfo(data))
@@ -21,7 +23,6 @@ class RecordRequestInfo(Decorator):
     def __writeInfo(self, data):
         data = sh.copy(data)
         for key, value in self.arguments.items():
-            assert not data.get(key, None), u'不应该显示给出%s，小心作弊' % key
             if sh.getEnv(value, None):
                 data[key] = sh.getEnv(value)
             elif sh.session.get(value, None):

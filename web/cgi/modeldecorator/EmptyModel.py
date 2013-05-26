@@ -19,5 +19,8 @@ class EmptyModel(Decorator):
     # 获得一个empty数据
     def getEmptyData(self):
         data = sh.storage([(k, '') for k in self.model.column_names])
+        for name, ct in self.getColumnTypes().items():
+            if isinstance(ct, dict) and ct.has_key('default'):
+                data[name] = ct.default
         data['__is_empty'] = True
         return data

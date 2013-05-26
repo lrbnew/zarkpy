@@ -6,8 +6,8 @@
     2 以及对应的访问路径是否都已加入TEST_URL列表？
     若为否,将可能导致您本地的数据丢失 '''
 
-TEST_PATH = ['UPLOAD_IMAGE_PATH']
-TEST_URL  = ['UPLOAD_IMAGE_URL']
+TEST_PATH = ['UPLOAD_IMAGE_PATH', 'USER_IMAGE_PATH']
+TEST_URL  = ['UPLOAD_IMAGE_URL', 'USER_IMAGE_URL']
 
 assert __name__ == "__main__", u'test.py只能运行,切勿导入,以免因不小心操作导致数据丢失'
 import os, re, sys

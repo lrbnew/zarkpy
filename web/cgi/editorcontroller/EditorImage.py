@@ -21,7 +21,7 @@ class EditorImage:
         <head>
             <title>insertcallback</title>
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-            <script type="text/javascript" src="/plugins/jquery-plugins/jquery-1.3.2.js"></script>
+            <script type="text/javascript" src="/plugins/jquery-plugins/jquery-1.7.2.js"></script>
             <script type="text/javascript" src="/plugins/jquery-plugins/tiny_mce/tiny_mce_popup.js"></script>
             <script type="text/javascript" src="/plugins/jquery-plugins/tiny_mce/plugins/sparker5imagemanager/js/dialog.js"></script>
             <script>

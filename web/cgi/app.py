@@ -51,7 +51,10 @@ urls = (
 '/api/update','api.Update', # api/Update.py
 '/api/delete','api.Delete', # api/Delete.py
 '/api/user/register','api.user.Register', # api/user/Register.py
+'/api/user/login','api.user.Login', # api/user/Login.py
+'/api/user/logout','api.user.Login', # api/user/Login.py
 '/api/user/profile','api.user.Profile', # api/user/Profile.py
+'/api/user-image','api.UserImage', # api/UserImage.py
 )
 
 # init app
@@ -106,10 +109,12 @@ initRender()
 
 import processor
 def addProcessor():
+    # 上面的先运行
     app.add_processor(processor.profiler.profiler)
     app.add_processor(processor.auto_login.loginByCookie) # 应该放到validate的前面
     app.add_processor(processor.validate.validate)
     app.add_processor(processor.print_api.printDict)
+    app.add_processor(processor.file_version.appendVersionNum)
 
 # 仅headers processor用于测试环境
 if not sh.config.IS_TEST:

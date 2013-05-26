@@ -3,6 +3,9 @@ import site_helper as sh
 
 class Profile:
 
+    def GET(self):
+        return self.POST()
+
     def POST(self):
         inputs = sh.inputs()
 

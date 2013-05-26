@@ -14,7 +14,12 @@ class TestEmptyModel(unittest.TestCase):
     def test_noneToEmpty(self):
         item = user_model.noneToEmpty(None)
         # 所有出现在column_names中的字段都为''
-        self.assertTrue(all([item.get(k) == '' for k in user_model.column_names]))
+        for name, ct in user_model.getColumnTypes().items():
+            if name[0] != '_':
+                if ct.has_key('default'):
+                    self.assertEqual(item.get(name), ct.default)
+                else:
+                    self.assertEqual(item.get(name), '')
         # 可以通过__is_empty来判断是否为空数据
         self.assertTrue(item.get('__is_empty') is True)
         # noneToEmpty也可以传入data列表, 只有is None时才返回Empty
@@ -26,5 +31,10 @@ class TestEmptyModel(unittest.TestCase):
     # 可以通过getEmptyData直接得到一个Empty
     def test_getEmptyData(self):
         item = user_model.getEmptyData()
-        self.assertTrue(all([item.get(k) == '' for k in user_model.column_names]))
+        for name, ct in user_model.getColumnTypes().items():
+            if name[0] != '_':
+                if ct.has_key('default'):
+                    self.assertEqual(item.get(name), ct.default)
+                else:
+                    self.assertEqual(item.get(name), '')
         self.assertTrue(item.get('__is_empty') is True)
