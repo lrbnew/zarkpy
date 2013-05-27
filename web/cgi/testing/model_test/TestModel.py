@@ -75,7 +75,7 @@ class TestModel(unittest.TestCase):
 
     def test_getOneByWhere(self):
         id1 = db.insert('insert into Image (data_name, data_id) values (%s, %s)', ('test_image', 123))
-        item = image_model.getOneByWhere('data_name=%s and data_id=%s', ('test_image', 123))
+        item = image_model.getOneByWhere('data_name=%s and data_id=%s', 'test_image', 123)
         self.assertEqual(id1, item.id)
 
     # 分别对传入all函数的不同env进行测试
@@ -83,7 +83,7 @@ class TestModel(unittest.TestCase):
         # 测试where
         id1 = db.insert('insert into Image (data_name, data_id) values (%s, %s)', ('test_image', 123))
         env = sh.storage()
-        env.where = ['data_name=%s and data_id=%s', ('test_image', 123)]
+        env.where = ['data_name=%s and data_id=%s', 'test_image', 123]
         self.assertEqual(image_model.all(env)[0].id, id1)
 
         # 测试where + select
@@ -106,7 +106,7 @@ class TestModel(unittest.TestCase):
 
         # 测试distinct
         id3 = db.insert('insert into Image (data_name, data_id) values (%s, %s)', ('image2', 789))
-        env = sh.storage(dict(distinct=True, where=['data_name=%s', ['image2']]))
+        env = sh.storage(dict(distinct=True, where=['data_name=%s', 'image2']))
         items = image_model.all(env)
         self.assertTrue(len(items) == 2)
 
@@ -115,7 +115,7 @@ class TestModel(unittest.TestCase):
         env = sh.storage()
         env['from'] = 'User u join Image i on u.Imageid=i.Imageid'
         env.select = 'u.email email, i.data_id data_id'
-        env.where = ['email=%s', ['sdjllyh@gmail.com']]
+        env.where = ['email=%s', 'sdjllyh@gmail.com']
         items = image_model.all(env)
         self.assertTrue(len(items) == 1)
         self.assertEqual(items[0].email, 'sdjllyh@gmail.com')
@@ -125,7 +125,7 @@ class TestModel(unittest.TestCase):
         db.insert('insert into Image (data_name, data_id) values (%s, %s)', ('test_image', 123))
         db.insert('insert into Image (data_name, data_id) values (%s, %s)', ('test_image', 123))
         db.insert('insert into Image (data_name, data_id) values (%s, %s)', ('test_image', 456))
-        env = sh.storage(dict(where=['data_id=%s', [123]]))
+        env = sh.storage(dict(where=['data_id=%s', 123]))
         self.assertEqual(image_model.getCount(env), len(image_model.all(env)))
 
     def test_getColumnTypes(self):

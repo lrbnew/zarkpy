@@ -36,7 +36,7 @@ def _operateSetting(argv, usage, actions):
         action, name, value = argv[1:]
         model = sh.model('SiteConfig')
 
-        exists = model.getOneByWhere('name=%s', [name])
+        exists = model.getOneByWhere('name=%s', name)
 
         if action == 'get':
             if exists:

@@ -24,10 +24,10 @@ class OAuth2(Model):
         return Model.insert(self, data)
 
     def getByUid(self, uid):
-        return self.getOneByWhere('uid=%s', [uid])
+        return self.getOneByWhere('uid=%s', uid)
 
     def getByAccessToken(self, access_token):
-        return self.getOneByWhere('access_token=%s', [access_token])
+        return self.getOneByWhere('access_token=%s', access_token)
 
     # 更新uid的token及其有效期
     def refreshToken(self, uid, access_token, access_expires):

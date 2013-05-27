@@ -8,7 +8,7 @@ def loginByCookie(handler):
         email = web.cookies().get('email', '')
         md5password = web.cookies().get('md5password', '')
         if email and md5password:
-            user = sh.model('User').getOneByWhere('email=%s and password=%s', [email, md5password])
+            user = sh.model('User').getOneByWhere('email=%s and password=%s', email, md5password)
             if user:
                 sh.ctrl('User').login(user)
     return handler()

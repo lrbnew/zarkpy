@@ -63,7 +63,7 @@ class TestPrivate(AppTest.AppTest):
         self.assertEqual(self.proxyDo(model.get, new_id).title, 'a3`')
         # 使用getOneByWhere不需要显示指出Userid
         curr_user_id = self.getUserid()
-        item_a3 = sh.proxyDo(curr_user_id, model.getOneByWhere, 'title=%s', ['a3`'])
+        item_a3 = sh.proxyDo(curr_user_id, model.getOneByWhere, 'title=%s', 'a3`')
         self.assertEqual(item_a3.id, new_id)
 
         # 用id删除user1的所有数据

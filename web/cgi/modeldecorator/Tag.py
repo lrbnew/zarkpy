@@ -73,7 +73,7 @@ class Tag(Decorator):
 
     # 获得某个数据的tag
     def getTags(self, item_id):
-        return [t.name for t in self.__getTagModel().all({'where': ('data_name=%s and data_id=%s', [self._getModelTableName(), item_id])})]
+        return [t.name for t in self.__getTagModel().all({'where': ['data_name=%s and data_id=%s', self._getModelTableName(), item_id]})]
 
     # 判断某个数据是否有某个tag
     def hasTag(self, item_id, tag):
@@ -114,7 +114,7 @@ class Tag(Decorator):
 
     def __getExistsTag(self, item_id, tag):
         assert(isinstance(tag, str) and len(tag.strip()) > 0)
-        return self.__getTagModel().getOneByWhere('data_name=%s and data_id=%s and name=%s', [self._getModelTableName(), item_id, tag.strip()])
+        return self.__getTagModel().getOneByWhere('data_name=%s and data_id=%s and name=%s', self._getModelTableName(), item_id, tag.strip())
 
     def __insertTag(self, item_id, tag):
         return self.__getTagModel().insert(dict( data_name = self._getModelTableName(), data_id = item_id, name = tag ))

@@ -68,12 +68,12 @@ class Private(Decorator):
         return self._changePrimaryKey(self.model.get(real_id)) if real_id else None
     # def gets? 不需要重写gets函数，因为gets继承了get所做的事情
 
-    def getOneByWhere(self, where, argv=[]):
+    def getOneByWhere(self, where, *argv):
         uk = self.arguments.user_id_key
         assert re.search(r'\b%s\b' % uk, where) is None, u'你不想让getOneByWhere为where自动添加Userid? 请使用all函数和_ignore_private_uk=True'
         where = '(%s) and %s=%%s' % (where, uk)
-        argv = argv + [sh.session.id]
-        return self._changePrimaryKey(self.model.getOneByWhere(where, argv))
+        argv = list(argv) + [sh.session.id]
+        return self._changePrimaryKey(self.model.getOneByWhere(where, *argv))
 
     def all(self, env=None):
         if self._usePrivate(env):
@@ -120,9 +120,9 @@ class Private(Decorator):
             if env.has_key('where'):
                 assert re.search(r'\b%s\b' % uk, env['where'][0]) is None, u"想自定义Userid? 请使用env['_ignore_private_uk']=True%s" + env['where'][0] 
                 env['where'][0] = '(%s) and %s=%%s' % (env['where'][0], uk)
-                env['where'][1].append(user_id)
+                env['where'].append(user_id)
             else:
-                env['where'] = (uk+'=%s', [user_id])
+                env['where'] = [uk+'=%s', user_id]
         return env
 
     def _changePrimaryKey(self, datas):

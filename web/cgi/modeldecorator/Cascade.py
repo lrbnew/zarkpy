@@ -39,7 +39,7 @@ class Cascade(Decorator):
             assert(all([len(x)==2 for x in self.arguments.delete]))
             for other_table, attr in self.arguments.delete:
                 other_model = sh.model(other_table)
-                for item in other_model.all(dict(where=[attr+'=%s', [item_id]])):
+                for item in other_model.all(dict(where=[attr+'=%s', item_id])):
                     other_model.delete(item.id)
         return affected
 

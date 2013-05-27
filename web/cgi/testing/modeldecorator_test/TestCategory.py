@@ -112,7 +112,7 @@ class TestCategory(unittest.TestCase):
         # 插入ForTestCategory2
         new_id = model.insert(dict(title='c++', cat='computer'))
         self.assertEqual(model.get(new_id).cat, 'computer')
-        self.assertEqual(model.getOneByWhere('title=%s', ['c++']).cat, 'computer')
+        self.assertEqual(model.getOneByWhere('title=%s', 'c++').cat, 'computer')
         self.assertEqual(model.all()[0].cat, 'computer')
         self.assertEqual(model.gets([new_id])[0].cat, 'computer')
         

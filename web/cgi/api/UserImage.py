@@ -19,7 +19,7 @@ class UserImage:
 
         if inputs.action == 'getChooseImageHtml':
             assert sh.session.is_login
-            env = dict(paging=False, where=['deleted=%s',['no']])
+            env = dict(paging=False, where=['deleted=%s','no'])
             images = model.all(env)
             #paging = model.getPaginationHtml(env)
             paging = ''

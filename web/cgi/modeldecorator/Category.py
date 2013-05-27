@@ -32,8 +32,8 @@ class Category(Decorator):
         self._setCategoryToItem(item)
         return item
 
-    def getOneByWhere(self, where, argv=[]):
-        item = self.model.getOneByWhere(where, argv)
+    def getOneByWhere(self, where, *argv):
+        item = self.model.getOneByWhere(where, *argv)
         self._setCategoryToItem(item)
         return item
 
@@ -72,7 +72,7 @@ class Category(Decorator):
 
     # 获得model的所有分类名称
     def getAllCategory(self):
-        return [c.name for c in self.__getCatModel().all({'where': ('data_name=%s', [self._getModelTableName()])})]
+        return [c.name for c in self.__getCatModel().all({'where': ['data_name=%s', self._getModelTableName()]})]
 
     # 判断model是否已有莫个分类
     def hasCategory(self, name):
@@ -118,7 +118,7 @@ class Category(Decorator):
 
     def _getExistsCategory(self, name):
         assert(isinstance(name, (str, unicode)) and len(name.strip()) > 0)
-        return self.__getCatModel().getOneByWhere('data_name=%s and name=%s', [self._getModelTableName(), name.strip()])
+        return self.__getCatModel().getOneByWhere('data_name=%s and name=%s', self._getModelTableName(), name.strip())
 
     def __getCatModel(self):
         return sh.model(self.arguments.cat_model_name)

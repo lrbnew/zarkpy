@@ -19,7 +19,7 @@ class Setting(Model):
     ]
 
     def setValue(self, Userid, type, value):
-        exists = self.getOneByWhere('Userid=%s and type=%s', [Userid, type])
+        exists = self.getOneByWhere('Userid=%s and type=%s', Userid, type)
         if exists:
             return self.update(exists.id, {'value': value})
         else:
@@ -50,7 +50,7 @@ def _operateSetting(argv, usage, actions):
             print 'ERROR: user %s is not exists' % email
             exit(0)
 
-        exists = setting_model.getOneByWhere('Userid=%s and type=%s', [user.id, key])
+        exists = setting_model.getOneByWhere('Userid=%s and type=%s', user.id, key)
 
         if action == 'get':
             if exists:

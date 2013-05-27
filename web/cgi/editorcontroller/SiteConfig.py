@@ -14,7 +14,7 @@ class SiteConfig:
         env = sh.storage()
 
         if menu_config.get('filter', None):
-            env['where'] = ('name like %s', [menu_config['filter']])
+            env['where'] = ['name like %s', menu_config['filter']]
 
         if menu_config.get('orderby', None):
             env.orderby = model.replaceAttr(menu_config.orderby)

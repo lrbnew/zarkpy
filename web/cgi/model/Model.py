@@ -100,9 +100,9 @@ class Model:
         query = self.replaceAttr(query)
         return [ModelData(one, self) for one in self.db.fetchSome(query, argv)]
 
-    # 用例: user_model.getOneByWhere('sex=%s and age>%s', ['男', 18])
+    # 用例: user_model.getOneByWhere('sex=%s and age>%s', '男', 18)
     # getOneByWhere会调用一次self.get, 以继承get函数, 但是仅调用model的get，而不是装饰器的get
-    def getOneByWhere(self, where, argv=[]):
+    def getOneByWhere(self, where, *argv):
         query  = self.replaceAttr('select * from {$table_name} where %s' % where)
         exists = self.db.fetchOne(query, argv)
         return ModelData(self.get(exists.get(self.primary_key)), self) if exists else None
@@ -300,11 +300,10 @@ class Model:
             query += 'from '+ self.table_name + ' '
 
         if env.get('where', None) != None:
-            assert isinstance(env['where'], (tuple, list)) and  len(env['where']) == 2 
-            assert isinstance(env['where'][0], str)
-            assert isinstance(env['where'][1], (tuple, list))
+            assert isinstance(env['where'], (tuple, list)) and len(env['where']) >= 1
+            assert not any(map(lambda x:isinstance(x, (tuple, list, dict, sh.storage_class)), env['where']))
             query += ' where ' + env['where'][0] + ' '
-            argv.extend(env['where'][1])
+            argv.extend(env['where'][1:])
 
         if env.get('groupby', None):
             query += ' group by '+env.get('groupby')
@@ -367,7 +366,7 @@ class ModelData(web.Storage):
                 id_key = self.get('_table_name') + 'id'
                 if self.db.isColumnExists(table_name, id_key):
                     try:
-                        return sh.model(model_name).all({'where': [id_key + '=%s', [self.id]]})
+                        return sh.model(model_name).all({'where': [id_key + '=%s', self.id]})
                     except:
                         print 'ERROR: ModelData找不到属性', key
                         raise

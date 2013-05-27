@@ -28,10 +28,10 @@ class User(ImgItem):
     validation_request = False # 为True注册时发送验证邮件, 见 ../pagecontroller/user/Register.py
 
     def getByEmail(self, email):
-        return self.getOneByWhere('email=%s',[email.lower()])
+        return self.getOneByWhere('email=%s',email.lower())
 
     def getByName(self, name):
-        return self.getOneByWhere('name=%s',[name])
+        return self.getOneByWhere('name=%s',name)
 
     def getMD5Password(self, text_password):
         return sh.toMD5(text_password)

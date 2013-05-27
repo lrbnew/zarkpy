@@ -34,6 +34,6 @@ class List:
             for query in sh.splitAndStrip(inputs.query):
                 where.append('('+ ' or '.join([c+' like %s' for c in menu_config.search]) +')')
                 argvs += ['%'+query+'%'] * len(menu_config.search)
-            env.where = (' and '.join(where), argvs)
+            env.where = [' and '.join(where)] + argvs
 
         return env

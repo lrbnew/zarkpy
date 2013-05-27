@@ -247,13 +247,13 @@ def storage(data={}):
 storage_class = web.Storage
 
 def getSiteConfig(name, default=''):
-    exists = model('SiteConfig').getOneByWhere('name=%s', [name])
+    exists = model('SiteConfig').getOneByWhere('name=%s', name)
     return exists.value.strip() if exists and exists.value.strip() else default
 
 def setSiteConfig(name, value):
     conf_model = model('SiteConfig')
     assert(name.strip())
-    exists = conf_model.getOneByWhere('name=%s', [name])
+    exists = conf_model.getOneByWhere('name=%s', name)
     if isinstance(value, unicode): value = unicodeToStr(value)
     if exists:
         conf_model.update(exists.id, dict(value=str(value)))
@@ -379,7 +379,7 @@ def splitAndStrip(string, chars=' '):
 def getUserSetting(key, default=''):
     if not session.is_login:
         return ''
-    item = model('Setting').getOneByWhere('Userid=%s and type=%s', [session.id, key])
+    item = model('Setting').getOneByWhere('Userid=%s and type=%s', session.id, key)
     return item.value if item else default
 
 # resize参考man convert，如果传入一个整数，则默认为最大宽度

@@ -23,7 +23,7 @@ class ForgetPassword:
             assert(6 <= len(inputs.password) < 60)
             user_model = sh.model('User')
             code_model = sh.model('UserForgetPassword')
-            exists = code_model.getOneByWhere('Userid=%s and code=%s', [inputs.Userid, inputs.code])
+            exists = code_model.getOneByWhere('Userid=%s and code=%s', inputs.Userid, inputs.code)
             if not exists:
                 return sh.alert('链接无效,请重新申请')
             if (datetime.now() - exists.created).seconds > code_model.expires:

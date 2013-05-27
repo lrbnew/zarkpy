@@ -12,7 +12,7 @@ class Validate:
         assert(inputs.has_key('code'))
 
         model = sh.model('UserValidation')
-        exists = model.getOneByWhere('Userid=%s and code=%s', [inputs.Userid, inputs.code])
+        exists = model.getOneByWhere('Userid=%s and code=%s', inputs.Userid, inputs.code)
 
         if exists:
             sh.model('User').update(inputs.Userid, dict(activated='yes'))

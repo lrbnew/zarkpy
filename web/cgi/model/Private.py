@@ -8,11 +8,11 @@ class Private(Model):
     column_names = ['data_name', 'user_id', 'private_id', ]
 
     def getNextPrivateid(self, data_name, user_id):
-        exists = self.getOneByWhere('data_name=%s and user_id=%s', [data_name, user_id])
+        exists = self.getOneByWhere('data_name=%s and user_id=%s', data_name, user_id)
         return exists.private_id + 1 if exists else 1
 
     def incPrivateid(self, data_name, user_id):
-        exists = self.getOneByWhere('data_name=%s and user_id=%s', [data_name, user_id])
+        exists = self.getOneByWhere('data_name=%s and user_id=%s', data_name, user_id)
         if not exists:
             self.insert(dict(data_name=data_name, user_id=user_id, private_id=1))
             return 1
@@ -21,7 +21,7 @@ class Private(Model):
             return exists.private_id + 1
 
     def resetPrivateid(self, data_name, user_id):
-        exists = self.getOneByWhere('data_name=%s and user_id=%s', [data_name, user_id])
+        exists = self.getOneByWhere('data_name=%s and user_id=%s', data_name, user_id)
         return self.delete(exists.id) > 0 if exists else False
 
     table_template = \

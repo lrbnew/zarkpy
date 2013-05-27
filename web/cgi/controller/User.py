@@ -9,7 +9,7 @@ class User:
 
     # 验证密码是否正确
     def validate(self, email, password):
-        user = sh.model(self.model_name).getOneByWhere('email=%s', [email.strip().lower()])
+        user = sh.model(self.model_name).getOneByWhere('email=%s', email.strip().lower())
         return user and self.__validatePassword(user.password, password)
 
     def login(self, user, remember_me=False, ignore_cookie=False, inc_count=True):
