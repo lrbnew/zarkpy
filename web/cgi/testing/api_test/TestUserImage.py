@@ -43,4 +43,3 @@ class TestUserImage(AppTest.AppTest):
         # 使用delete删除图片
         self.get(api_url, dict(action='delete', UserImageid=new_img_id))
         self.assertIsNone(self.proxyDo(ui_model.get, new_img_id))
-
