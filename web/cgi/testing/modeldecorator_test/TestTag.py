@@ -26,6 +26,9 @@ class TestTag(unittest.TestCase):
         model.update(new_id, dict(tags='fast \t  power   easy'))
         # 原有标签被替换
         self.assertEqual(set(model.get(new_id).tags), set(['fast', 'power', 'easy']))
+        # 更新时不指定tags, 标签被保留
+        model.update(new_id, dict(title='new title'))
+        self.assertEqual(set(model.get(new_id).tags), set(['fast', 'power', 'easy']))
         # 使用空字符串更新tags, 标签被清空
         model.update(new_id, dict(tags=''))
         self.assertEqual(model.get(new_id).tags, [])

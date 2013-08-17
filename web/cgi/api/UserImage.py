@@ -10,23 +10,12 @@ class UserImage:
         assert inputs.has_key('action')
         model = sh.model('UserImage')
         
-        # assert
-        if inputs.action not in ['getChooseImageHtml']:
-            assert sh.session.is_login
-            assert inputs.get('UserImageid', None)
-            exists = model.get(inputs.UserImageid)
-            assert exists and exists.Userid == sh.session.id
+        assert sh.session.is_login
+        assert inputs.get('UserImageid', None)
+        exists = model.get(inputs.UserImageid)
+        assert exists and exists.Userid == sh.session.id
 
-        if inputs.action == 'getChooseImageHtml':
-            assert sh.session.is_login
-            env = dict(paging=False, where=['deleted=%s','no'])
-            images = model.all(env)
-            #paging = model.getPaginationHtml(env)
-            paging = ''
-            html = str(sh.subpage.ChooseImage(images, paging))
-            return sh.toJsonp({'success': True, 'html': html, 'Userid': sh.session.id})
-
-        elif inputs.action == 'delete':
+        if inputs.action == 'delete':
             model.update(inputs.UserImageid, {'deleted': 'yes'})
             return sh.toJsonp({'success': True})
 

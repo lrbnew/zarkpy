@@ -1,7 +1,6 @@
 #coding=utf-8
-import site_helper as sh
-
 # ../../page/user/Login.html
+import site_helper as sh
 
 class Login:
 
@@ -40,4 +39,4 @@ class Login:
             elif sh.inputs().get('referer', None):
                 return sh.redirect(sh.inputs().get('referer', None))
             else:
-                return sh.alert('登录成功. 欢迎回来!')
+                return sh.redirect('/')

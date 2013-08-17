@@ -24,7 +24,6 @@ $ show_image = ('Imageid' in column_names and column_types['Imageid'].type == 'i
         $if item and action=='update':
             <input type="hidden" name="model_id" value="$item.id" />
 
-                
         <!--如果有图片单张图片，图片显示在上边-->
         $if show_image:
             $if item and action == 'update' and item.image:
@@ -104,6 +103,16 @@ $ show_image = ('Imageid' in column_names and column_types['Imageid'].type == 'i
             <!--====== End ======-->
 
             <br/>
+
+        <!--检查是否使用了Tag, 编辑Tag-->
+        $if hasattr(sh.model(model_name), 'getTags'):
+            <label>Tag：</label>
+            <input type="text" name="tags" value="$(' '.join(item.tags) if item else '')" />
+
+        <!--检查是否使用了Category, 编辑Category-->
+        $if hasattr(sh.model(model_name), 'getAllCategory'):
+            <label>分类：</label>
+            <input type="text" name="category_name" value="$(item.category_name if item else '')" />
 
     </div><!--End 上半部分编辑区-->
     <br/>

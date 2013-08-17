@@ -40,12 +40,14 @@ class Tag(Decorator):
     # 插入数据并自动插入tag
     def insert(self, data):
         new_id = self.model.insert(data)
-        self.__autoOperateTags(new_id, data.get(self.arguments.data_key, ''))
+        if data.has_key(self.arguments.data_key):
+            self.__autoOperateTags(new_id, data.get(self.arguments.data_key))
         return new_id
 
     # 更新数据并自动插入tag
     def update(self, item_id, data):
-        self.__autoOperateTags(item_id, data.get(self.arguments.data_key, ''))
+        if data.has_key(self.arguments.data_key):
+            self.__autoOperateTags(item_id, data.get(self.arguments.data_key))
         return self.model.update(item_id, data)
 
     # 删除数据并自动删除tag
@@ -61,12 +63,12 @@ class Tag(Decorator):
 
     # 为某个数据添加多个tag
     def addTags(self, item_id, tags):
-        assert(isinstance(tags, list) or isinstance(tags, tuple))
+        assert isinstance(tags, (list, tuple))
         return [self.addTag(item_id, tag) for tag in tags if not self.__getExistsTag(item_id, tag)]
 
     # 重置某个数据的tag
     def resetTags(self, item_id, tags):
-        assert(isinstance(tags, list) or isinstance(tags, tuple))
+        assert isinstance(tags, (list, tuple))
         self.__clearTags(item_id)
         for tag in tags:
             self.addTag(item_id, tag)
@@ -86,6 +88,7 @@ class Tag(Decorator):
 
     # 根据tag名称获得所有打了此tag的数据
     def getsByTag(self, tag):
+        tag = sh.unicodeToStr(tag)
         assert(isinstance(tag, str) and len(tag.strip()) > 0)
         tag_model = self.__getTagModel()
         query = tag_model.replaceAttr('select data_id from {$table_name} where data_name=%s and name=%s')
@@ -95,6 +98,7 @@ class Tag(Decorator):
         return items
 
     def __autoOperateTags(self, item_id, tags):
+        tags = sh.unicodeToStr(tags)
         if isinstance(tags, str):
             tags = [t.strip() for t in tags.split(self.arguments.split_char) if t.strip()]
         if self.arguments.auto_operate == 'reset':
@@ -113,6 +117,7 @@ class Tag(Decorator):
         return self.__getTagModel().delete(tag_id)
 
     def __getExistsTag(self, item_id, tag):
+        tag = sh.unicodeToStr(tag)
         assert(isinstance(tag, str) and len(tag.strip()) > 0)
         return self.__getTagModel().getOneByWhere('data_name=%s and data_id=%s and name=%s', self._getModelTableName(), item_id, tag.strip())
 

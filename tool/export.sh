@@ -31,6 +31,7 @@ if [ "${rev1}"="master" ]; then
     sed -i "s/#\s*web.config.debug\s*=\s*False/web.config.debug = False/"  /opt/zarkpy/web/cgi/app.py
     sed -i "s/'HOST_NAME'\s*:\s*'http:\/\/me.zarkpy.com'/'HOST_NAME' : 'http:\/\/zarkpy.com'/"  /opt/zarkpy/web/cgi/site_helper.py
     chown www-data:www-data -R /opt/zarkpy
+    python /opt/zarkpy/web/cgi/processor/file_version.py inc
     /opt/zarkpy/tool/launch.sh restart
 
 elif [ "${rev1}"="exp" ]; then

@@ -6,6 +6,15 @@ $# ../editorcontroller/SiteConfig.py
     <h3 class="info_inline">$(mc.title if mc.title else mc['_title'][1])</h3>
     <!--添加新项按钮-->
     <a class="btn btn-success info_inline btn_else" fx="toggle[target=#new_config;toggleHtml=收起;]">添加配置+</a>
+    $if mc.where:
+        <div class="input-append">
+            $ _c = 'btn-info' if sh.getUrlParams().get('where', '') == '' else ''
+            <a class="btn $_c" href="?" >全部</a>
+
+            $for w in mc.where:
+                $ _c = 'btn-info' if sh.unquote(sh.getUrlParams().get('where', '')) == sh.unquote(w[1]) else ''
+                <a class="btn $_c" href="?where=$sh.quote(w[1])" >$w[0]</a>
+        </div>
 </div>
 
 $if mc.tip:

@@ -62,6 +62,14 @@ editor_config.menu = '''
             list_tip: 可以用浏览器的"ctrl+f"或"command+f"搜索
 '''
 
+# 你可能需要在后台中设置一些动态配置, 先在editor_config.menu使用%s表示动态的部分
+# 然后再在这里拼接, 每次打开后台任意页面时都会调用此函数
+def getEditorMenu():
+    if not config.IS_TEST:
+        return editor_config.menu # 在这里替换掉%s吧
+    else:
+        return editor_config.menu
+
 # 初始化一些重要变量
 web.config.session_parameters['timeout']    = config.SESSION_EXPIRES
 web.config.session_parameters['secret_key'] = config.SECRET_KEY
@@ -167,6 +175,10 @@ def getEnv(key, default=''):
 def unicodeToStr(s):
     assert(type(s) in [unicode, str])
     return s.encode('utf-8', 'ignore') if isinstance(s, unicode) else s
+
+def strToUnicode(s):
+    assert(type(s) in [unicode, str])
+    return unicode(s, 'utf-8', 'ignore') if isinstance(s, str) else s
 
 def quote(*l):
     return tuple(_quote(unicodeToStr(s)) for s in l) if len(l) != 1 else _quote(unicodeToStr(l[0]))
@@ -352,6 +364,10 @@ def inputs():
         return inputs
     return __processImageFile(web.input(image_file={}))
 
+# 得到post的data部分
+def data():
+    return web.data()
+
 def toJsonp(data):
     def __jsonEnabled(data):
         json_enable = [int, long, str, bool, list, dict, web.utils.Storage]
@@ -468,4 +484,39 @@ def requestImageFile(url):
                 imagetype=imghdr.what(None, content))) if content else None
     except:
         return None
+
+# 获得swfupload flash传来的图片数据
+def getSwfUploadImageFile(known_types = ['jpg', 'jpeg', 'png', 'gif', 'pjpeg', ]):
+    i = inputs()
+    image_type = imghdr.what(None, i['Filedata'])
+
+    file_name = i['Filename'].partition('.')[0]
+    if '.' in file_name:
+        file_name = file_name.partition('.')[2]
+    assert image_type in known_types
+
+    return storage({'filename':file_name, 'value':i['Filedata'], 'imagetype': image_type})
+
+# 对all函数的where添加更多的and条件, w表示新条件, *p表示新参数
+def appendWhere(where, w, *p):
+    if where:
+        ret_where = copy(where)
+        ret_where[0] = '(%s) and (%s)' % (where[0], w)
+        ret_where += list(p)
+        return ret_where
+    else:
+        return [w] + list(p)
+
+# 把本地图片转为inputs需要的格式, 常用于测试
+def createImageFile(path):
+    assert os.path.exists(path)
+    value = open(path).read()
+    return storage(dict(filename=path, value=value, imagetype=imghdr.what(None, value)))
+
+# 根据data字典替换string中{$abc}的串
+def replaceValue(string, data, default=''):
+    ret = string
+    for variable in re.compile('{\$\w+}').findall(string):
+        ret = ret.replace(variable, str(getattr(data, variable[2:-1], default)))
+    return ret
 

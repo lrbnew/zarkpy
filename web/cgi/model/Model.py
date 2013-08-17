@@ -103,6 +103,7 @@ class Model:
     # 用例: user_model.getOneByWhere('sex=%s and age>%s', '男', 18)
     # getOneByWhere会调用一次self.get, 以继承get函数, 但是仅调用model的get，而不是装饰器的get
     def getOneByWhere(self, where, *argv):
+        assert not any(map(lambda x:isinstance(x, (tuple, list, dict, sh.storage_class)), argv))
         query  = self.replaceAttr('select * from {$table_name} where %s' % where)
         exists = self.db.fetchOne(query, argv)
         return ModelData(self.get(exists.get(self.primary_key)), self) if exists else None

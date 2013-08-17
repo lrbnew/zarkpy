@@ -46,13 +46,13 @@ class User:
     def sendForgetPasswordEmail(self, user):
         code = self.__getValidationCode(user)
         sh.model('UserForgetPassword').replaceInsert(dict(Userid=user.id, code=code))
-        mail_text = '%s您好，请申请了密码重置,此链接将在24小时后过期\n%s/accounts/forget-password?Userid=%d&code=%s\n若非您本人操作，请忽略本邮件' % (user.name, sh.config.HOST_NAME, user.id, code)
+        mail_text = '%s您好，您申请了密码重置,此链接将在24小时后过期\n\n%s/accounts/forget-password?Userid=%d&code=%s\n\n若非您本人操作，请忽略本邮件即可。' % (user.name, sh.config.HOST_NAME, user.id, code)
         sh.sendMail(user.email, '重置您的密码', mail_text)
 
     # 检查新注册的用户数据是否正确，不正确时返回错误信息
     def checkNewUser(self, data):
         email = data.get('email', '').strip()
-        name = data.get('name', '').strip()
+        name = sh.strToUnicode(data.get('name', '').strip())
         password = data.get('password', '')
         model = sh.model(self.model_name)
 

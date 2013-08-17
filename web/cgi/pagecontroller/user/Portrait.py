@@ -1,9 +1,8 @@
 #coding=utf-8
+# ../../page/user/Portrait.html
+# 上传与裁剪头像
 import os
 import site_helper as sh
-
-''' 上传与裁剪头像 '''
-# ../../page/user/Portrait.html
 
 class Portrait:
 
@@ -17,7 +16,6 @@ class Portrait:
     def POST(self):
         if not sh.session.is_login:
             return sh.redirectToLogin()
-        image_model = sh.model('Image')
         user_model = sh.model('User')
         user = user_model.get(sh.session.id)
 
@@ -25,11 +23,8 @@ class Portrait:
         assert inputs.get('action', '')
 
         if inputs.action == 'upload':
-            if user.image:
-                path = sh.urlToPath(user.image.url)
-                os.system('rm %s' % (path+'.crop'))
-
-            user_model.update(sh.session.id, {image_model.image_key: inputs.image_file})
+            if inputs.get('image_file', ''):
+                self.savePortrait(sh.session.id, inputs.image_file)
             return sh.redirect('/accounts/portrait')
 
         elif inputs.action == 'crop':
@@ -58,4 +53,26 @@ class Portrait:
             path = sh.urlToPath(user.image.url)
             os.system('convert %s -crop %s %s' % (path, region, path+'.crop'))
             user_model.update(sh.session.id, {'crop': crop})
+
+            # 删除以前裁剪图片的各种尺寸副本
+            os.system('rm %s.crop_*' % path)
+
             return sh.redirect('/accounts')
+
+    def savePortrait(self, Userid, image_file):
+        user_model = sh.model('User')
+        user = user_model.get(Userid)
+
+        if user.image and image_file:
+            path = sh.urlToPath(user.image.url)
+            os.system('rm %s' % (path+'.crop'))
+
+        user_model.update(Userid, {sh.model('Image').image_key: image_file})
+
+        # 自动设置裁剪区域为整个图片
+        user = user_model.get(Userid) # 为了重新拿到image数据
+        size = sh.imageSize(user.image.url)
+        user_model.update(user.id, {'crop': '0 0 %d %d' % size})
+        path = sh.urlToPath(user.image.url)
+        os.system('cp %s %s' % (path, path+'.crop'))
+

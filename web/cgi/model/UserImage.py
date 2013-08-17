@@ -15,8 +15,8 @@ class UserImage(Image):
 
     decorator = [
         ('Orderby', dict(orderby='{$primary_key} desc') ),
+        ('Pagination', dict(paging_key='page_num', paging_volume=20, paging=True) ),
         ('Private', dict(user_id_key='Userid', primary_key='private_id', use_private=True) ),
-        ('Pagination', dict(paging_key='page_num', paging_volume=100, paging=True) ),
     ]
     test_decorator = decorator
 
@@ -42,6 +42,7 @@ class UserImage(Image):
             url                 varchar(100) not null default '',
             file_name           varchar(100) charset utf8 not null default '',
             deleted             enum('yes', 'no') not null default 'no',
+            created             timestamp not null default current_timestamp,
             primary key ({$table_name}id),
             key (data_name, data_id)
         )ENGINE=InnoDB; '''

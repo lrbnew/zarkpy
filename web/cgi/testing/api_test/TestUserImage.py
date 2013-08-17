@@ -16,7 +16,7 @@ class TestUserImage(AppTest.AppTest):
     def test_postImage(self):
         my_id = self.register()
         # 因为flash不能传webpy_session_id，所以这里自己指定Userid，这是一个安全隐患!
-        data = sh.storage(dict(action = 'postImage', Userid = my_id))
+        data = sh.storage(dict(action = 'postImage', Userid = my_id, data_name='None', data_id=1))
         data.Filedata = open(test_image_path).read()
         data.Filename = 'good_image.jpg'
         # 返回结果分别表示: 成功、UserImageid、url、文件名
@@ -35,7 +35,7 @@ class TestUserImage(AppTest.AppTest):
     def test_delete(self):
         my_id = self.register()
         # 插入图片并得到UserImageid
-        data = sh.storage(dict(action = 'postImage', Userid = my_id))
+        data = sh.storage(dict(action = 'postImage', Userid = my_id, data_name='None', data_id=1))
         data.Filedata = open(test_image_path).read()
         data.Filename = 'good_image.jpg'
         new_img_id = int(self.post(api_url, data).split(';')[1])

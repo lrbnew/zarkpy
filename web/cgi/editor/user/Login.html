@@ -24,7 +24,7 @@ $def with(error_info='', email='', referer='')
 
     <!-- js -->
     <script type="text/javascript" src="/plugins/jquery-plugins/jquery-1.7.2.js"></script>
-    <script type="text/javascript" src="/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/plugins/bootstrap/js/bootstrap.js"></script>
     <script type="text/javascript" src="/plugins/zarkfx/zarkfx.js"></script>
     <script type="text/javascript" src="/js/editor/Base.js"></script>
 </head>
@@ -49,9 +49,9 @@ $def with(error_info='', email='', referer='')
                 <br/>
                 <legend>登录 Login</legend>
 
-                <input class="span2" type="text" name="email" value="$email" placeholder="邮箱" />
+                <input class="span2" type="email" name="email" value="$email" autocomplete="on" placeholder="邮箱" />
                 <br/>
-                <input class="span2" type="password" autocomplete="off" name="password" placeholder="密码" />
+                <input class="span2" type="password" autocomplete="on" name="password" placeholder="密码" />
                 <br/>
                 <br/>
 
