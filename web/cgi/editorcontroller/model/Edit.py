@@ -16,6 +16,7 @@ class Edit:
         if model_id:
             item = model.get(model_id)
             action = 'update'
+            assert item is not None
         else:
             item = None
             action = 'insert'

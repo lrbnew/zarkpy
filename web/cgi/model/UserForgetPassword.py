@@ -1,7 +1,6 @@
 #coding=utf-8
-from Model import Model
-
 # 重置用户密码的验证码
+from Model import Model
 
 class UserForgetPassword(Model):
     table_name = 'UserForgetPassword'

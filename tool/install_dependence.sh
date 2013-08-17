@@ -26,8 +26,8 @@ easy_install pip
 
 aptitude install sphinxsearch
 aptitude install imagemagick 
-aptitude install memcached 
+apt-get install memcached 
 aptitude install exim4
 aptitude install heirloom-mailx
 
-aptitude install curl vnstat vim zsh unzip dstat telnet
+aptitude install curl vnstat vim zsh unzip dstat telnet rsync

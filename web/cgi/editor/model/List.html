@@ -18,6 +18,17 @@ $# ../../editorcontroller/model/List.py
                     <a class="btn" href="?" >取消搜索</a>
             </form>
         </div>
+    <!--过滤-->
+    $if mc.where:
+        <div class="input-append">
+            $ _c = 'btn-info' if sh.getUrlParams().get('where', '') == '' else ''
+            <a class="btn $_c" href="?" >全部</a>
+
+            $for w in mc.where:
+                $ _c = 'btn-info' if sh.unquote(sh.getUrlParams().get('where', '')) == sh.unquote(w[1]) else ''
+                <a class="btn $_c" href="?where=$sh.quote(w[1])" >$w[0]</a>
+        </div>
+            
 </div>
 
 <!--页面提示-->
@@ -38,7 +49,6 @@ $if items:
                     <!--显示数据-->
                     $:subpage.editor.ViewItem(model_name, column_names, column_types, mc, item)
                     $# ../../subpage/editor/ViewItem.html
-
                 </li>
 
         </ul>

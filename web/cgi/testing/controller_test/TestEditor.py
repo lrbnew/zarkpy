@@ -90,6 +90,7 @@ class TestEditor(unittest.TestCase):
             内容
                 新闻
                     model: News
+                    where: 被隐藏的新闻 hidden = 'yes' | 热门新闻 hot=1 and hidden='no'
         '''
 
         path = '/admin/model/News'
@@ -98,7 +99,8 @@ class TestEditor(unittest.TestCase):
                 richtext=[], list_link=[], search=[], layout=[], append_column=[],
                 hidden=[], new_hidden=[], edit_hidden=[], list_hidden=[], list_btn_hidden=[],
                 only_show=[], new_only_show=[], edit_only_show=[], list_only_show=[], 
-                list_view='', title='', tip='', orderby='')
+                list_view='', title='', tip='', orderby='', 
+                where=[('被隐藏的新闻',"hidden = 'yes'"), ('热门新闻',"hot=1 and hidden='no'")])
 
         self.assertEqual(e_ctrl.getMenuConfig(menu, path), target)
 
@@ -156,8 +158,3 @@ class TestEditor(unittest.TestCase):
         '''
         target = []
         self.assertEqual(e_ctrl.getTopMenuTitles(), target)
-
-
-
-
-

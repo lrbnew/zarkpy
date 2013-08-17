@@ -24,7 +24,10 @@ class Category(Decorator):
 
     # 更新data，并自动更新分类数据
     def update(self, item_id, data):
-        self.__autoSetCategory(item_id, data.get(self.arguments.data_key, ''))
+        if data.has_key(self.arguments.data_key):
+            self.__autoSetCategory(item_id, data.get(self.arguments.data_key, ''))
+            if data.has_key(self.arguments.cat_id_key):
+                del data[self.arguments.cat_id_key]
         return self.model.update(item_id, data)
 
     def get(self, item_id):

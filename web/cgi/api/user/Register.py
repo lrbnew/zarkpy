@@ -1,8 +1,7 @@
 #coding=utf-8
+# ../../controller/User.py
 import re
 import site_helper as sh
-
-# ../../controller/User.py
 
 class Register:
 

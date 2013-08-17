@@ -37,6 +37,17 @@ def hackForInputs(f):
     return newInputs
 sh.inputs = hackForInputs(sh.inputs)
 
+def hackForData(f):
+    def newData():
+        if not web.ctx.has_key('env'):
+            return {}
+        if web.ctx.env.get('wsgi.data.zarkpy.post.hack', None):
+            return web.ctx.env.get('wsgi.data.zarkpy.post.hack')
+        else:
+            return f()
+    return newData
+sh.data = hackForData(sh.data)
+
 class AppTest(unittest.TestCase):
 
     def appTestSetUp(self):
@@ -45,7 +56,6 @@ class AppTest(unittest.TestCase):
     def appTestTearDown(self):
         pass
 
-    # 需要用setUp来设置
     def setUp(self):
         self.appTestSetUp()
         app_errors.truncate(0)
@@ -66,8 +76,8 @@ class AppTest(unittest.TestCase):
         res = app.get(url, params, extra_environ=environ, expect_errors=True)
         return self._processResponse(res)
 
-    # 向app程序发起一个POST请求
-    def post(self, url, params={}, extra_environ = None):
+    # 向app程序发起一个POST请求, upload_files和data只能使用其中一个
+    def post(self, url, params={}, extra_environ = None, upload_files=None, data=None):
         assert(isinstance(params, (dict, sh.storage_class)))
         # 为webpy添加REQUEST_URI环境变量
         environ = {'REQUEST_URI': url, 'CONTENT_TYPE': 'text/plain; charset=utf-8', }
@@ -77,7 +87,10 @@ class AppTest(unittest.TestCase):
             params = sh.storage(params)
         # hack for use paste.fixture module test app.py
         environ['wsgi.input.zarkpy.post.hack'] = params
-        res = app.post(url, params, extra_environ=environ, expect_errors=True)
+        if data:
+            environ['wsgi.data.zarkpy.post.hack'] = data
+        res = app.post(url, params, extra_environ=environ,
+                upload_files=upload_files, expect_errors=True)
         return self._processResponse(res)
 
     def _processResponse(self, res):

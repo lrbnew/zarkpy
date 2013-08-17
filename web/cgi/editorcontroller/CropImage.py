@@ -70,4 +70,8 @@ class CropImage:
         path = sh.urlToPath(image.url)
         os.system('convert %s -crop %s %s' % (path, region, path+'.crop'))
         model.update(inputs.model_id, {inputs.column_name: crop})
+
+        # 删除以前裁剪图片的各种尺寸副本
+        os.system('rm %s.crop_*' % path)
+
         return sh.refresh()

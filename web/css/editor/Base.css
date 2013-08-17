@@ -212,6 +212,9 @@ a:active{
 .photo_page .crop_large {
     display:inline-block;
 }
+.photo_page .crop_large img {
+    width: 100%;
+}
 .photo_page .crop_small {
     margin-left:20px;
     display:inline-block;

@@ -4,6 +4,13 @@ if (navigator.userAgent.indexOf('MSIE') !== -1) {
 };
 
 $(function(){
+
     // 去掉所有input的autocomplete, 显示指定的除外
     $('input:not([autocomplete]), textarea:not([autocomplete]), select:not([autocomplete])').attr('autocomplete', 'off');
+
+    // 去掉a选中的虚线框
+    $('a').focus(function(){
+        $(this).blue();
+    });
+
 });

@@ -40,7 +40,8 @@ class TestCategory(unittest.TestCase):
         self.assertTrue(model.hasCategory('math'))
         self.assertRaises(AssertionError, model.addNewCategory, 'math')
         # 通过update可以自动设置新分类
-        model.update(new_id, dict(cat='language'))
+        item.cat = 'language' # 此时Categoryid不起作用
+        model.update(new_id, item)
         self.assertEqual(model.getCategory(new_id), 'language')
         self.assertEqual(model.get(new_id).category.name, 'language')
         

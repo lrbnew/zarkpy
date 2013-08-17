@@ -3,13 +3,18 @@ $def with(sub_page)
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <!-- favicon -->
     <link rel="favicon icon" type="image/png" href="/img/page/favicon.ico" />
     <link rel="Shortcut Icon" type="image/x-icon" href="/img/page/favicon.ico" />
+    <!--seo -->
     <meta name="description" content="" />
     <meta name="keywords" content="" />
+    $if sub_page.has_key('title'):
+        <title>$sub_page.title</title>
     <meta http-equiv="Cache-Control" content="no-cache"/>
     <meta content="sparker5.com" name="author" /> 
     <meta content="Copyright ©sparker5.com 版权所有" name="copyright"/>
+    <!-- global js and css -->
 
     <!-- sub_page js and css -->
     $if sub_page.get('cssfiles',None):

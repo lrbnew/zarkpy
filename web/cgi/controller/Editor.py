@@ -9,7 +9,7 @@ class Editor:
     default_menu_config = dict(richtext=[], list_link=[], search=[], layout=[],append_column=[], 
         hidden=[], new_hidden=[], edit_hidden=[], list_hidden=[], list_btn_hidden=[],
         only_show=[], new_only_show=[], edit_only_show=[], list_only_show=[], 
-        list_view='', title='', tip='', orderby='' )
+        list_view='', title='', tip='', orderby='', where='' )
 
     # 根据访问路径path和目录配置，返回此页面的相关配置信息
     # 针对不同的配置会得到不同的数据结构
@@ -57,17 +57,20 @@ class Editor:
             for k, v in self.default_menu_config.items():
                 menu_config.setdefault(k, v)
 
+        if menu_config and menu_config.where:
+            menu_config.where = [c.partition(' ')[::2] for c in sh.splitAndStrip(menu_config.where, '|')]
+
         return menu_config
 
     # 当后台使用四级目录分类时，_getEditorMenu根据url中的menu参数查找配置
     # 否者直接返回site_helper.editor_config.menu
     def _getEditorMenu(self):
         it = sh.ctrl('IndentTable')
-        indents = it.indent(sh.editor_config.menu)
+        indents = it.indent(sh.getEditorMenu())
         level = it.getIndentsLevel(indents)
 
         if level == 3:
-            return sh.editor_config.menu
+            return sh.getEditorMenu()
         elif level == 4:
             menu_name = sh.getUrlParams().get('top_menu', indents[0][0])
             for k,v in indents:
@@ -90,14 +93,14 @@ class Editor:
 
     def getTopMenuTitles(self):
         it = sh.ctrl('IndentTable')
-        indents = it.indent(sh.editor_config.menu)
+        indents = it.indent(sh.getEditorMenu())
         titles = [i.strip() for i,k in indents] if it.getIndentsLevel(indents) == 4 else []
         return [t.partition(' ')[::2] if ' ' in t else (t, sh.editor_config.index) for t in titles ]
 
     # 如果后台目录配置是四级的，则返回当前选中的第一级名称，否则返回空''
     def getCurrTopMenuTitle(self):
         it = sh.ctrl('IndentTable')
-        indents = it.indent(sh.editor_config.menu)
+        indents = it.indent(sh.getEditorMenu())
         if it.getIndentsLevel(indents) == 4:
             return sh.getUrlParams().get('top_menu', indents[0][0]).partition(' ')[0]
         else:

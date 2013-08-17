@@ -10,12 +10,12 @@ var initSWFUpload = (function(){
     function addImage(src, img_id, img_name) {
         var img_html;
         if (img_id){
-            img_html = '<div class="col3_padding" js="one_user_image" id="choose_image_' + img_id + '" onchange="modifyUserImage(' + img_id + ');"><img src="' + src + '" ondblclick="chooseUserImage(this,' + img_id + ');return false;" /><input type="text" js="file_name" value="' + img_name + '" /><br/><p>ID: '+img_id+'</p><a class="link_del trans" href="javascript:void(0);" onclick="deleteUserImage(this, ' + img_id + '); return false;">删除</a></div>';
+            img_html = $('#new_image_template').html().replace('{$src}', src).replace('{$img_id}', img_id);
         }else{
-            img_html = '<div><img src="'+src+'" /></div>';
+            img_html = '<div class="uploaded_img_box" ><img src="'+src+'" /></div>';
         };
 
-        $(img_html).hide().prependTo('#' + THUMBNAILS_ID).fadeIn();
+        $(img_html).hide().appendTo('#' + THUMBNAILS_ID).fadeIn();
     }
 
     function fileQueueError(file, errorCode, message) {
@@ -71,7 +71,7 @@ var initSWFUpload = (function(){
                 progress.setStatus("创建缩略图...");
                 progress.toggleCancel(false, this);
             } else {
-                progress.setStatus("上传中...");
+                progress.setStatus("上传中,请勿关闭或刷新页面...");
                 progress.toggleCancel(true, this);
             }
         } catch (ex) {
@@ -280,17 +280,14 @@ var initSWFUpload = (function(){
         }
     };
 
-    return function(user_id){
+    return function(url, post_params, btn_url){
         return new SWFUpload({
-            upload_url : "/api/user-image",
+            upload_url : url,
             flash_url  : "/plugins/swfupload/swfupload.swf",
-            post_params: {
-                "action": 'postImage',
-                "Userid": user_id
-            },
+            post_params: post_params,
 
-            file_size_limit : "2 MB",
-            file_types : "*.jpg;*.jpeg;*.gif;*.png;",
+            file_size_limit : "4 MB",
+            file_types : "*.jpg;*.jpeg;*.gif;*.png;*.JPG;*.JPEG;*.GIF;*.PNG;",
             file_types_description : "JPG/JPEG/GIF/PNG Images",
             file_upload_limit : "100",
 
@@ -301,7 +298,7 @@ var initSWFUpload = (function(){
             upload_success_handler : uploadSuccess,
             upload_complete_handler : uploadComplete,
 
-            button_image_url : "/plugins/swfupload/images/XPButtonText_105x30.png",
+            button_image_url : btn_url,
             button_placeholder_id : OPENER_ID,
             button_width: 105,
             button_height: 30,

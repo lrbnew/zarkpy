@@ -1,7 +1,6 @@
 #coding=utf-8
-# ../subpage/ChooseImage.html
-import site_helper as sh
 import imghdr
+import site_helper as sh
 
 class UserImage:
 
@@ -10,33 +9,18 @@ class UserImage:
         assert inputs.has_key('action')
         model = sh.model('UserImage')
         
-        # assert
-        if inputs.action not in ['getChooseImageHtml']:
+        if inputs.action in ['delete', 'recover']:
             assert sh.session.is_login
             assert inputs.get('UserImageid', None)
             exists = model.get(inputs.UserImageid)
             assert exists and exists.Userid == sh.session.id
 
-        if inputs.action == 'getChooseImageHtml':
-            assert sh.session.is_login
-            env = dict(paging=False, where=['deleted=%s','no'])
-            images = model.all(env)
-            #paging = model.getPaginationHtml(env)
-            paging = ''
-            html = str(sh.subpage.ChooseImage(images, paging))
-            return sh.toJsonp({'success': True, 'html': html, 'Userid': sh.session.id})
-
-        elif inputs.action == 'delete':
-            model.update(inputs.UserImageid, {'deleted': 'yes'})
-            return sh.toJsonp({'success': True})
-
-        elif inputs.action == 'realDelete':
-            model.delete(inputs.UserImageid)
-            return sh.toJsonp({'success': True})
-
-        elif inputs.action == 'recover':
-            model.update(inputs.UserImageid, {'deleted': 'no'})
-            return sh.toJsonp({'success': True})
+            if inputs.action == 'delete':
+                if sh.inModifyTime(exists.created):
+                    model.delete(inputs.UserImageid)
+                    return sh.toJsonp({'success': True})
+                else:
+                    return sh.toJsonp({'success': False, 'error': '超过了修改时限'})
 
     def POST(self, inputs=None):
         if not inputs: inputs = sh.inputs()
@@ -45,19 +29,15 @@ class UserImage:
         if inputs.action == 'postImage':
             assert inputs.get('Userid', 0)
             assert sh.model('User').get(inputs.Userid)
+            assert inputs.get('data_name', None)
+            assert inputs.get('data_id', None)
             img_model = sh.model('UserImage')
-            image_type = imghdr.what(None, inputs['Filedata'])
 
-            file_name = inputs['Filename'].partition('.')[0]
-            if '.' in file_name:
-                file_name = file_name.partition('.')[2]
-            assert image_type in img_model.known_types
-
-            image_data = sh.storage({'filename':file_name,
-                'value':inputs['Filedata'], 'imagetype': image_type})
+            image_data = sh.getSwfUploadImageFile()
 
             new_id = img_model.insert(sh.storage(dict(image_file=image_data,
-                Userid=inputs.Userid, file_name=file_name)))
+                Userid=inputs.Userid, file_name=image_data.filename,
+                data_name=inputs.data_name, data_id=inputs.data_id)))
 
             return 'success;%d;%s;%s' % (new_id,
-                    img_model.getUrlByPrivate(inputs.Userid, new_id), file_name)
+                    img_model.getUrlByPrivate(inputs.Userid, new_id), image_data.filename)

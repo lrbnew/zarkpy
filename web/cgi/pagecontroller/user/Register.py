@@ -1,9 +1,8 @@
 #coding=utf-8
-import site_helper as sh
-
 # ../../page/user/Register.html
 # ../../controller/User.py
 # ../Insert.py
+import site_helper as sh
 
 class Register:
 

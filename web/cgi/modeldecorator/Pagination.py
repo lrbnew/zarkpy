@@ -32,7 +32,7 @@ class Pagination(Decorator):
     # 返回分页的前端代码，需要结合zarkfx使用
     def getPaginationHtml(self, env=None):
         env = sh.copy(env) if env is not None else {}
-        return '<div fx="paging[style=zarkpy;pageCount=%d;totalCount=%d;displayPages=10;firstText=第一页;lastText=末页;]"></div>' % (self.arguments.paging_volume, self.getCount(env)) if env.get('paging', self.arguments.paging) else ''
+        return '<div fx="paging[style=zarkpy;pageCount=%d;totalCount=%d;displayPages=10;firstText=第一页;lastText=末页;]"></div>' % (env.get('paging_volume', self.arguments.paging_volume), self.getCount(env)) if env.get('paging', self.arguments.paging) else ''
     
     def __getLimit(self, page_num, volume):
         return (int(volume) * (int(page_num) - 1), int(volume))

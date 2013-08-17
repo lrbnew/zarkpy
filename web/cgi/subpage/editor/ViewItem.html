@@ -66,6 +66,21 @@ $ show_image = 'Imageid' in column_names and 'Imageid' not in hidden and (not on
 
             </div>
 
+        <!--检查是否使用了Category, 显示Category-->
+        $if hasattr(sh.model(model_name), 'getAllCategory'):
+            <br/>
+            <div class="info_control info_inline">
+                <label class="muted" >分类：</label>
+                <p>$item.category_name</p>
+            </div>
+
+        <!--检查是否使用了Tag, 显示Tag-->
+        $if hasattr(sh.model(model_name), 'getTags'):
+            <br/>
+            <div class="info_control info_inline">
+                <label class="muted" >Tag：</label>
+                <p>$(' '.join(item.tags))</p>
+            </div>
 
         <!--====== End ======-->
 
@@ -75,7 +90,7 @@ $ show_image = 'Imageid' in column_names and 'Imageid' not in hidden and (not on
             $if 'edit' not in mc.list_btn_hidden:
                 <a class="btn" href="/admin/model/$model_name/edit/$item.id" >编辑</a>
             $if mc.list_view:
-                <a class="btn" href="$(mc.list_view.replace('{$id}', str(item.id)))" target="_blank" >查看</a>
+                <a class="btn" href="$sh.replaceValue(mc.list_view, item)" target="_blank" >查看</a>
         </div>
         $if 'delete' not in mc.list_btn_hidden:
             <a class="btn btn-danger" href="/admin/delete?model_id=$item.id&model_name=$model_name" fx="confirm[msg=确定删除 ID: $item.id ?]">删除</a>
