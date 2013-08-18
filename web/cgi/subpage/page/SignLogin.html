@@ -1,0 +1,17 @@
+$# 使用sign login需要引用API.js 和 Sign.js
+
+<!--ajax登录弹窗-->
+<div id="sign_login_div" fx="center" style="z-index: 99999; background-color: gray;" class="hidden">
+    <p>您还没有登录, 请先登录</p>
+    <p>邮箱:</p>
+    <input id="sign_login_email" type="email" value="" />
+    <p>密码:</p>
+    <input id="sign_login_password" type="password" value="" />
+    记住我<input id="sign_login_remember_me" type="checkbox" />
+    <p id="sign_login_error"></p>
+
+    <a id="sign_login_btn" href="javascript:void(0);" >登录</a>
+    <a id="sign_close_btn" href="javascript:void(0);" >关闭</a>
+
+</div>
+<div id="sign_overlayer" fx="overlayer[zIndex=99998;style=default;]" class="hidden" ></div>
