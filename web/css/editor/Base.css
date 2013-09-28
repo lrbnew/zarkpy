@@ -158,6 +158,19 @@ a:active{
 .pagination { 
     margin-bottom:30px;
  }
+.pagination .zarkfx_pagination_default ul li a { 
+    color:#0088CC; 
+    font-size:14px;
+    font-weight:bold;
+}
+.pagination .zarkfx_pagination_default ul .zarkfx_pagination_current_page a { 
+    color:#999; 
+    background-color:#f5f5f5;
+    cursor:default;
+}
+.pagination .zarkfx_pagination_default ul .zarkfx_pagination_current_page a:hover { 
+    color:#999; 
+}
 /*******************************************************/
 
 
@@ -379,6 +392,48 @@ input.inp_file .file_img {
     display:inline-block;
     white-space:pre-wrap;
     word-wrap:break-word;
+}
+/*******************************************************/
+
+/*TABLE_BOX*/
+.table_box {
+    display:inline-block;
+    border:1px solid #ddd;
+    border-radius:4px;
+    margin:15px 0;
+    position:relative;
+    overflow-x:scroll;
+}
+.table_box .th_box {
+    width:100%;
+    background-color:#D9EDF7;
+}
+.table_box th {
+    color:#3A87AD;
+    height:40px;
+    line-height:40px;
+    padding:0 20px;
+    border-left:1px dashed #fff;
+    white-space:nowrap;
+}
+.table_box th:first-child {
+    border-left:0;
+}
+.table_box .td_box {
+    width:100%;
+}
+.table_box td {
+    height:40px;
+    line-height:40px;
+    padding:0 20px;
+    border-top:1px solid #ddd;
+    border-left:1px dashed #ddd;
+}
+.table_box .td_box td:first-child {
+    border-left:0;
+}
+.table_box tr.td_box:nth-child(odd) {
+    background-color:#f4f4f4;
 }
 /*******************************************************/
 

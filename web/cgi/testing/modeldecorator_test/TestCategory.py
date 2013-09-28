@@ -44,6 +44,11 @@ class TestCategory(unittest.TestCase):
         model.update(new_id, item)
         self.assertEqual(model.getCategory(new_id), 'language')
         self.assertEqual(model.get(new_id).category.name, 'language')
+        # cat为空字符串时分类被删除
+        item.cat = ''
+        model.update(new_id, item)
+        self.assertEqual(model.getCategory(new_id), None)
+        self.assertEqual(model.get(new_id).Categoryid, 0)
         
     # 测试: delete removeCategory deleteCategory
     def test_multi2(self):

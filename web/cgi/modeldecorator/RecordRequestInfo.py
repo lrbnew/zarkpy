@@ -1,4 +1,5 @@
 #coding=utf-8
+import web
 from Decorator import Decorator
 import site_helper as sh
 
@@ -23,8 +24,8 @@ class RecordRequestInfo(Decorator):
     def __writeInfo(self, data):
         data = sh.copy(data)
         for key, value in self.arguments.items():
-            if sh.getEnv(value, None):
+            if hasattr(web.ctx, 'env') and sh.getEnv(value, None):
                 data[key] = sh.getEnv(value)
-            elif sh.session.get(value, None):
+            elif hasattr(sh, 'session') and sh.session.get(value, None):
                 data[key] = sh.session.get(value)
         return data

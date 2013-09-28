@@ -40,6 +40,7 @@ urls = (
 '/cgi/admin/indent-table/([-\w]+)','editorcontroller.IndentTable', # editorcontroller/IndentTable.py
 '/cgi/admin/crop-image','editorcontroller.CropImage', # editorcontroller/CropImage.py
 '/cgi/admin/api-index','editorcontroller.ApiIndex', # editorcontroller/ApiIndex.py
+'/cgi/admin/report-forms(/[-\w]+)*','editorcontroller.ReportForms', # editorcontroller/ReportForms.py
 # oauth2
 '/cgi/oauth/login','pagecontroller.oauth.Login', # pagecontroller/oauth/Login.py
 '/cgi/oauth/register','pagecontroller.oauth.Register', # pagecontroller/oauth/Register.py

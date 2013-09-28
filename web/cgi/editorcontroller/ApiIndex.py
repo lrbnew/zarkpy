@@ -1,6 +1,6 @@
 #coding=utf-8
-import site_helper as sh
 # ../editor/ApiIndex.html
+import site_helper as sh
 
 class ApiIndex:
 

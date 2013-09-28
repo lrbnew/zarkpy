@@ -1,4 +1,5 @@
 #coding=utf-8
+# ../../model/Model.py
 import unittest
 import site_helper as sh
 
@@ -141,7 +142,7 @@ class TestModel(unittest.TestCase):
         types = user_model.getColumnTypes(['created', 'dead'])
         self.assertEqual(len(types.keys()), 3) # 还有 __column_names
         self.assertEqual(types['created'],
-            {'type':'time', 'accurate_type':'timestamp', 'null': False, 'default': 'current_timestamp' })
+            {'type':'time', 'accurate_type':'timestamp', 'null': False, 'default': '' })
         self.assertEqual(types['dead'],
             {'type':'enum', 'options':['yes', 'no'], 'accurate_type':'enum', 'null': False, 'default': 'no' })
 

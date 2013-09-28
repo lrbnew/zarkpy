@@ -1,8 +1,7 @@
 #coding=utf-8
+# ../../editor/model/Edit.html
 import web
 import site_helper as sh
-
-# ../../editor/model/Edit.html
 
 class Edit:
 
@@ -21,6 +20,5 @@ class Edit:
             item = None
             action = 'insert'
 
-        return sh.editor.model.Edit(model_name, model.column_names + menu_config.append_column,
-                model.getColumnTypes(), menu_config, item, action)
+        return sh.editor.model.Edit(model_name, model.column_names + menu_config.append_column, model.getColumnTypes(), menu_config, item, action)
 

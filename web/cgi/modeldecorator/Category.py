@@ -26,8 +26,10 @@ class Category(Decorator):
     def update(self, item_id, data):
         if data.has_key(self.arguments.data_key):
             self.__autoSetCategory(item_id, data.get(self.arguments.data_key, ''))
-            if data.has_key(self.arguments.cat_id_key):
+            if data.get(self.arguments.data_key, '') and data.has_key(self.arguments.cat_id_key):
                 del data[self.arguments.cat_id_key]
+            elif data.get(self.arguments.data_key, None) == '':
+                data[self.arguments.cat_id_key] = 0
         return self.model.update(item_id, data)
 
     def get(self, item_id):

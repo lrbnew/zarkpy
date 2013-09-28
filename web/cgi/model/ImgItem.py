@@ -56,7 +56,7 @@ class ImgItem(Model):
             if self.getImageId(item_id):
                 img_model.delete(self.getImageId(item_id))
             img_id = img_model.insert(data)
-            self.update(item_id, {'Imageid': img_id})
+            data['Imageid'] = img_id
             img_model.update(img_id, {'data_id': item_id, 'data_name': self.table_name})
             # convert image
             ignore_covert = data.get('__ignore_convert_image', False)

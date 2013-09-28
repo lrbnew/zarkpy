@@ -171,6 +171,8 @@ class Model:
                             ct.default = all_describle[all_describle.index('default')+1]
                             if ct.default.isdigit():
                                 ct.default = int(ct.default)
+                            elif ct.default == 'current_timestamp':
+                                ct.default = ''
                             else:
                                 ct.default = ct.default.strip("'")
 

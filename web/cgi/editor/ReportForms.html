@@ -1,0 +1,32 @@
+$def with(items, pagination_html, keys, mc)
+
+$if mc.get('title', ''):
+    <div class="title_control_h3">
+        <!--页面标题-->
+        <h3 class="info_inline">
+            $mc.title
+        </h3>
+    </div>
+
+$if mc.tip:
+    <br/>
+    <div class="alert alert-info">
+        <button data-dismiss="alert" class="close" type="button">×</button>
+        $mc.tip
+    </div>
+
+<table class="table_box clearfix">
+    <tr class="th_box">
+        $for k in keys:
+            <th>$k</th>
+    </tr>
+    $for i in items:
+        <tr class="td_box">
+            $for k in keys:
+                <td>$i[k]</td>
+        </tr>
+</table>
+    
+<div class="pagination pagination-large">
+    $:pagination_html
+</div>

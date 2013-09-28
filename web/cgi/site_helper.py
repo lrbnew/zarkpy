@@ -39,11 +39,12 @@ editor_config = web.Storage({
 })
 
 # 后台目录配置表，基础可选配置分别有(其中model和url有且仅有其一):
-# model url hidden only_show orderby richtext list_view list_link search layout
+# model url hidden only_show orderby richtext list_view list_link search layout list_btn_hidden
 # new_hidden new_only_show edit_hidden edit_only_show list_hidden list_only_show
 # new_title new_tip edit_title edit_tip list_title list_tip
 # 其中hidden和only_show同时控制new、edit、list，但优先级较低
 # 对ImgItem使用crop指定裁剪字段时，图片可裁剪
+# url指向/admin/report-forms/xxxx时可以使用报表功能,可指定title, tip, select
 editor_config.menu = '''
     内容管理
         API文档
@@ -159,25 +160,25 @@ def getDBHelper():
     return DBHelper()
 
 def ipToInt(ip_str):
-    assert(isinstance(ip_str, str))
+    assert isinstance(ip_str, str), ip_str
     return struct.unpack('=L',socket.inet_aton(ip_str))[0]
 
 def ipToStr(ip_int):
-    assert(isinstance(ip_int, int))
+    assert isinstance(ip_int, int), ip_int
     return socket.inet_ntoa(struct.pack('=L', ip_int))
 
 # 获得webpy提供的request变量, key的取值可以为:
 # CONTENT_LENGTH CONTENT_TYPE DOCUMENT_ROOT HTTP_ACCEPT HTTP_ACCEPT_CHARSET HTTP_ACCEPT_ENCODING HTTP_ACCEPT_LANGUAGE HTTP_CONNECTION HTTP_COOKIE HTTP_HOST HTTP_REFERER HTTP_USER_AGENT PATH_INFO QUERY_STRING REMOTE_ADDR REMOTE_PORT REQUEST_METHOD REQUEST_URI SERVER_NAME SERVER_PORT SERVER_PROTOCOL
 def getEnv(key, default=''):
-    assert(isinstance(key, str))
+    assert isinstance(key, str), key
     return web.ctx.env.get(key, default)
 
 def unicodeToStr(s):
-    assert(type(s) in [unicode, str])
+    assert type(s) in [unicode, str], s
     return s.encode('utf-8', 'ignore') if isinstance(s, unicode) else s
 
 def strToUnicode(s):
-    assert(type(s) in [unicode, str])
+    assert type(s) in [unicode, str], s
     return unicode(s, 'utf-8', 'ignore') if isinstance(s, str) else s
 
 def quote(*l):
@@ -303,7 +304,7 @@ def toMD5(text):
 def alert(msg, referer=None, stay=3):
     referer = getReferer(referer)
     if not referer: referer = '/'
-    return web.seeother('/alert?msg=%s&referer=%s&stay=%s' % quote(msg, referer, str(stay)))
+    raise web.seeother('/alert?msg=%s&referer=%s&stay=%s' % quote(msg, referer, str(stay)))
 
 # 刷新当前页面，可以通过referer参数指定打开的页面
 def refresh(referer=None):
@@ -314,18 +315,18 @@ def refresh(referer=None):
         alert(getUrlParams().get('alert'), referer)
     else:
         referer = getReferer(referer)
-        return web.seeother(referer if referer else '/')
+        raise web.seeother(referer if referer else '/')
 
 def redirect(url):
-    web.seeother(url)
+    raise web.seeother(url)
 
 def redirectTo404():
-    web.seeother('/404.html')
+    raise web.seeother('/404.html')
 
 def redirectToLogin(referer=None):
     referer = getReferer(referer)
     url = '/login?referer=%s' % quote(referer if referer else '/')
-    web.seeother(url)
+    raise web.seeother(url)
 
 def copy(obj):
     return _copy.deepcopy(obj)

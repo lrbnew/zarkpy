@@ -15,6 +15,4 @@ class Delete:
         if inputs is None: inputs = sh.inputs()
         assert(inputs.has_key('model_name'))
         assert(inputs.has_key('model_id'))
-        model = sh.model(inputs.model_name)
-        model.delete(int(inputs.model_id))
-        return sh.model(inputs.model_name).update(int(inputs.model_id),inputs)
+        return sh.model(inputs.model_name).delete(int(inputs.model_id))

@@ -38,7 +38,8 @@ $ show_image = ('Imageid' in column_names and column_types['Imageid'].type == 'i
             </div>
 
         <!--用only_show判断是否仅显示部分数据-->
-        $ show_columns = only_show if only_show else [n for n in column_names if n not in ['Imageid'] ]
+        $ show_columns = only_show if only_show else column_names 
+        $ show_columns = [n for n in show_columns if n not in ['Imageid'] ]
 
         <!--右边的其它数据, not in表示不在这里显示的数据-->
         $for name in show_columns:
