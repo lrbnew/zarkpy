@@ -13,14 +13,14 @@ if [ "x$(whoami)" != "xroot" ]; then
     exit 1
 fi
 
-PWD="/opt/zarkpy_exp/web/cgi"
-PIDFILE="/var/run/zarkpy-exp-spawn-fcgi.pid"
+PWD="/opt/homework_exp/web/cgi"
+PIDFILE="/var/run/homework-exp-spawn-fcgi.pid"
 
 case $1 in
     "start")
         export PYTHON_EGG_CACHE="/tmp/.python-eggs"
         cp "${PIDFILE}" "${PIDFILE}.bak" 2>/dev/null
-        spawn-fcgi -f "${PWD}/app.py" -d "${PWD}" -a 127.0.0.1 -p 10001 \
+        spawn-fcgi -f "${PWD}/app.py" -d "${PWD}" -a 127.0.0.1 -p 10121 \
             -F 1 -P "${PIDFILE}" -u www-data -g www-data
         ret=$?
         if [ "x${ret}" == "x0" ]; then

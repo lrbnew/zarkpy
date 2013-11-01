@@ -20,7 +20,7 @@ from unittest import TestLoader, TestSuite, TextTestRunner, TestCase
 # 添加cgi文件夹所在路径, 以实现下面的import
 sys.path.insert(0, os.path.split(os.path.realpath(__file__))[0].rpartition('/')[0])
 import site_helper as sh
-assert sh.config.HOST_NAME == 'http://me.zarkpy.com', u'只能在开发环境中运行测试'
+assert sh.config.HOST_NAME == 'http://me.homework.com', u'只能在开发环境中运行测试'
 
 # 为测试修改配置，以免改动正式数据库与正式文件
 def modifyConfigForTest():

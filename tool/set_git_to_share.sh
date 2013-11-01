@@ -4,9 +4,9 @@ if [ "x$(whoami)" != "xroot" ]; then
     exit 1
 fi
 
-cd /opt/git/zarkpy.git
+cd /opt/git/homework.git
 git config --add core.sharedRepositoy group
-chgrp  -R zarkpydev /opt/git/zarkpy.git
-chmod g+rsw -R /opt/git/zarkpy.git
-echo "#!/bin/sh\n chgrp -R zarkpydev . 2>/dev/null" > /opt/git/zarkpy.git/hooks/post-update
-chmod g+x /opt/git/zarkpy.git/hooks/post-update
+chgrp  -R homeworkdev /opt/git/homework.git
+chmod g+rsw -R /opt/git/homework.git
+echo "#!/bin/sh\n chgrp -R homeworkdev . 2>/dev/null" > /opt/git/homework.git/hooks/post-update
+chmod g+x /opt/git/homework.git/hooks/post-update

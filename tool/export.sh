@@ -11,8 +11,8 @@ if [ "x${rev1}" != "xexp" ] && [ "x${rev1}" != "xmaster" ]; then
     exit 1
 fi
 
-cd /opt/git/zarkpy.git
-git archive ${rev1} -o /tmp/zarkpy.tgz
+cd /opt/git/homework.git
+git archive ${rev1} -o /tmp/homework.tgz
 ret=$?
 if [ "x${ret}" != "x0" ]; then
     echo "An error occurs when archiving."
@@ -20,28 +20,28 @@ if [ "x${ret}" != "x0" ]; then
 fi
 
 if [ "${rev1}" = "master" ]; then
-    cd /opt/zarkpy
+    cd /opt/homework
 elif [ "${rev1}" = "exp" ]; then
-    cd /opt/zarkpy_exp
+    cd /opt/homework_exp
 fi
 
-tar xf /tmp/zarkpy.tgz
+tar xf /tmp/homework.tgz
 
 if [ "${rev1}" = "master" ]; then
-    sed -i "s/#\s*web.config.debug\s*=\s*False/web.config.debug = False/"  /opt/zarkpy/web/cgi/app.py
-    sed -i "s/'HOST_NAME'\s*:\s*'http:\/\/me.zarkpy.com'/'HOST_NAME' : 'http:\/\/zarkpy.com'/"  /opt/zarkpy/web/cgi/site_helper.py
-    chown www-data:www-data -R /opt/zarkpy
-    python /opt/zarkpy/web/cgi/processor/file_version.py inc
-    /opt/zarkpy/tool/launch.sh restart
+    sed -i "s/#\s*web.config.debug\s*=\s*False/web.config.debug = False/"  /opt/homework/web/cgi/app.py
+    sed -i "s/'HOST_NAME'\s*:\s*'http:\/\/me.homework.com'/'HOST_NAME' : 'http:\/\/homework.com'/"  /opt/homework/web/cgi/site_helper.py
+    chown www-data:www-data -R /opt/homework
+    python /opt/homework/web/cgi/processor/file_version.py inc
+    /opt/homework/tool/launch.sh restart
 
 elif [ "${rev1}" = "exp" ]; then
-    sed -i "s/#\s*web.config.debug\s*=\s*False/web.config.debug = False/"  /opt/zarkpy_exp/web/cgi/app.py
-    sed -i "s/'HOST_NAME'\s*:\s*'http:\/\/me.zarkpy.com'/'HOST_NAME' : 'http:\/\/exp.zarkpy.com'/"  /opt/zarkpy_exp/web/cgi/site_helper.py
-    sed -i "s/'APP_ROOT_PATH'\s*:\s*'\/opt\/zarkpy\/'/'APP_ROOT_PATH' : '\/opt\/zarkpy_exp\/'/"  /opt/zarkpy_exp/web/cgi/site_helper.py
-    sed -i "s/'APP_PORT'\s*:\s*10000/'APP_PORT' : 10001/" /opt/zarkpy_exp/web/cgi/site_helper.py
-    sed -i "s/'SESSION_PATH'\s*:\s*'\/opt\/zarkpy\/session\/'/'SESSION_PATH' : '\/opt\/zarkpy_exp\/session\/'/"  /opt/zarkpy_exp/web/cgi/site_helper.py
-    sed -i "s/'ERROR_LOG_PATH'\s*:\s*'\/opt\/zarkpy\/log\/error.log'/'ERROR_LOG_PATH' : '\/opt\/zarkpy_exp\/log\/error.log'/"  /opt/zarkpy_exp/web/cgi/site_helper.py
-    chown www-data:www-data -R /opt/zarkpy_exp
-    /opt/zarkpy_exp/tool/launch-exp.sh restart
+    sed -i "s/#\s*web.config.debug\s*=\s*False/web.config.debug = False/"  /opt/homework_exp/web/cgi/app.py
+    sed -i "s/'HOST_NAME'\s*:\s*'http:\/\/me.homework.com'/'HOST_NAME' : 'http:\/\/exp.homework.com'/"  /opt/homework_exp/web/cgi/site_helper.py
+    sed -i "s/'APP_ROOT_PATH'\s*:\s*'\/opt\/homework\/'/'APP_ROOT_PATH' : '\/opt\/homework_exp\/'/"  /opt/homework_exp/web/cgi/site_helper.py
+    sed -i "s/'APP_PORT'\s*:\s*10120/'APP_PORT' : 10121/" /opt/homework_exp/web/cgi/site_helper.py
+    sed -i "s/'SESSION_PATH'\s*:\s*'\/opt\/homework\/session\/'/'SESSION_PATH' : '\/opt\/homework_exp\/session\/'/"  /opt/homework_exp/web/cgi/site_helper.py
+    sed -i "s/'ERROR_LOG_PATH'\s*:\s*'\/opt\/homework\/log\/error.log'/'ERROR_LOG_PATH' : '\/opt\/homework_exp\/log\/error.log'/"  /opt/homework_exp/web/cgi/site_helper.py
+    chown www-data:www-data -R /opt/homework_exp
+    /opt/homework_exp/tool/launch-exp.sh restart
 
 fi

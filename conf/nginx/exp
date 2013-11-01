@@ -1,5 +1,5 @@
 server {
-    root /opt/zarkpy_exp/web;
+    root /opt/homework_exp/web;
     error_page  404  /404.html;
     index index.html index.htm;
 
@@ -13,10 +13,10 @@ server {
 
     client_max_body_size 4M;
 
-    server_name exp.zarkpy.com;
+    server_name exp.homework.com;
 
-    #access_log /var/log/nginx/zarkpy_exp.access_log;
-    #error_log  /var/log/nginx/zarkpy_exp.error_log;
+    #access_log /var/log/nginx/homework_exp.access_log;
+    #error_log  /var/log/nginx/homework_exp.error_log;
 
     # For safety
     rewrite ^/cgi/.*$ /404.html break;
@@ -41,12 +41,12 @@ server {
 
     location /cgi {
         include uwsgi_params;
-        uwsgi_pass 127.0.0.1:10001;
+        uwsgi_pass 127.0.0.1:10121;
     }
 
     location /api {
         include uwsgi_params;
-        uwsgi_pass 127.0.0.1:10001;
+        uwsgi_pass 127.0.0.1:10121;
     }
 
 }

@@ -3,7 +3,7 @@ import time, web, re, site_helper as sh
 import hashlib
 
 DEBUG = False
-if sh.config.HOST_NAME != 'http://me.zarkpy.com':
+if sh.config.HOST_NAME != 'http://me.homework.com':
     import memcache
     mem_client = memcache.Client(['127.0.0.1:11211'], debug=0)
 

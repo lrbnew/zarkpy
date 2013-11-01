@@ -23,6 +23,6 @@ if __name__=='__main__':
             print '请使用下面的命令搜索依然包含"%s"字符串的文件，确保修改了所有地方的端口号' % old_port
             print 'grep "%s" -rl "%s"' % (old_port, project_root)
     else:
-        print 'Usage: python /opt/zarkpy/tool/reset_port.py old_port new_port'
+        print 'Usage: python /opt/homework/tool/reset_port.py old_port new_port'
         print 'reset port之前,建议先备份原代码'
 
