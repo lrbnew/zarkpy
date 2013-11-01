@@ -21,7 +21,7 @@ case $1 in
         export PYTHON_EGG_CACHE="/tmp/.python-eggs"
         cp "${PIDFILE}" "${PIDFILE}.bak" 2>/dev/null
         spawn-fcgi -f "${PWD}/app.py" -d "${PWD}" -a 127.0.0.1 -p 10120 \
-            -F 4 -P "${PIDFILE}" -u www-data -g www-data
+            -F 1 -P "${PIDFILE}" -u www-data -g www-data
         ret=$?
         if [ "x${ret}" == "x0" ]; then
             echo "" >> "${PIDFILE}"
